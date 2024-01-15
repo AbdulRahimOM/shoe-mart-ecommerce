@@ -1,0 +1,742 @@
+definitions:
+  entities.SellerDetails:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      phone:
+        type: string
+      status:
+        type: string
+    type: object
+  entities.UserDetails:
+    properties:
+      email:
+        type: string
+      firstName:
+        type: string
+      id:
+        type: integer
+      lastName:
+        type: string
+      phone:
+        type: string
+      status:
+        type: string
+    type: object
+  requestModels.AddBrandReq:
+    properties:
+      name:
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  requestModels.AddCategoryReq:
+    properties:
+      name:
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  requestModels.AddColourVariantReq:
+    properties:
+      modelId:
+        type: integer
+      mrp:
+        type: integer
+      variationName:
+        minLength: 3
+        type: string
+    required:
+    - modelId
+    - mrp
+    - variationName
+    type: object
+  requestModels.AddDimensionalVariationReq:
+    properties:
+      name:
+        minLength: 3
+        type: string
+    required:
+    - name
+    type: object
+  requestModels.AddModelReq:
+    properties:
+      brandId:
+        type: integer
+      name:
+        minLength: 3
+        type: string
+    required:
+    - brandId
+    - name
+    type: object
+  requestModels.AddModelToCategoryReq:
+    properties:
+      categoryId:
+        type: integer
+      modelId:
+        type: integer
+    required:
+    - categoryId
+    - modelId
+    type: object
+  requestModels.AdminSignInReq:
+    properties:
+      Login_email:
+        type: string
+      Login_password:
+        minLength: 3
+        type: string
+    required:
+    - Login_email
+    - Login_password
+    type: object
+  requestModels.BlockSellerReq:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  requestModels.BlockUserReq:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  requestModels.SellerSignInReq:
+    properties:
+      Login_email:
+        type: string
+      Login_password:
+        minLength: 3
+        type: string
+    required:
+    - Login_email
+    - Login_password
+    type: object
+  requestModels.SellerSignUpReq:
+    properties:
+      SignUp_email:
+        type: string
+      SignUp_firstName:
+        minLength: 3
+        type: string
+      SignUp_lastName:
+        type: string
+      SignUp_password:
+        description: 1st password shall only be considered. Its frontend to check
+          both typed passwords are same. No security implicatoions
+        minLength: 3
+        type: string
+      SignUp_phone:
+        type: string
+    required:
+    - SignUp_email
+    - SignUp_firstName
+    - SignUp_phone
+    type: object
+  requestModels.UnblockSellerReq:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  requestModels.UnblockUserReq:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
+  response.AdminLoginResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+      token:
+        type: string
+    type: object
+  response.BlockSellerResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.BlockUserResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.GetSellersListResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      sellersList:
+        items:
+          $ref: '#/definitions/entities.SellerDetails'
+        type: array
+      status:
+        type: string
+    type: object
+  response.GetUsersListResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+      usersList:
+        items:
+          $ref: '#/definitions/entities.UserDetails'
+        type: array
+    type: object
+  response.UnblockSellerResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.UnblockUserResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+info:
+  contact: {}
+  description: This is a sebcgbdgfrver for MyShoo API.
+  title: MyShoo AP0
+  version: "1.0"
+paths:
+  /admin/addbrand:
+    post:
+      consumes:
+      - application/json
+      description: Add brand
+      parameters:
+      - description: Add Brand Request
+        in: body
+        name: addBrandReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddBrandReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add brand
+      tags:
+      - admin
+  /admin/addcategory:
+    post:
+      consumes:
+      - application/json
+      description: Add category
+      parameters:
+      - description: Add Category Request
+        in: body
+        name: addCategoryReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add category
+      tags:
+      - admin
+  /admin/addcolourvariant:
+    post:
+      consumes:
+      - application/json
+      description: Add colour variant
+      parameters:
+      - description: Add Colour Variant Request
+        in: body
+        name: addColourVariantReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddColourVariantReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add colour variant
+      tags:
+      - admin
+  /admin/adddimensionalvariation:
+    post:
+      consumes:
+      - application/json
+      description: Add dimensional variation
+      parameters:
+      - description: Add Dimensional Variation Request
+        in: body
+        name: addDimensionalVariationReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddDimensionalVariationReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add dimensional variation
+      tags:
+      - admin
+  /admin/addmodel:
+    post:
+      consumes:
+      - application/json
+      description: Add model
+      parameters:
+      - description: Add Model Request
+        in: body
+        name: addModelReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddModelReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add model
+      tags:
+      - admin
+  /admin/addmodeltocategory:
+    post:
+      consumes:
+      - application/json
+      description: Add model to category
+      parameters:
+      - description: Add Model To Category Request
+        in: body
+        name: addModelToCategoryReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddModelToCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Add model to category
+      tags:
+      - admin
+  /admin/blockseller:
+    post:
+      consumes:
+      - application/json
+      description: Block seller
+      parameters:
+      - description: user
+        in: body
+        name: blockSellerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.BlockSellerReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BlockSellerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.BlockSellerResponse'
+      summary: Block seller
+      tags:
+      - admin
+  /admin/blockuser:
+    post:
+      consumes:
+      - application/json
+      description: Block user
+      parameters:
+      - description: user
+        in: body
+        name: unblockUserRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.BlockUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.BlockUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.BlockUserResponse'
+      summary: Block user
+      tags:
+      - admin
+  /admin/getbrands:
+    get:
+      consumes:
+      - application/json
+      description: Get brands
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get brands
+      tags:
+      - admin
+  /admin/getcategories:
+    get:
+      consumes:
+      - application/json
+      description: Get categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get categories
+      tags:
+      - admin
+  /admin/getdimensionalvariations:
+    post:
+      consumes:
+      - application/json
+      description: Get dimensional variations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get dimensional variations
+      tags:
+      - admin
+  /admin/getmodels:
+    get:
+      consumes:
+      - application/json
+      description: Get models
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get models
+      tags:
+      - admin
+  /admin/login:
+    get:
+      consumes:
+      - application/json
+      description: Get admin login page
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get admin login page
+      tags:
+      - admin
+    post:
+      consumes:
+      - application/json
+      description: Login admin
+      parameters:
+      - description: Admin Sign In Request
+        in: body
+        name: adminSignInReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AdminSignInReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.AdminLoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.AdminLoginResponse'
+      summary: Login admin
+      tags:
+      - admin
+  /admin/sellerslist:
+    get:
+      consumes:
+      - application/json
+      description: Get sellers list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetSellersListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.GetSellersListResponse'
+      summary: Get sellers list
+      tags:
+      - admin
+  /admin/unblockseller:
+    post:
+      consumes:
+      - application/json
+      description: Unblock seller
+      parameters:
+      - description: user
+        in: body
+        name: unblockSellerRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.UnblockSellerReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UnblockSellerResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.UnblockSellerResponse'
+      summary: Unblock seller
+      tags:
+      - admin
+  /admin/unblockuser:
+    post:
+      consumes:
+      - application/json
+      description: Unblock user
+      parameters:
+      - description: user
+        in: body
+        name: unblockUserRequest
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.UnblockUserReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.UnblockUserResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.UnblockUserResponse'
+      summary: Unblock user
+      tags:
+      - admin
+  /admin/userslist:
+    get:
+      consumes:
+      - application/json
+      description: Get users list
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetUsersListResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.GetUsersListResponse'
+      summary: Get users list
+      tags:
+      - admin
+  /seller/getdimensionalvariations:
+    post:
+      consumes:
+      - application/json
+      description: Get dimensional variations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get dimensional variations
+      tags:
+      - admin
+  /seller/login:
+    get:
+      consumes:
+      - application/json
+      description: Seller Login Page
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Seller Login Page
+      tags:
+      - seller
+  /seller/signup:
+    post:
+      consumes:
+      - application/json
+      description: Seller Sign Up Handler
+      parameters:
+      - description: Seller Sign Up Request
+        in: body
+        name: signUpReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.SellerSignUpReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Seller Sign Up Handler
+      tags:
+      - seller
+  /user/getdimensionalvariations:
+    post:
+      consumes:
+      - application/json
+      description: Get dimensional variations
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Get dimensional variations
+      tags:
+      - admin
+swagger: "2.0"

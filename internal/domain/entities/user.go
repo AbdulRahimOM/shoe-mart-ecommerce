@@ -1,0 +1,37 @@
+package entities
+
+type User struct {
+	ID        uint   `gorm:"primaryKey"`
+	FirstName string `gorm:"column:firstName;notNull"`
+	LastName  string `gorm:"column:lastName"`
+	Email     string `gorm:"column:email;unique;notNull"`
+	Phone     string `gorm:"column:phone;notNull"`
+	Password  string `gorm:"-"`
+	Status    string `gorm:"default:Pending"`
+}
+
+type UserDetails struct {
+	ID        uint   `gorm:"primaryKey"`
+	FirstName string `gorm:"column:firstName;notNull"`
+	LastName  string `gorm:"column:lastName"`
+	Email     string `gorm:"column:email;unique;notNull"`
+	Phone     string `gorm:"column:phone;notNull"`
+	Status    string `gorm:"default:Pending"`
+}
+
+type UserAddress struct {
+	ID          uint   `gorm:"primaryKey"`
+	UserID      uint   `gorm:"column:userId;notNull"`
+	AddressName string `gorm:"column:addressName;notNull"`
+	FirstName   string `gorm:"column:firstName;notNull"`
+	LastName    string `gorm:"column:lastName"`
+	Email       string `gorm:"column:email;notNull"`
+	Phone       string `gorm:"column:phone;notNull"` //with country code
+	Street      string `gorm:"column:street;notNull"`
+	LandMark    string `gorm:"column:landmark"`
+	City        string `gorm:"column:city;notNull"`
+	State       string `gorm:"column:state;notNull"`
+	Country     string `gorm:"column:country;notNull"`
+
+	// FkUser UserDetails `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+}
