@@ -103,7 +103,7 @@ func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error)
 		fmt.Println("\n error while hashing pw. Error:)", err, "\n.")
 		return nil, err
 	}
-
+	fmt.Println("\n\n\n\nhashedpw=",hashedPwd)
 	var signingUser = entities.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -111,6 +111,7 @@ func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error)
 		Phone:     req.Phone,
 		Password:  hashedPwd,
 		Status:    "not verified",
+		CreatedAt: time.Now(),
 	}
 
 	err = uc.userRepo.CreateUser(&signingUser)

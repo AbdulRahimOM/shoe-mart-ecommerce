@@ -7,4 +7,5 @@ type GetSalesReportResponse struct {
 	Message     string               `json:"message"`
 	Error       string               `json:"error"`
 	SalesReport entities.SalesReport `json:"sales_report"` //need update
+	SalePerDay  []entities.SalePerDay `json:"sale_per_day"`
 }

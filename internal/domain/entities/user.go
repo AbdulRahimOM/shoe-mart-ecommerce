@@ -1,13 +1,16 @@
 package entities
 
+import "time"
+
 type User struct {
-	ID        uint   `gorm:"primaryKey"`
-	FirstName string `gorm:"column:firstName;notNull"`
-	LastName  string `gorm:"column:lastName"`
-	Email     string `gorm:"column:email;unique;notNull"`
-	Phone     string `gorm:"column:phone;notNull"`
-	Password  string `gorm:"-"`
-	Status    string `gorm:"default:Pending"`
+	ID        uint      `gorm:"primaryKey"`
+	FirstName string    `gorm:"column:firstName;notNull"`
+	LastName  string    `gorm:"column:lastName"`
+	Email     string    `gorm:"column:email;unique;notNull"`
+	Phone     string    `gorm:"column:phone;notNull"`
+	Password  string    `gorm:"column:password;notNull"`
+	Status    string    `gorm:"default:Pending;notNull"`
+	CreatedAt time.Time `gorm:"column:created_at;notNull"`
 }
 
 type UserDetails struct {

@@ -4,6 +4,7 @@ import (
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	ordermanagementHandlers "MyShoo/internal/handlers/orderManagementHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
+	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	"MyShoo/internal/middleware"
 
 	"github.com/gin-gonic/gin"
@@ -19,6 +20,7 @@ func AdminRoutes(engine *gin.RouterGroup,
 	cart *ordermanagementHandlers.CartHandler,
 	wishList *ordermanagementHandlers.WishListHandler,
 	order *ordermanagementHandlers.OrderHandler,
+	reports *reporthandlers.ReportsHandler,
 ) {
 	engine.Use(middleware.ClearCache)
 	engine.GET("/login", middleware.NotLoggedOutCheck, admin.GetAdminLogin)
@@ -36,13 +38,16 @@ func AdminRoutes(engine *gin.RouterGroup,
 	engine.POST("/unblockseller", middleware.AdminAuth, admin.UnblockSeller)
 
 	//viewing
-	engine.GET("/categories",  middleware.AdminAuth, category.GetCategories)
-	engine.GET("/brands", middleware.AdminAuth,  brand.GetBrands)
-	engine.GET("/models",  middleware.AdminAuth, model.GetModelsByBrandsAndCategories)
-	engine.GET("/products",  middleware.AdminAuth, product.GetProducts)
+	engine.GET("/categories", middleware.AdminAuth, category.GetCategories)
+	engine.GET("/brands", middleware.AdminAuth, brand.GetBrands)
+	engine.GET("/models", middleware.AdminAuth, model.GetModelsByBrandsAndCategories)
+	engine.GET("/products", middleware.AdminAuth, product.GetProducts)
 
 	//get all orders
 	engine.GET("/orders", middleware.AdminAuth, order.GetOrders)
 	//cancel order
 	engine.PATCH("/cancelorder", middleware.AdminAuth, order.CancelOrderByAdmin)
+
+	// salesReport
+	engine.GET("/salesreport/:range", middleware.AdminAuth, reports.GetSalesReport)
 }

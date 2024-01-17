@@ -5,13 +5,16 @@ import (
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	orderManagementHandlers "MyShoo/internal/handlers/orderManagementHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
+	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	infra "MyShoo/internal/infrastructure"
 	accRepository "MyShoo/internal/repository/accounts_Repo"
 	ordermanagementrepo "MyShoo/internal/repository/orderManagement_Repo"
 	productRepository "MyShoo/internal/repository/productManagement_Repo"
+	reportsrepo "MyShoo/internal/repository/reports_Repo"
 	accountsUsecase "MyShoo/internal/usecase/accountsUsecases"
 	orderManageUseCase "MyShoo/internal/usecase/orderManageUseCase"
 	prodManageUsecase "MyShoo/internal/usecase/productManagementUsecases"
+	reportsusecases "MyShoo/internal/usecase/reportsUsecases"
 	"fmt"
 )
 
@@ -62,10 +65,16 @@ func InitializeAndStartAPI() {
 	orderUseCase := orderManageUseCase.NewOrderUseCase(userRepository, orderRepository, cartRepository, productRepository)
 	orderHandler := orderManagementHandlers.NewOrderHandler(orderUseCase)
 
+	//reports
+	reportsRepository := reportsrepo.NewSalesReportRepository(infra.DB)
+	reportsUseCase := reportsusecases.NewReportsUseCase(reportsRepository)
+	reportsHandler := reporthandlers.NewReportsHandler(reportsUseCase)
+
 	serveHttp := myhttp.NewServerHTTP(
 		userHandler, adminHandler, sellerHandler,
 		categoryHandler, brandHandler, modelHandler, productHandler,
 		cartHandler, wishListHandler, orderHandler,
+		reportsHandler,
 	)
 	serveHttp.Start()
 }

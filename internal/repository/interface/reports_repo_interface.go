@@ -6,5 +6,6 @@ import (
 )
 
 type IReportsRepo interface{
-	GetSalesReport(start time.Time, end time.Time) (*entities.SalesReport, error)
+	GetSalesReportBetweenDates(start time.Time, end time.Time) (*entities.SalesReport,*[]entities.SalePerDay, error)
+	GetSalesReportFullTime() (*entities.SalesReport,*[]entities.SalePerDay, error)
 }

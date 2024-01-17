@@ -4,6 +4,7 @@ import (
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	orderHandlers "MyShoo/internal/handlers/orderManagementHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
+	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	"MyShoo/internal/routes"
 
 	"github.com/gin-gonic/gin"
@@ -27,12 +28,13 @@ func NewServerHTTP(
 	cart *orderHandlers.CartHandler,
 	wishList *orderHandlers.WishListHandler,
 	order *orderHandlers.OrderHandler,
+	reports *reporthandlers.ReportsHandler,
 ) *ServerHttp {
 	engine := gin.Default()
 	// engine.LoadHTMLGlob("./web/templates/*.html")
 
 	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order)
-	routes.AdminRoutes(engine.Group("/admin"), admin, category, brand, model, product, cart, wishList, order)
+	routes.AdminRoutes(engine.Group("/admin"), admin, category, brand, model, product, cart, wishList, order, reports)
 
 	routes.SellerRoutes(engine.Group("/seller"), seller, category, brand, model, product, cart, wishList)
 	routes.PublicRoutes(engine.Group("/"), category, brand, model, product, cart, wishList)
