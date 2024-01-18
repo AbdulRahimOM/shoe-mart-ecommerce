@@ -11,6 +11,7 @@ type ColourVariant struct {
 	ModelID   uint    `gorm:"column:modelId;notNull"`
 	MRP       float32 `gorm:"column:mrp;notNull"`
 	SalePrice float32 `gorm:"column:salePrice;notNull"`
+	ImageURL  string  `gorm:"column:imageUrl"` //update required for: swagger ignore?
 
 	FkModel Models `gorm:"foreignKey:ModelID;constraint:OnDelete:CASCADE"`
 }

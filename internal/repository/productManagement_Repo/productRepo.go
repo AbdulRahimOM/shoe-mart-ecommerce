@@ -6,15 +6,20 @@ import (
 	repoInterface "MyShoo/internal/repository/interface"
 	"fmt"
 
+	"github.com/cloudinary/cloudinary-go"
 	"gorm.io/gorm"
 )
 
 type ProductsRepo struct {
 	DB *gorm.DB
+	Cld *cloudinary.Cloudinary
 }
 
-func NewProductRepository(db *gorm.DB) repoInterface.IProductsRepo {
-	return &ProductsRepo{DB: db}
+func NewProductRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInterface.IProductsRepo {
+	return &ProductsRepo{
+		DB: db,
+		Cld: cloudinary,
+	}
 }
 
 func (repo *ProductsRepo) DoProductExistsByID(id uint) (bool, error) {

@@ -2,15 +2,60 @@ package manageProductRepository
 
 import (
 	"MyShoo/internal/domain/entities"
+	"MyShoo/internal/models/requestModels"
+	"MyShoo/internal/services"
+	"context"
 	"fmt"
+	"os"
+
+	"github.com/cloudinary/cloudinary-go/api/uploader"
+	"github.com/google/uuid"
 )
 
-func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant) error {
-	result := repo.DB.Create(&req)
+func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os.File) error {
+	fmt.Println("repo file: ", file)
+	//initiate transaction
+	tx := repo.DB.Begin()
+
+	//defer rollback if error
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Println("-------\npanic happened. r= ", r, "\n----")
+			tx.Rollback()
+		}
+	}()
+
+	//add image
+	imageUploadService := services.NewImageUploadService(repo.Cld)
+	imageFileReq := requestModels.ImageFileReq{
+		Ctx: context.Background(),
+		File: file,
+		UploadParams: uploader.UploadParams{
+			Folder:   "MyShoo/colourVariants",
+			PublicID: uuid.New().String()[:7],
+		},
+	}
+	fmt.Println("imageFileReq.File: ", imageFileReq.File)
+	fmt.Println("imageFileReq: ", imageFileReq)
+	var err error
+	req.ImageURL, err = imageUploadService.UploadImage(&imageFileReq)
+	if err != nil {
+		fmt.Println("-------\nerror happened while uploading image to cloudinary. err: ", err, "\n----")
+		tx.Rollback()
+		return err
+	}
+	fmt.Println("req.ImageURL: ", req.ImageURL)
+
+	//add colourVariant
+	result := tx.Create(&req)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add colourVariant. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
 		return result.Error
 	}
+
+	tx.Commit()
+	//need update bcoz transaction is really inefficient to the rollback because one op is in cloudinary!!!!
 
 	return nil
 }

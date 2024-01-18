@@ -38,7 +38,7 @@ func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, error) {
 		name).Scan(&temp)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-model is existing or not. query.Error= ", query.Error, "\n----")
+		fmt.Println("-------\nquery error happened. couldn't check if-model is existing (by name) or not. query.Error= ", query.Error, "\n----")
 		return false, query.Error
 	}
 
@@ -60,7 +60,7 @@ func (repo *ModelsRepo) AddModel(req *entities.Models) error {
 	return nil
 }
 
-func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, error) {
+func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, error) {//need update : is this needed?
 
 	var temp entities.Models
 	query := repo.DB.Raw(`
@@ -70,7 +70,7 @@ func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, error) {
 		id).Scan(&temp)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-model is existing or not. query.Error= ", query.Error, "\n----")
+		fmt.Println("-------\nquery error happened. couldn't check if-model is existing (by ID) or not. query.Error= ", query.Error, "\n----")
 		return false, query.Error
 	}
 
@@ -107,4 +107,26 @@ func (repo *ModelsRepo) GetModelsByBrandsAndCategories(brandExists bool, brandID
 	}
 
 	return &modelsList, nil
+}
+
+// DoModelExistByIDAndBelongsToUser
+func (repo *ModelsRepo) DoModelExistByIDAndBelongsToUser(id uint, sellerID uint) (bool, bool, error) {
+	var temp entities.Models
+	//preloading brand and category
+	query := repo.DB.Preload("FkBrand").
+		Where("id = ?", id).Find(&temp)
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't check if-model is existing by id or not. query.Error= ", query.Error, "\n----")
+		return false, false, query.Error
+	}
+
+	if query.RowsAffected == 0 {
+		return false, false, nil
+	} else {
+		if temp.FkBrand.SellerID == sellerID {
+			return true, true, nil
+		} else {
+			return true, false, nil
+		}
+	}
 }

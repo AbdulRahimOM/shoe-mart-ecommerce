@@ -11,10 +11,14 @@ import (
 
 type ProductsUC struct {
 	ProductsRepo repoInterface.IProductsRepo
+	ModelsRepo  repoInterface.IModelsRepo
 }
 
-func NewProductUseCase(repo repoInterface.IProductsRepo) usecaseInterface.IProductsUC {
-	return &ProductsUC{ProductsRepo: repo}
+func NewProductUseCase(productRepo repoInterface.IProductsRepo, modelsRepo repoInterface.IModelsRepo) usecaseInterface.IProductsUC {
+	return &ProductsUC{
+		ProductsRepo: productRepo, 
+		ModelsRepo: modelsRepo,
+	}
 }
 
 // GetProducts

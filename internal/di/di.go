@@ -45,8 +45,8 @@ func InitializeAndStartAPI() {
 	modelUseCase := prodManageUsecase.NewModelUseCase(modelRepository)
 	modelHandler := productHandlers.NewModelHandler(modelUseCase)
 
-	productRepository := productRepository.NewProductRepository(infra.DB)
-	productUseCase := prodManageUsecase.NewProductUseCase(productRepository)
+	productRepository := productRepository.NewProductRepository(infra.DB,infra.CloudinaryClient)
+	productUseCase := prodManageUsecase.NewProductUseCase(productRepository,modelRepository)
 	productHandler := productHandlers.NewProductHandler(productUseCase)
 
 	//order management related_____________________________________

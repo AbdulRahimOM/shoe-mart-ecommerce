@@ -6,11 +6,12 @@ import (
 	response "MyShoo/internal/models/responseModels"
 	"errors"
 	"fmt"
+	"os"
 
 	"github.com/jinzhu/copier"
 )
 
-func (uc *ProductsUC) AddColourVariant(req *requestModels.AddColourVariantReq) error {
+func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColourVariantReq, file *os.File) error {
 	var colourVariant entities.ColourVariant
 	if err := copier.Copy(&colourVariant, &req); err != nil {
 		return err
@@ -27,8 +28,26 @@ func (uc *ProductsUC) AddColourVariant(req *requestModels.AddColourVariantReq) e
 		return errors.New("colourVariant already exists")
 	}
 
+	//check if modelID exists and belongs to the seller
+	doModelExists,doModelBelongsToSeller, err := uc.ModelsRepo.DoModelExistByIDAndBelongsToUser(req.ModelID, sellerID)
+	if err != nil {
+		fmt.Println("Error occured while checking if model exists")
+		return err
+	}
+	if !doModelExists {
+		fmt.Println("model doesn't exist with this id")
+		return errors.New("model doesn't exist")
+	}
+	if !doModelBelongsToSeller {
+		fmt.Println("model doesn't belong to this seller")
+		return errors.New("model doesn't belong to this seller")
+	}
+
+
+
 	//add colourVariant
-	err = uc.ProductsRepo.AddColourVariant(&colourVariant)
+	fmt.Println("UC file: ", file)
+	err = uc.ProductsRepo.AddColourVariant(&colourVariant, file)
 	if err != nil {
 		return err
 	}

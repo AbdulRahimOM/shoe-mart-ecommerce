@@ -4,6 +4,7 @@ import (
 	"MyShoo/internal/domain/entities"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
+	"os"
 )
 
 type ICategoryUC interface {
@@ -23,7 +24,7 @@ type IModelsUC interface {
 	GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, error)
 }
 type IProductsUC interface {
-	AddColourVariant(req *requestModels.AddColourVariantReq) error
+	AddColourVariant(sellerID uint, req *requestModels.AddColourVariantReq, file *os.File) error
 	EditColourVariant(req *requestModels.EditColourVariantReq) error
 	GetColourVariantsUnderModel(modelID uint) (*[]response.ResponseColourVarient, error)
 

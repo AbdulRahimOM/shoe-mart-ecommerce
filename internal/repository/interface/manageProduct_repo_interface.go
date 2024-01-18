@@ -3,6 +3,7 @@ package repository_interface
 import (
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
+	"os"
 )
 
 type ICategoryRepo interface {
@@ -24,11 +25,12 @@ type IModelsRepo interface {
 	EditModel(req *requestModels.EditModelReq) error
 	DoModelExistsByID(id uint) (bool, error)
 	GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, error)
+	DoModelExistByIDAndBelongsToUser(id uint, sellerID uint) (bool, bool, error)
 }
 
 type IProductsRepo interface {
 	DoColourVariantExists(req *entities.ColourVariant) (bool, error)
-	AddColourVariant(req *entities.ColourVariant) error
+	AddColourVariant(req *entities.ColourVariant, file *os.File) error
 	EditColourVariant(req *entities.ColourVariant) error
 	DoColourVariantExistByID(id uint) (bool, error)
 	GetColourVariantsUnderModel(modelID uint) (*[]entities.ColourVariant, error)
