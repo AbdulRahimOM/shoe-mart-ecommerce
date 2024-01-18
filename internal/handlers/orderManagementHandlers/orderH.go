@@ -309,4 +309,59 @@ func (h *OrderHandler) CancelOrderByAdmin(c *gin.Context) {
 	})
 }
 
-//
+//return order of user
+func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
+	fmt.Println("Handler ::: return order handler")
+
+	//get req from body
+	var req *requestModels.ReturnOrderReq
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error binding request. Try Again",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	//validate request
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
+		fmt.Println(errResponse)
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error validating request. Try Again",
+			Error:   errResponse,
+		})
+		return
+	}
+
+	//get userID from token
+	userID, err := tools.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.SME{
+			Status:  "failed",
+			Message: "Error returning order. Try Again",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	//return order
+	message, err := h.orderUseCase.ReturnOrderByUser(req.OrderID, userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.SME{
+			Status:  "failed",
+			Message: message,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SME{
+		Status:  "success",
+		Message: "Order returned successfully",
+		Error:   "",
+	})
+}

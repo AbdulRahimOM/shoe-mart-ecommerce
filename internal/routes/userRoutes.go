@@ -53,6 +53,8 @@ func UserRoutes(engine *gin.RouterGroup,
 	engine.POST("/makeorder", middleware.UserAuth, middleware.VerifyUserStatus, order.MakeOrder)
 	//cancel order
 	engine.PATCH("/cancelorder", middleware.UserAuth, middleware.VerifyUserStatus, order.CancelMyOrder)
+	//return order
+	engine.PATCH("/returnorder", middleware.UserAuth, middleware.VerifyUserStatus, order.ReturnMyOrder)
 
 	//get user addresses
 	engine.GET("/addresses", middleware.UserAuth, middleware.VerifyUserStatus, user.GetUserAddresses)

@@ -17,3 +17,8 @@ type MakeOrderProducts struct {
 type CancelOrderReq struct {
 	OrderID uint `json:"orderID" validate:"required,number"`
 }
+
+//return order req
+type ReturnOrderReq struct {
+	OrderID uint `json:"orderID" validate:"required,number"`
+}

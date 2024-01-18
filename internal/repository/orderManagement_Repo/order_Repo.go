@@ -292,3 +292,53 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 
 	return order, nil
 }
+
+//ReturnOrder
+func (repo *OrderRepo) ReturnOrder(orderID uint) error {
+	//start transaction
+	tx := repo.DB.Begin()
+	var result *gorm.DB
+
+	//defer rollback if error happened
+	defer func() {
+		if r := recover(); r != nil || result.Error != nil{
+			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+		}
+	}()
+
+	//update order status
+	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "returned")
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return result.Error
+	}
+
+	//get order items
+	var orderItems []entities.OrderItem
+	query := tx.
+		Where("order_id = ?", orderID).
+		Find(&orderItems)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		tx.Rollback()
+		return query.Error
+	}
+
+	//update stock
+	for _, item := range orderItems {
+		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock + ?", item.Quantity))
+		if result.Error != nil {
+			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+			return result.Error
+		}
+	}
+
+	//commit transaction
+	tx.Commit()
+
+	return nil
+}

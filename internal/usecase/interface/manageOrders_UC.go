@@ -34,4 +34,5 @@ type IOrderUC interface {
 	GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, string, error)
 	CancelOrderByUser(orderID uint, userID uint) (string, error)
 	CancelOrderByAdmin(orderID uint) (string, error)
+	ReturnOrderByUser(orderID uint, userID uint) (string, error)
 }

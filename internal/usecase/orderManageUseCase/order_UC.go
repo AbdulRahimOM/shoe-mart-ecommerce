@@ -264,3 +264,49 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) (string, error) {
 
 	return "Order cancelled successfully", nil
 }
+
+//ReturnOrderByUser
+func (uc *OrderUseCase) ReturnOrderByUser(orderID, userID uint) (string, error) {
+	//check if order exists
+	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while checking if order exists")
+		return "Some error occured, contact customer care", err
+	}
+	if !orderExists {
+		fmt.Println("Order doesn't exist by ID")
+		return "Invalid order ID. Contact customer care", errors.New("order doesn't exist by ID")
+	}
+
+	//check if order belongs to userID
+	userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting userID")
+		return "Some error occured, contact customer care", err
+	}
+	if userID != userIDFromOrder {
+		fmt.Println("Order doesn't belong to user")
+		return "Order doesn't belong to user", errors.New("order doesn't belong to user")
+	}
+
+	//check if order is in "delivered" status
+	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting order status")
+		return "Some error occured, contact customer care", err
+	}
+	if orderStatus != "delivered" {
+		message:="Cannot return. Order is in '"+orderStatus+"' status"
+		fmt.Println(message)
+		return message, errors.New(message)
+	}
+
+	//return order
+	err = uc.orderRepo.ReturnOrder(orderID)
+	if err != nil {
+		fmt.Println("Error occured while returning order")
+		return "Some error occured, contact customer care", err
+	}
+
+	return "Order returned successfully", nil
+}
