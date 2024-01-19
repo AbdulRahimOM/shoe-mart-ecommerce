@@ -216,9 +216,10 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) (string, er
 		fmt.Println("Error occured while getting order status")
 		return "Some error occured, contact customer care", err
 	}
-	if orderStatus == "cancelled" {
-		fmt.Println("Order is already cancelled")
-		return "Order is already cancelled", errors.New("order is already cancelled")
+	if orderStatus != "placed" {
+		message := "Cannot return. Order is in '" + orderStatus + "' status"
+		fmt.Println(message)
+		return message, errors.New(message)
 	}
 
 	//cancel order, update stock
@@ -250,9 +251,10 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) (string, error) {
 		fmt.Println("Error occured while getting order status")
 		return "Some error occured, contact customer care", err
 	}
-	if orderStatus == "cancelled" {
-		fmt.Println("Order is already cancelled")
-		return "Order is already cancelled", errors.New("order is already cancelled")
+	if orderStatus != "placed" {
+		message := "Cannot return. Order is in '" + orderStatus + "' status"
+		fmt.Println(message)
+		return message, errors.New(message)
 	}
 
 	//cancel order
@@ -265,8 +267,8 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) (string, error) {
 	return "Order cancelled successfully", nil
 }
 
-//ReturnOrderByUser
-func (uc *OrderUseCase) ReturnOrderByUser(orderID, userID uint) (string, error) {
+// ReturnOrderRequestByUser
+func (uc *OrderUseCase) ReturnOrderRequestByUser(orderID, userID uint) (string, error) {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
@@ -296,17 +298,87 @@ func (uc *OrderUseCase) ReturnOrderByUser(orderID, userID uint) (string, error) 
 		return "Some error occured, contact customer care", err
 	}
 	if orderStatus != "delivered" {
-		message:="Cannot return. Order is in '"+orderStatus+"' status"
+		message := "Cannot return. Order is in '" + orderStatus + "' status"
 		fmt.Println(message)
 		return message, errors.New(message)
 	}
 
 	//return order
-	err = uc.orderRepo.ReturnOrder(orderID)
+	err = uc.orderRepo.ReturnOrderRequest(orderID)
 	if err != nil {
 		fmt.Println("Error occured while returning order")
 		return "Some error occured, contact customer care", err
 	}
 
-	return "Order returned successfully", nil
+	return "Request for return submitted successfully", nil
+}
+
+//MarkOrderAsReturned
+func (uc *OrderUseCase) MarkOrderAsReturned(orderID uint) (string, error) {
+	//check if order exists
+	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while checking if order exists")
+		return "Some error occured, contact customer care", err
+	}
+	if !orderExists {
+		fmt.Println("Order doesn't exist by ID")
+		return "Invalid order ID. Contact customer care", errors.New("order doesn't exist by ID")
+	}
+
+	//check if order is in "return requested" status
+	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting order status")
+		return "Some error occured, contact customer care", err
+	}
+	if orderStatus != "return requested" {
+		message := "Cannot mark as returned. Order is in '" + orderStatus + "' status"
+		fmt.Println(message)
+		return message, errors.New(message)
+	}
+
+	//mark order as returned
+	err = uc.orderRepo.MarkOrderAsReturned(orderID)
+	if err != nil {
+		fmt.Println("Error occured while marking order as returned")
+		return "Some error occured, contact customer care", err
+	}
+
+	return "Order marked as returned successfully", nil
+}
+
+//MarkOrderAsDelivered
+func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) (string, error) {
+	//check if order exists
+	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while checking if order exists")
+		return "Some error occured, contact customer care", err
+	}
+	if !orderExists {
+		fmt.Println("Order doesn't exist by ID")
+		return "Invalid order ID. Contact customer care", errors.New("order doesn't exist by ID")
+	}
+
+	//check if order is in "placed" status
+	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting order status")
+		return "Some error occured, contact customer care", err
+	}
+	if orderStatus != "placed" {
+		message := "Cannot mark as delivered. Order is in '" + orderStatus + "' status"
+		fmt.Println(message)
+		return message, errors.New(message)
+	}
+
+	//mark order as delivered
+	err = uc.orderRepo.MarkOrderAsDelivered(orderID)
+	if err != nil {
+		fmt.Println("Error occured while marking order as delivered")
+		return "Some error occured, contact customer care", err
+	}
+
+	return "Order marked as delivered successfully", nil
 }

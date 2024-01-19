@@ -50,4 +50,9 @@ func AdminRoutes(engine *gin.RouterGroup,
 
 	// salesReport
 	engine.GET("/salesreport/:range", middleware.AdminAuth, reports.GetSalesReport)
+
+	//mark order as delivered
+	engine.PATCH("/markdelivery", middleware.AdminAuth, order.MarkOrderAsDelivered)
+	//mark order as returned
+	engine.PATCH("/markorderasreturned", middleware.AdminAuth, order.MarkOrderAsReturned)
 }

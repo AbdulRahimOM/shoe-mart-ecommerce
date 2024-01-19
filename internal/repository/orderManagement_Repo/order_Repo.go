@@ -127,7 +127,6 @@ func (repo *OrderRepo) GetOrders(resultOffset int, resultLimit int) (*[]entities
 	return &orderInfos, nil
 }
 
-
 // CancelOrder implements repository_interface.IOrderRepo.
 func (repo *OrderRepo) CancelOrder(orderID uint) error {
 	//start transaction
@@ -136,7 +135,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 
 	//defer rollback if error happened
 	defer func() {
-		if r := recover(); r != nil || result.Error != nil{
+		if r := recover(); r != nil || result.Error != nil {
 			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
@@ -170,6 +169,27 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 			tx.Rollback()
 			return result.Error
 		}
+	}
+
+	//get order's final amount (to update wallet)
+	var order entities.Order
+	query = tx.
+		Select("final_amount").
+		Where("id = ?", orderID).
+		Find(&order)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		tx.Rollback()
+		return query.Error
+	}
+
+	//update wallet
+	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("walletBalance", gorm.Expr("walletBalance + ?", order.FinalAmount))
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return result.Error
 	}
 
 	//commit transaction
@@ -235,7 +255,7 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 
 	//defer rollback if error happened
 	defer func() {
-		if r := recover(); r != nil || result.Error != nil{
+		if r := recover(); r != nil || result.Error != nil {
 			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
@@ -277,7 +297,7 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 			tx.Rollback()
 			return order, result.Error
 		}
-	}		
+	}
 
 	//clear cart
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
@@ -293,15 +313,43 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	return order, nil
 }
 
-//ReturnOrder
-func (repo *OrderRepo) ReturnOrder(orderID uint) error {
+// ReturnOrder
+func (repo *OrderRepo) ReturnOrderRequest(orderID uint) error {
 	//start transaction
 	tx := repo.DB.Begin()
 	var result *gorm.DB
 
 	//defer rollback if error happened
 	defer func() {
-		if r := recover(); r != nil || result.Error != nil{
+		if r := recover(); r != nil || result.Error != nil {
+			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+		}
+	}()
+
+	//update order status
+	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "return requested")
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return result.Error
+	}
+
+	//commit transaction
+	tx.Commit()
+
+	return nil
+}
+
+//MarkOrderAsReturned
+func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) error {
+	//start transaction
+	tx := repo.DB.Begin()
+	var result *gorm.DB
+
+	//defer rollback if error happened
+	defer func() {
+		if r := recover(); r != nil || result.Error != nil {
 			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
@@ -335,6 +383,54 @@ func (repo *OrderRepo) ReturnOrder(orderID uint) error {
 			tx.Rollback()
 			return result.Error
 		}
+	}
+
+	//get order's final amount and userID (to update wallet)
+	var order entities.Order
+	query = tx.
+		Where("id = ?", orderID).
+		Find(&order)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		tx.Rollback()
+		return query.Error
+	}
+	
+	//update wallet
+	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return result.Error
+	}
+
+	//commit transaction
+	tx.Commit()
+
+	return nil
+}
+
+//MarkOrderAsDelivered
+func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) error {
+	//start transaction
+	tx := repo.DB.Begin()
+	var result *gorm.DB
+
+	//defer rollback if error happened
+	defer func() {
+		if r := recover(); r != nil || result.Error != nil {
+			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+		}
+	}()
+
+	//update order status
+	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "delivered")
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return result.Error
 	}
 
 	//commit transaction

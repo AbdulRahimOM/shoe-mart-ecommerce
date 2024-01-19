@@ -37,5 +37,7 @@ type IOrderRepo interface {
 	GetUserIDByOrderID(orderID uint) (uint, error)
 	GetOrderStatusByID(orderID uint) (string, error)
 	CancelOrder(orderID uint) error
-	ReturnOrder(orderID uint) error
+	ReturnOrderRequest(orderID uint) error
+	MarkOrderAsReturned(orderID uint) error
+	MarkOrderAsDelivered(orderID uint) error
 }

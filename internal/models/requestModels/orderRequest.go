@@ -22,3 +22,8 @@ type CancelOrderReq struct {
 type ReturnOrderReq struct {
 	OrderID uint `json:"orderID" validate:"required,number"`
 }
+
+//MarkOrderAsDeliveredReq
+type MarkOrderAsDeliveredReq struct {
+	OrderID uint `json:"orderID" validate:"required,number"`
+}

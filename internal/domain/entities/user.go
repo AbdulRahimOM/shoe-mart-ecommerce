@@ -11,6 +11,7 @@ type User struct {
 	Password  string    `gorm:"column:password;notNull"`
 	Status    string    `gorm:"default:Pending;notNull"`
 	CreatedAt time.Time `gorm:"column:created_at;notNull"`
+	WalletBalance float32 `gorm:"column:wallet_balance;notNull;default:0"`
 }
 
 type UserDetails struct {

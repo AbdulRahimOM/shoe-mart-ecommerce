@@ -309,7 +309,7 @@ func (h *OrderHandler) CancelOrderByAdmin(c *gin.Context) {
 	})
 }
 
-//return order of user
+// return order of user
 func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 	fmt.Println("Handler ::: return order handler")
 
@@ -349,7 +349,7 @@ func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 	}
 
 	//return order
-	message, err := h.orderUseCase.ReturnOrderByUser(req.OrderID, userID)
+	message, err := h.orderUseCase.ReturnOrderRequestByUser(req.OrderID, userID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.SME{
 			Status:  "failed",
@@ -361,7 +361,98 @@ func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 
 	c.JSON(http.StatusOK, response.SME{
 		Status:  "success",
-		Message: "Order returned successfully",
+		Message: message,
+	})
+}
+
+// mark order as returned by admin upon receiving returned order
+func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
+	fmt.Println("Handler ::: mark order as returned handler")
+
+	//get req from body
+	var req *requestModels.ReturnOrderReq
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error binding request. Try Again",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	//validate request
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
+		fmt.Println(errResponse)
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error validating request. Try Again",
+			Error:   errResponse,
+		})
+		return
+	}
+
+	//mark order as returned
+	message, err := h.orderUseCase.MarkOrderAsReturned(req.OrderID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.SME{
+			Status:  "failed",
+			Message: message,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SME{
+		Status:  "success",
+		Message: "Order marked as returned successfully",
+		Error:   "",
+	})
+}
+
+//MarkOrderAsDelivered
+func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
+	fmt.Println("Handler ::: mark order as delivered handler")
+
+	//get req from body
+	var req *requestModels.MarkOrderAsDeliveredReq
+
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error binding request. Try Again",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	//validate request
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
+		fmt.Println(errResponse)
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error validating request. Try Again",
+			Error:   errResponse,
+		})
+		return
+	}
+
+	//mark order as delivered
+	message, err := h.orderUseCase.MarkOrderAsDelivered(req.OrderID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.SME{
+			Status:  "failed",
+			Message: message,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SME{
+		Status:  "success",
+		Message: "Order marked as delivered successfully",
 		Error:   "",
 	})
 }
