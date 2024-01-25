@@ -437,7 +437,7 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) error {
 	//update order status and delivered_date
 	result = tx.Model(&entities.Order{}).
 		Where("id = ?", orderID).
-		Updates(map[string]interface{}{"status": "delivered", "delivered_date": gorm.Expr("CURRENT_TIMESTAMP")})
+		Updates(map[string]interface{}{"status": "delivered", "delivered_date": gorm.Expr("CURRENT_TIMESTAMP"), "payment_status": "paid"})
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()

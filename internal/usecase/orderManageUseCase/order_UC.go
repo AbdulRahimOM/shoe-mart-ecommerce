@@ -410,7 +410,6 @@ func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) (string, error) {
 		}
 	}
 
-	//mark order as delivered
 	err = uc.orderRepo.MarkOrderAsDelivered(orderID)
 	if err != nil {
 		fmt.Println("Error occured while marking order as delivered")

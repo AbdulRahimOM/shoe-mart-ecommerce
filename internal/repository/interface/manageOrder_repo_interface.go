@@ -43,6 +43,8 @@ type IOrderRepo interface {
 	CancelOrder(orderID uint) error
 	ReturnOrderRequest(orderID uint) error
 	MarkOrderAsReturned(orderID uint) error
+
+	//mark order as delivered and change payment-status to "paid" in case of COD
 	MarkOrderAsDelivered(orderID uint) error
 
 	GetOrderByTransactionID(transactionID string) (uint, error)

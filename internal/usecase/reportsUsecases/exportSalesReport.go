@@ -2,6 +2,7 @@ package reportsusecases
 
 import (
 	"MyShoo/internal/domain/entities"
+	"MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecaseInterface "MyShoo/internal/usecase/interface"
 	"fmt"
@@ -9,6 +10,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -29,7 +31,7 @@ func (uc *ReportsUseCase) ExportSalesReportFullTime() (string, error) {
 	var orderList *[]entities.SalesReportOrderList
 	var sellerWiseReport *[]entities.SellerWiseReport
 	var url string
-	orderList,sellerWiseReport, err := uc.reportsRepo.GetSalesReportFullTime()
+	orderList, sellerWiseReport, err := uc.reportsRepo.GetSalesReportFullTime()
 	if err != nil {
 		fmt.Println("Error getting sales report:", err)
 		return "", err
@@ -69,7 +71,7 @@ func (uc *ReportsUseCase) ExportSalesReportFullTime() (string, error) {
 		file.SetCellFormula("All Orders", fmt.Sprintf("K%d", i+2), fmt.Sprintf("H%d*J%d", i+2, i+2))
 	}
 
-	for i,sellerData:= range *sellerWiseReport {
+	for i, sellerData := range *sellerWiseReport {
 		file.SetCellValue("Seller Data", fmt.Sprintf("A%d", i+3), sellerData.SellerID)
 		file.SetCellValue("Seller Data", fmt.Sprintf("B%d", i+3), sellerData.SellerName)
 		file.SetCellValue("Seller Data", fmt.Sprintf("C%d", i+3), sellerData.QuantityCount)
@@ -81,13 +83,6 @@ func (uc *ReportsUseCase) ExportSalesReportFullTime() (string, error) {
 		file.SetCellValue("Seller Data", fmt.Sprintf("I%d", i+3), sellerData.EffectiveQuantityCount)
 		file.SetCellValue("Seller Data", fmt.Sprintf("J%d", i+3), sellerData.EffectiveSaleValue)
 	}
-
-
-
-
-
-
-
 
 	// Save the Excel file
 	if err := file.SaveAs("output.xlsx"); err != nil {
@@ -103,21 +98,22 @@ func (uc *ReportsUseCase) ExportSalesReportFullTime() (string, error) {
 		return "", err
 	}
 	defer os.Remove(tempFilePath)
+	if os.Getenv("UPLOAD_EXCEL") == "true" {
+		var excelUploadReq requestModels.ExcelFileReq = requestModels.ExcelFileReq{
+			File: tempFilePath,
+			UploadParams: uploader.UploadParams{
+				Folder:    "MyShoo/adminreports",
+				PublicID:  "fulltimeReportForAdmin",
+				Overwrite: true,
+			},
+		}
 
-	// var excelUploadReq requestModels.ExcelFileReq = requestModels.ExcelFileReq{
-	// 	File: tempFilePath,
-	// 	UploadParams: uploader.UploadParams{
-	// 		Folder:    "MyShoo/adminreports",
-	// 		PublicID:  "fulltimeReportForAdmin",
-	// 		Overwrite: true,
-	// 	},
-	// }
-
-	// url, err = uc.reportsRepo.UploadExcelFile(&excelUploadReq)
-	// if err != nil {
-	// 	fmt.Println("Error uploading Excel file:", err)
-	// 	return "", err
-	// }
+		url, err = uc.reportsRepo.UploadExcelFile(&excelUploadReq)
+		if err != nil {
+			fmt.Println("Error uploading Excel file:", err)
+			return "", err
+		}
+	}
 	return url, nil
 }
 
