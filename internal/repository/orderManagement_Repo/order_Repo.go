@@ -173,10 +173,9 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 
 	//get order's final amount (to update wallet)
 	var order entities.Order
-	var paymentStatus string
 	query = tx.
 		Select("final_amount,payment_status").
-		Where("id = ?", orderID, paymentStatus).
+		Where("id = ?", orderID).
 		Find(&order)
 
 	if query.Error != nil {
@@ -184,7 +183,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 		tx.Rollback()
 		return query.Error
 	}
-	if paymentStatus == "paid" {
+	if order.PaymentStatus == "paid" {
 		//update wallet , update payment status to refunded
 		result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 		if result.Error != nil {

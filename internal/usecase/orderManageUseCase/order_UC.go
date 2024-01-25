@@ -246,7 +246,7 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) (string, er
 		return "Some error occured.", err
 	}
 
-	if orderStatus != "placed" {
+	if orderStatus != "placed" && orderStatus != "payment pending"{
 		if orderStatus == "cancelled" {
 			message := "Order is already in '" + orderStatus + "' status"
 			return message, errors.New(message)
@@ -284,10 +284,14 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) (string, error) {
 		fmt.Println("Error occured while getting order status")
 		return "Some error occured.", err
 	}
-	if orderStatus != "placed" {
-		message := "Cannot return. Order is in '" + orderStatus + "' status"
-		fmt.Println(message)
-		return message, errors.New(message)
+	if orderStatus != "placed" && orderStatus != "payment pending"{
+		if orderStatus == "cancelled" {
+			message := "Order is already in '" + orderStatus + "' status"
+			return message, errors.New(message)
+		} else {
+			message := "Cannot cancel. Order is in '" + orderStatus + "' status"
+			return message, errors.New(message)
+		}
 	}
 
 	//cancel order, update stock, refund to wallet if already paid
