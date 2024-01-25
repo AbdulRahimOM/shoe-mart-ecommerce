@@ -43,10 +43,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 		return errors.New("model doesn't belong to this seller")
 	}
 
-
-
 	//add colourVariant
-	fmt.Println("UC file: ", file)
 	err = uc.ProductsRepo.AddColourVariant(&colourVariant, file)
 	if err != nil {
 		return err

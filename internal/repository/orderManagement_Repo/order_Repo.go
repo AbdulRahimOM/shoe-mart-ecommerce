@@ -185,7 +185,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 	}
 
 	//update wallet
-	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("walletBalance", gorm.Expr("walletBalance + ?", order.FinalAmount))
+	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
@@ -425,8 +425,10 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) error {
 		}
 	}()
 
-	//update order status
-	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "delivered")
+	//update order status and delivered_date
+	result = tx.Model(&entities.Order{}).
+		Where("id = ?", orderID).
+		Updates(map[string]interface{}{"status": "delivered", "delivered_date": gorm.Expr("CURRENT_TIMESTAMP")})
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
@@ -437,4 +439,33 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) error {
 	tx.Commit()
 
 	return nil
+}
+
+//GetAllOrders
+func (repo *OrderRepo) GetAllOrders() (*[]entities.Order, error) {
+	var orders []entities.Order
+	query := repo.DB.
+		Find(&orders)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		return nil, query.Error
+	}
+
+	return &orders, nil
+}
+
+func (repo *OrderRepo) 	GetOrderSummaryByID(orderID uint) (*entities.Order, error){
+	var order entities.Order
+	query := repo.DB.
+		Preload("FkAddress").
+		Where("id = ?", orderID).
+		Find(&order)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		return nil, query.Error
+	}
+
+	return &order, nil
 }

@@ -3,6 +3,7 @@ package myhttp
 import (
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	orderHandlers "MyShoo/internal/handlers/orderManagementHandlers"
+	"MyShoo/internal/handlers/paymentHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
 	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	"MyShoo/internal/routes"
@@ -29,11 +30,13 @@ func NewServerHTTP(
 	wishList *orderHandlers.WishListHandler,
 	order *orderHandlers.OrderHandler,
 	reports *reporthandlers.ReportsHandler,
+	payment *paymentHandlers.PaymentHandler,
 ) *ServerHttp {
 	engine := gin.Default()
 	// engine.LoadHTMLGlob("./web/templates/*.html")
+	engine.LoadHTMLGlob("./internal/view/*.html")
 
-	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order)
+	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order,payment)
 	routes.AdminRoutes(engine.Group("/admin"), admin, category, brand, model, product, cart, wishList, order, reports)
 
 	routes.SellerRoutes(engine.Group("/seller"), seller, category, brand, model, product, cart, wishList)

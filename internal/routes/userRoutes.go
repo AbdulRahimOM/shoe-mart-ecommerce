@@ -3,6 +3,7 @@ package routes
 import (
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	ordermanagementHandlers "MyShoo/internal/handlers/orderManagementHandlers"
+	"MyShoo/internal/handlers/paymentHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
 	"MyShoo/internal/middleware"
 
@@ -18,6 +19,7 @@ func UserRoutes(engine *gin.RouterGroup,
 	cart *ordermanagementHandlers.CartHandler,
 	wishList *ordermanagementHandlers.WishListHandler,
 	order *ordermanagementHandlers.OrderHandler,
+	payment *paymentHandlers.PaymentHandler,
 ) {
 	engine.Use(middleware.ClearCache)
 	engine.GET("/login", middleware.NotLoggedOutCheck, user.GetLogin)
@@ -31,12 +33,12 @@ func UserRoutes(engine *gin.RouterGroup,
 	engine.POST("/resetpasswordsendotp", middleware.NotLoggedOutCheck, user.SendOtpForPWChange)
 	engine.POST("/resetpasswordverifyotp", middleware.NotLoggedOutCheck, user.VerifyOtpForPWChange)
 	engine.POST("/resetpassword", middleware.NotLoggedOutCheck, user.ResetPassword)
-	
+
 	engine.GET("/", middleware.UserAuth, middleware.VerifyUserStatus, user.GetHome)
 	engine.GET("/home", middleware.UserAuth, middleware.VerifyUserStatus, user.GetHome)
 
 	//order management related_____________________________________
-	
+
 	engine.GET("/colourvariants/:modelID", middleware.UserAuth, product.GetColourVariantsUnderModel)
 
 	//cart related________________________________________________
@@ -76,4 +78,8 @@ func UserRoutes(engine *gin.RouterGroup,
 	engine.POST("/addtowishlist", middleware.UserAuth, middleware.VerifyUserStatus, wishList.AddToWishList)
 	engine.DELETE("/removefromwishlist", middleware.UserAuth, middleware.VerifyUserStatus, wishList.RemoveFromWishList)
 
+	//payment related_____________________________________________
+	engine.POST("/payment", payment.ProceedToPayViaRazorPay)
+	engine.GET("/payment", payment.ProceedToPayViaRazorPay2)
+	engine.POST("/payment/verify", payment.VerifyPayment)
 }

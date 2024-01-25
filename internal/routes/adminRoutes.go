@@ -48,8 +48,12 @@ func AdminRoutes(engine *gin.RouterGroup,
 	//cancel order
 	engine.PATCH("/cancelorder", middleware.AdminAuth, order.CancelOrderByAdmin)
 
-	// salesReport
-	engine.GET("/salesreport/:range", middleware.AdminAuth, reports.GetSalesReport)
+	// dashBoardData
+	engine.GET("/dashboarddata/:range", middleware.AdminAuth, reports.GetDashBoardData)
+
+	//salesreport
+	// engine.GET("/exportsalesreport/:range", middleware.AdminAuth, reports.ExportSalesReport)
+	engine.GET("/exportsalesreport/:range", reports.ExportSalesReport)
 
 	//mark order as delivered
 	engine.PATCH("/markdelivery", middleware.AdminAuth, order.MarkOrderAsDelivered)

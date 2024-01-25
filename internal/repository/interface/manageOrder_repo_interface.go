@@ -28,14 +28,16 @@ type IWishListsRepo interface {
 }
 
 type IOrderRepo interface {
-	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order,error)
+	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error)
 
-	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order,error)
-	GetOrdersOfUser(userID uint,resultOffset int,resultLimit int) (*[]entities.DetailedOrderInfo, error)
-	GetOrders(resultOffset int,resultLimit int) (*[]entities.DetailedOrderInfo, error)
+	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error)
+	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
+	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
+	GetAllOrders() (*[]entities.Order, error)
 	DoOrderExistByID(orderID uint) (bool, error)
 	GetUserIDByOrderID(orderID uint) (uint, error)
 	GetOrderStatusByID(orderID uint) (string, error)
+	GetOrderSummaryByID(orderID uint) (*entities.Order, error)
 	CancelOrder(orderID uint) error
 	ReturnOrderRequest(orderID uint) error
 	MarkOrderAsReturned(orderID uint) error

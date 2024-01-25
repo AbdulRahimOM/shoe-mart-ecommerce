@@ -47,6 +47,8 @@ type IUserRepo interface {
 
 	DoUserExistsByID(userId uint) (bool, error)
 	GetUserAddresses(userId uint) (*[]entities.UserAddress, error)
+	GetUserAddress(addressID uint) (*entities.UserAddress, error)
+
 	GetProfile(userID uint) (*entities.UserDetails, error)
 	GetEmailByID(userID uint) (string, error)
 	EditProfile(userID uint, req *requestModels.EditProfileReq) error

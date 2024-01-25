@@ -1,6 +1,7 @@
 package ordermanagementHandlers
 
 import (
+	myshoo "MyShoo"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -68,7 +69,8 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 	}
 
 	//make order
-	orderInfo, message, err := h.orderUseCase.MakeOrder(req)
+
+	orderInfo, proceedToPaymentInfo, message, err := h.orderUseCase.MakeOrder(req)
 	if err != nil {
 		switch err.Error() {
 		case "cart is empty":
@@ -93,13 +95,21 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 		return
 
 	}
-
-	c.JSON(http.StatusOK, response.OrderResponse{
-		Status:    "success",
-		Message:   "Order placed successfully",
-		Error:     "",
-		OrderInfo: *orderInfo,
-	})
+	if proceedToPaymentInfo == nil {
+		c.JSON(http.StatusCreated, response.CODOrderResponse{
+			Status:    "success",
+			Message:   message,
+			OrderInfo: *orderInfo,
+		})
+	} else {
+		c.JSON(http.StatusCreated, response.OnlinePaymentOrderResponse{
+			Status:               "success",
+			Message:              message,
+			OrderInfo:            *orderInfo,
+			ProceedToPaymentInfo: *proceedToPaymentInfo,
+		})
+		myshoo.TemporarySolution(*proceedToPaymentInfo)
+	}
 }
 
 // Get Orders of the user
@@ -411,7 +421,7 @@ func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
 	})
 }
 
-//MarkOrderAsDelivered
+// MarkOrderAsDelivered
 func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 	fmt.Println("Handler ::: mark order as delivered handler")
 
@@ -426,6 +436,7 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 		})
 		return
 	}
+	fmt.Println("req.OrderID=", req.OrderID)
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {

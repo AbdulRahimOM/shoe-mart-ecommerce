@@ -4,7 +4,6 @@ import (
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
 	"MyShoo/internal/services"
-	"context"
 	"fmt"
 	"os"
 
@@ -13,7 +12,7 @@ import (
 )
 
 func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os.File) error {
-	fmt.Println("repo file: ", file)
+	// fmt.Println("repo file: ", file)
 	//initiate transaction
 	tx := repo.DB.Begin()
 
@@ -26,17 +25,16 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 	}()
 
 	//add image
-	imageUploadService := services.NewImageUploadService(repo.Cld)
+	imageUploadService := services.NewFileUploadService(repo.Cld)
 	imageFileReq := requestModels.ImageFileReq{
-		Ctx: context.Background(),
 		File: file,
 		UploadParams: uploader.UploadParams{
 			Folder:   "MyShoo/colourVariants",
 			PublicID: uuid.New().String()[:7],
 		},
 	}
-	fmt.Println("imageFileReq.File: ", imageFileReq.File)
-	fmt.Println("imageFileReq: ", imageFileReq)
+	// fmt.Println("imageFileReq.File: ", imageFileReq.File)
+	// fmt.Println("imageFileReq: ", imageFileReq)
 	var err error
 	req.ImageURL, err = imageUploadService.UploadImage(&imageFileReq)
 	if err != nil {
@@ -44,7 +42,7 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 		tx.Rollback()
 		return err
 	}
-	fmt.Println("req.ImageURL: ", req.ImageURL)
+	fmt.Println("req.ImageURL: ", req.ImageURL) //url printing,.. may be required for checking purposes
 
 	//add colourVariant
 	result := tx.Create(&req)

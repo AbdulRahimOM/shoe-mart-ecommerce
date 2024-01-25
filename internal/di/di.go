@@ -4,6 +4,7 @@ import (
 	myhttp "MyShoo/internal"
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	orderManagementHandlers "MyShoo/internal/handlers/orderManagementHandlers"
+	"MyShoo/internal/handlers/paymentHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
 	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	infra "MyShoo/internal/infrastructure"
@@ -45,8 +46,8 @@ func InitializeAndStartAPI() {
 	modelUseCase := prodManageUsecase.NewModelUseCase(modelRepository)
 	modelHandler := productHandlers.NewModelHandler(modelUseCase)
 
-	productRepository := productRepository.NewProductRepository(infra.DB,infra.CloudinaryClient)
-	productUseCase := prodManageUsecase.NewProductUseCase(productRepository,modelRepository)
+	productRepository := productRepository.NewProductRepository(infra.DB, infra.CloudinaryClient)
+	productUseCase := prodManageUsecase.NewProductUseCase(productRepository, modelRepository)
 	productHandler := productHandlers.NewProductHandler(productUseCase)
 
 	//order management related_____________________________________
@@ -66,15 +67,18 @@ func InitializeAndStartAPI() {
 	orderHandler := orderManagementHandlers.NewOrderHandler(orderUseCase)
 
 	//reports
-	reportsRepository := reportsrepo.NewSalesReportRepository(infra.DB)
-	reportsUseCase := reportsusecases.NewReportsUseCase(reportsRepository)
+	reportsRepository := reportsrepo.NewReportRepository(infra.DB, infra.CloudinaryClient)
+	reportsUseCase := reportsusecases.NewReportsUseCase(reportsRepository,orderRepository)
 	reportsHandler := reporthandlers.NewReportsHandler(reportsUseCase)
+
+	//payment
+	paymentHandler := paymentHandlers.NewPaymentHandler()
 
 	serveHttp := myhttp.NewServerHTTP(
 		userHandler, adminHandler, sellerHandler,
 		categoryHandler, brandHandler, modelHandler, productHandler,
 		cartHandler, wishListHandler, orderHandler,
-		reportsHandler,
+		reportsHandler,paymentHandler,
 	)
 	serveHttp.Start()
 }

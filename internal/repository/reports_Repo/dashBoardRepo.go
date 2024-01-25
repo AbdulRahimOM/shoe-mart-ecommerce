@@ -4,20 +4,10 @@ import (
 	"MyShoo/internal/domain/entities"
 	"fmt"
 	"time"
-
-	"gorm.io/gorm"
 )
 
-type SalesReportRepo struct {
-	DB *gorm.DB
-}
-
-func NewSalesReportRepository(db *gorm.DB) *SalesReportRepo {
-	return &SalesReportRepo{DB: db}
-}
-
-func (repo *SalesReportRepo) GetSalesReportBetweenDates(start time.Time, end time.Time) (*entities.SalesReport, *[]entities.SalePerDay, error) {
-	var salesReport entities.SalesReport
+func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, error) {
+	var dashBoardData entities.DashboardData
 	var salePerDay []entities.SalePerDay
 
 	err := repo.DB.Raw(`
@@ -31,10 +21,10 @@ func (repo *SalesReportRepo) GetSalesReportBetweenDates(start time.Time, end tim
 		(SELECT COUNT(*) FROM users WHERE created_at BETWEEN ? AND ?) AS users_registered
 		FROM orders 
 		WHERE order_date_and_time BETWEEN ? AND ?`,
-		start, end, start, end).Scan(&salesReport).Error
+		start, end, start, end).Scan(&dashBoardData).Error
 	if err != nil {
-		fmt.Println("-------\nquery error happened. couldn't get sales report. query.Error= ", err, "\n----")
-		return &salesReport, &salePerDay, err
+		fmt.Println("-------\nquery error happened. couldn't get dashboard data. query.Error= ", err, "\n----")
+		return &dashBoardData, &salePerDay, err
 	}
 
 	err = repo.DB.Raw(`
@@ -45,14 +35,14 @@ func (repo *SalesReportRepo) GetSalesReportBetweenDates(start time.Time, end tim
 		start, end).Scan(&salePerDay).Error
 	if err != nil {
 		fmt.Println("-------\nquery error happened. couldn't get sales per day graph data. query.Error= ", err, "\n----")
-		return &salesReport, &salePerDay, err
+		return &dashBoardData, &salePerDay, err
 	}
 
-	return &salesReport, &salePerDay, nil
+	return &dashBoardData, &salePerDay, nil
 }
 
-func (repo *SalesReportRepo) GetSalesReportFullTime() (*entities.SalesReport, *[]entities.SalePerDay, error) {
-	var salesReport entities.SalesReport
+func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, error) {
+	var dashBoardData entities.DashboardData
 	var salePerDay []entities.SalePerDay
 
 	err := repo.DB.Raw(`
@@ -65,10 +55,10 @@ func (repo *SalesReportRepo) GetSalesReportFullTime() (*entities.SalesReport, *[
 		SUM(CASE WHEN status = 'cancelled' THEN 0 ELSE final_amount END) AS sale_value_after_cancellation_and_returns,
 		(SELECT COUNT(*) FROM users) AS users_registered
 		FROM orders`,
-	).Scan(&salesReport).Error
+	).Scan(&dashBoardData).Error
 	if err != nil {
-		fmt.Println("-------\nquery error happened. couldn't get sales report. query.Error= ", err, "\n----")
-		return &salesReport, &salePerDay, err
+		fmt.Println("-------\nquery error happened. couldn't get dashboard data. query.Error= ", err, "\n----")
+		return &dashBoardData, &salePerDay, err
 	}
 
 	err = repo.DB.Raw(`
@@ -78,8 +68,8 @@ func (repo *SalesReportRepo) GetSalesReportFullTime() (*entities.SalesReport, *[
 	).Scan(&salePerDay).Error
 	if err != nil {
 		fmt.Println("-------\nquery error happened. couldn't get sales per day graph data. query.Error= ", err, "\n----")
-		return &salesReport, &salePerDay, err
+		return &dashBoardData, &salePerDay, err
 	}
 
-	return &salesReport, &salePerDay, nil
+	return &dashBoardData, &salePerDay, nil
 }

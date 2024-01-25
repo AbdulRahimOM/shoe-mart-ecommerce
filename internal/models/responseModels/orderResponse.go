@@ -3,11 +3,19 @@ package response
 import "MyShoo/internal/domain/entities"
 
 // OrderResponse
-type OrderResponse struct {
+type CODOrderResponse struct {
 	Status    string             `json:"status"`
 	Message   string             `json:"message"`
 	Error     string             `json:"error"`
 	OrderInfo entities.OrderInfo `json:"orderInfo"`
+}
+
+type OnlinePaymentOrderResponse struct {
+	Status    string             `json:"status"`
+	Message   string             `json:"message"`
+	Error     string             `json:"error"`
+	OrderInfo entities.OrderInfo `json:"orderInfo"`
+	ProceedToPaymentInfo ProceedToPaymentInfo `json:"proceedToPaymentInfo"`
 }
 
 // responseOrderInfo

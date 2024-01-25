@@ -317,3 +317,19 @@ func (repo *UserRepo) DoAddressExistsByIDForUser(id uint, userID uint) (bool, er
 		return true, nil
 	}
 }
+
+//	GetUserAddress(userID uint, addressID uint) (*entities.UserAddress, error)
+func (repo *UserRepo) GetUserAddress(addressID uint) (*entities.UserAddress, error) {
+	var address entities.UserAddress
+	query := repo.DB.Raw(`
+		SELECT *
+		FROM user_addresses
+		WHERE id = ?`,
+		addressID).Scan(&address)
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't get address. query.Error= ", query.Error, "\n----")
+		return nil, query.Error
+	}
+
+	return &address, nil
+}

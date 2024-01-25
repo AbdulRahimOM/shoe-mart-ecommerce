@@ -28,7 +28,8 @@ type Order struct {
 	PaymentMethod    string    `gorm:"column:payment_method;notNull"`
 	Status           string    `gorm:"column:status;notNull"`
 	AddressID        uint      `gorm:"column:address_id;notNull"`
-	// PaymentStatus string  `gorm:"column:payment_status;notNull"`
+	PaymentStatus    string    `gorm:"column:payment_status"` //need update to notNull
+	TransactionID    string    `gorm:"column:transaction_id"` //need update to notNull
 
 	// FkUser    User    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 	FkAddress UserAddress `gorm:"foreignKey:AddressID;constraint:OnDelete:CASCADE"`
@@ -48,16 +49,17 @@ type OrderInfo struct {
 	OrderItems   []PQ  `json:"orderItems"`
 }
 type DetailedOrderInfo struct {
-	OrderDetails Order `json:"orderDetails"`
-	OrderItems   []OrderItem  `json:"orderItems"`
+	OrderDetails Order       `json:"orderDetails"`
+	OrderItems   []OrderItem `json:"orderItems"`
 }
 
-var PaymentMethod = []string{"COD", "UPI", "BANK", "WALLET"}
+var PaymentMethod = []string{"COD", "ONLINE", "WALLET"}
 
 type PQ struct {
 	ProductID uint `gorm:"column:product_id;notNull"`
 	Quantity  uint `gorm:"column:quantity;notNull"`
 }
+
 // type PQS struct {
 // 	ProductID uint `json:"productID" validate:"required,number"`
 // 	Quantity  uint `json:"quantity" validate:"required,number"`

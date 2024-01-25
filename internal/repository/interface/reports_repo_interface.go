@@ -2,10 +2,15 @@ package repository_interface
 
 import (
 	"MyShoo/internal/domain/entities"
+	"MyShoo/internal/models/requestModels"
 	"time"
 )
 
-type IReportsRepo interface{
-	GetSalesReportBetweenDates(start time.Time, end time.Time) (*entities.SalesReport,*[]entities.SalePerDay, error)
-	GetSalesReportFullTime() (*entities.SalesReport,*[]entities.SalePerDay, error)
+type IReportsRepo interface {
+	GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, error)
+	GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, error)
+
+	UploadExcelFile(req *requestModels.ExcelFileReq) (string, error)
+
+	GetSalesReportFullTime() (*[]entities.SalesReport, error)
 }

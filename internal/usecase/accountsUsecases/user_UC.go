@@ -417,3 +417,4 @@ func (uc *UserUseCase) ResetPassword(id uint, newPassword *string) error {
 	}
 	return nil
 }
+
