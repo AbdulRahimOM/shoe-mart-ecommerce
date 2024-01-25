@@ -173,9 +173,10 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 
 	//get order's final amount (to update wallet)
 	var order entities.Order
+	var paymentStatus string
 	query = tx.
-		Select("final_amount").
-		Where("id = ?", orderID).
+		Select("final_amount,payment_status").
+		Where("id = ?", orderID, paymentStatus).
 		Find(&order)
 
 	if query.Error != nil {
@@ -183,13 +184,22 @@ func (repo *OrderRepo) CancelOrder(orderID uint) error {
 		tx.Rollback()
 		return query.Error
 	}
+	if paymentStatus == "paid" {
+		//update wallet , update payment status to refunded
+		result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
+		if result.Error != nil {
+			fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+			return result.Error
+		}
 
-	//update wallet
-	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
-	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
-		tx.Rollback()
-		return result.Error
+		//update payment status to refunded
+		result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("payment_status", "refunded")
+		if result.Error != nil {
+			fmt.Println("-------\nquery error happened. couldn't update payment status. query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+			return result.Error
+		}
 	}
 
 	//commit transaction
@@ -341,7 +351,7 @@ func (repo *OrderRepo) ReturnOrderRequest(orderID uint) error {
 	return nil
 }
 
-//MarkOrderAsReturned
+// MarkOrderAsReturned
 func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) error {
 	//start transaction
 	tx := repo.DB.Begin()
@@ -396,7 +406,7 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) error {
 		tx.Rollback()
 		return query.Error
 	}
-	
+
 	//update wallet
 	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 	if result.Error != nil {
@@ -411,7 +421,7 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) error {
 	return nil
 }
 
-//MarkOrderAsDelivered
+// MarkOrderAsDelivered
 func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) error {
 	//start transaction
 	tx := repo.DB.Begin()
@@ -441,7 +451,7 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) error {
 	return nil
 }
 
-//GetAllOrders
+// GetAllOrders
 func (repo *OrderRepo) GetAllOrders() (*[]entities.Order, error) {
 	var orders []entities.Order
 	query := repo.DB.
@@ -455,7 +465,7 @@ func (repo *OrderRepo) GetAllOrders() (*[]entities.Order, error) {
 	return &orders, nil
 }
 
-func (repo *OrderRepo) 	GetOrderSummaryByID(orderID uint) (*entities.Order, error){
+func (repo *OrderRepo) GetOrderSummaryByID(orderID uint) (*entities.Order, error) {
 	var order entities.Order
 	query := repo.DB.
 		Preload("FkAddress").

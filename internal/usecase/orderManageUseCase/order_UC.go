@@ -256,7 +256,7 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) (string, er
 		}
 	}
 
-	//cancel order, update stock
+	//cancel order, update stock, refund to wallet if already paid
 	err = uc.orderRepo.CancelOrder(orderID)
 	if err != nil {
 		fmt.Println("Error occured while cancelling order")
@@ -290,7 +290,7 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) (string, error) {
 		return message, errors.New(message)
 	}
 
-	//cancel order
+	//cancel order, update stock, refund to wallet if already paid
 	err = uc.orderRepo.CancelOrder(orderID)
 	if err != nil {
 		fmt.Println("Error occured while cancelling order")
@@ -368,7 +368,7 @@ func (uc *OrderUseCase) MarkOrderAsReturned(orderID uint) (string, error) {
 		return message, errors.New(message)
 	}
 
-	//mark order as returned
+	//mark order as returned, update stock, refund to wallet
 	err = uc.orderRepo.MarkOrderAsReturned(orderID)
 	if err != nil {
 		fmt.Println("Error occured while marking order as returned")
