@@ -17,7 +17,11 @@ type OnlinePaymentOrderResponse struct {
 	OrderInfo entities.OrderInfo `json:"orderInfo"`
 	ProceedToPaymentInfo ProceedToPaymentInfo `json:"proceedToPaymentInfo"`
 }
-
+type PaidOrderResponse struct {
+	Status    string             `json:"status"`
+	Message   string             `json:"message"`
+	OrderInfo entities.Order `json:"order"`
+}
 // responseOrderInfo
 type ResponseOrderInfo struct {
 	OrderDetails entities.Order `json:"orderDetails"`

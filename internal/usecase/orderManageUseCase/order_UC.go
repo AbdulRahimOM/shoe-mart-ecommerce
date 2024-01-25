@@ -44,6 +44,7 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 	var orderItems []entities.OrderItem
 	var totalCartOriginalAmount float32
 	var message string
+	var responseOrder *entities.Order
 
 	//validate payment method
 	paymentValid := tools.IsValidPaymentMethod(req.PaymentMethod)
@@ -137,10 +138,16 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 			return &orderInfo, nil, "Some error occured.", err
 		}
 	}
-
+	if order.Status == "payment pending" {
+		message = "Order placed successfully. "
+		responseOrder, err = uc.orderRepo.MakeOrder_UpdateStock_ClearCart(&order, &orderItems)
+	} else {
+		message = "Proceed to payment"
+		responseOrder, err = uc.orderRepo.MakeOrder(&order, &orderItems)
+	}
 	//make order
-	var responseOrder *entities.Order
-	responseOrder, err = uc.orderRepo.MakeOrder(&order, &orderItems)
+	
+	
 	if err != nil {
 		fmt.Println("Error occured while placing order")
 		return &orderInfo, nil, "Error occured while placing order. Try again or", err
@@ -161,11 +168,7 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 		Phone:              order.FkAddress.Phone,
 	}
 
-	if order.Status == "payment pending" {
-		message = "Order placed successfully. "
-	} else {
-		message = "Proceed to payment"
-	}
+
 	return &orderInfo, &proceedToPaymentInfo, message, nil
 }
 

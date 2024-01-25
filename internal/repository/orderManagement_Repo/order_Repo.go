@@ -469,3 +469,89 @@ func (repo *OrderRepo) 	GetOrderSummaryByID(orderID uint) (*entities.Order, erro
 
 	return &order, nil
 }
+
+func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*entities.Order, error) {
+	//start transaction
+	tx := repo.DB.Begin()
+	var result *gorm.DB
+
+	//defer rollback if error happened
+	defer func() {
+		if r := recover(); r != nil || result.Error != nil {
+			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+		}
+	}()
+
+	//update order status to "placed" and payment status to "paid"
+	result = tx.Model(&entities.Order{}).
+		Where("id = ?", orderID).
+		Updates(map[string]interface{}{"status": "placed", "payment_status": "paid"})
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't update order status. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return nil, result.Error
+	}
+
+	//get order
+	var order entities.Order
+	query := tx.
+		Preload("FkAddress").
+		Where("id = ?", orderID).
+		Find(&order)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		tx.Rollback()
+		return nil, query.Error
+	}
+
+	//get order items
+	var orderItems *[]entities.OrderItem
+	query = tx.
+		Where("order_id = ?", order.ID).
+		Find(&orderItems)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		tx.Rollback()
+		return nil, query.Error
+	}
+
+	//update stock
+	for _, item := range *orderItems {
+		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock - ?", item.Quantity))
+		if result.Error != nil {
+			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+			return nil, result.Error
+		}
+	}
+
+	//clear cart
+	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return nil, result.Error
+	}
+
+	//commit transaction
+	tx.Commit()
+
+	return &order, nil
+}
+
+func (repo *OrderRepo) GetOrderByTransactionID(transactionID string) (uint, error) {
+	var order entities.Order
+	query := repo.DB.
+		Where("transaction_id = ?", transactionID).
+		Find(&order)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		return 0, query.Error
+	}
+
+	return order.ID, nil
+}

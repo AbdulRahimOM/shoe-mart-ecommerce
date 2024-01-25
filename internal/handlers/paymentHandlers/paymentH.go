@@ -3,21 +3,22 @@ package paymentHandlers
 import (
 	myshoo "MyShoo"
 	"MyShoo/internal/models/requestModels"
+	response "MyShoo/internal/models/responseModels"
+	usecaseInterface "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
-	"io"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
 type PaymentHandler struct {
-	// paymentUseCase usecaseInterface.IPaymentUC
+	paymentUseCase usecaseInterface.IPaymentUC
 }
 
-func NewPaymentHandler() *PaymentHandler {
+func NewPaymentHandler(paymentUseCase usecaseInterface.IPaymentUC) *PaymentHandler {
 	return &PaymentHandler{
-		// paymentUseCase: paymentUseCase,
+		paymentUseCase: paymentUseCase,
 	}
 }
 
@@ -59,24 +60,46 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay2(c *gin.Context) {
 // VerifyPayment
 func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 	fmt.Println("Handler ::: verify payment handler")
-	body, err := io.ReadAll(c.Request.Body)
-	if err != nil {
-		// Handle error, if any
-		fmt.Println("Error reading request body:", err)
-		c.JSON(500, gin.H{"error": "Internal Server Error"})
-		return
-	}
 
-	// Print the request body to the console
-	fmt.Println("Request Body:", string(body))
-	//get req from body
-	var request map[string]interface{}
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.HTML(http.StatusBadRequest, "test.html", gin.H{
-			"message": "Error happened with request. Try Again",
-			"error":   err.Error(),
+	if err := c.Request.ParseForm(); err != nil {
+		fmt.Println("Error parsing form data:", err)
+		c.JSON(500, response.SME{
+			Status:  "failed",
+			Message: "Error parsing form data. Try Again",
+			Error:   err.Error(),
 		})
 		return
 	}
-	c.HTML(http.StatusOK, "test.html", request)
+
+	var request requestModels.VerifyPaymentReq= requestModels.VerifyPaymentReq{
+		RazorpayPaymentID: string(c.Request.Form.Get("razorpay_payment_id")),	
+		RazorpayOrderID: string(c.Request.Form.Get("razorpay_order_id")),
+		RazorpaySignature: string(c.Request.Form.Get("razorpay_signature")),
+	}
+
+	paymentValid,orderDetails, message, err := h.paymentUseCase.VerifyPayment(&request)
+	if err != nil {
+		fmt.Println("Error verifying payment:", err)
+		c.JSON(500, response.SME{
+			Status:  "failed",
+			Message: message,
+			Error:   err.Error(),
+		})
+		return
+	}
+	if !paymentValid {
+		c.JSON(http.StatusExpectationFailed, response.SME{
+			Status:  "failed",	
+			Message: message,
+			Error:   "Payment failed",
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.PaidOrderResponse{
+		Status:  "success",
+		Message: message,
+		OrderInfo: *orderDetails,
+	})
+
 }

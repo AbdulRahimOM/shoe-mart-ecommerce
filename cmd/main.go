@@ -1,7 +1,6 @@
 package main
 
 import (
-	myshoo "MyShoo"
 	_ "MyShoo/docs"
 	"MyShoo/internal/di"
 	infra "MyShoo/internal/infrastructure"
@@ -27,9 +26,6 @@ func main() {
 		fmt.Println("Couldn't connect to Cloud")
 		return
 	}
-
-	//test purposes
-	myshoo.Test()
 
 	di.InitializeAndStartAPI()
 }

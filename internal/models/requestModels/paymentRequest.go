@@ -13,3 +13,10 @@ type ProceedToPaymentReq struct {
 	Email              string  `json:"email" validate:"required,email"`
 	Phone              string  `json:"phone" validate:"required"`
 }
+
+// VerifyPaymentReq
+type VerifyPaymentReq struct {
+	RazorpayPaymentID string `json:"razorpay_payment_id" validate:"required"`
+	RazorpayOrderID   string `json:"razorpay_order_id" validate:"required"`
+	RazorpaySignature string `json:"razorpay_signature" validate:"required"`
+}

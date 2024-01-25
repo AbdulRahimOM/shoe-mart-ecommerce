@@ -31,6 +31,8 @@ type IOrderRepo interface {
 	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error)
 
 	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error)
+	UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*entities.Order, error)
+
 	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
 	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
 	GetAllOrders() (*[]entities.Order, error)
@@ -42,4 +44,6 @@ type IOrderRepo interface {
 	ReturnOrderRequest(orderID uint) error
 	MarkOrderAsReturned(orderID uint) error
 	MarkOrderAsDelivered(orderID uint) error
+
+	GetOrderByTransactionID(transactionID string) (uint, error)
 }
