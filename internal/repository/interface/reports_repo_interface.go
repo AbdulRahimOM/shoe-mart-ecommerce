@@ -12,5 +12,5 @@ type IReportsRepo interface {
 
 	UploadExcelFile(req *requestModels.ExcelFileReq) (string, error)
 
-	GetSalesReportFullTime() (*[]entities.SalesReport, error)
+	GetSalesReportFullTime() (*[]entities.SalesReportOrderList, *[]entities.SellerWiseReport, error)
 }
