@@ -75,3 +75,9 @@ type SizeWiseReport struct {
 	SizeName      string `json:"size_name" gorm:"column:size_name"`
 	QuantityCount uint   `json:"quantity_count" gorm:"column:quantity_count"`
 }
+
+type RevenueGraph struct {
+	Date     string  `json:"date" gorm:"column:date"`
+	Sale     float32 `json:"sale" gorm:"column:sale"`
+	Quantity uint    `json:"quantity" gorm:"column:quantity"`
+}
