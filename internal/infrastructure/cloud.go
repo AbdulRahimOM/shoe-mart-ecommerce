@@ -21,15 +21,3 @@ func ConnectToCloud() error {
 	}
 	return nil
 }
-
-// uploadParams := uploader.UploadParams{
-// 	PublicID: "olympic_flag",
-// }
-
-// uploadResult, err := cloudinaryClient.Upload(context.Background(), "https://upload.wikimedia.org/wikipedia/commons/a/ae/Olympic_flag.jpg", uploadParams)
-// if err != nil {
-// 	fmt.Println("Error uploading image:", err)
-// 	return
-// }
-
-// fmt.Println("Upload result:", uploadResult)

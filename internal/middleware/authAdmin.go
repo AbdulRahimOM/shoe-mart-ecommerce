@@ -12,7 +12,7 @@ import (
 )
 
 func AdminAuth(c *gin.Context) {
-	// fmt.Println("#Middleware: AdminAuth: Entered")
+	fmt.Println("#Middleware: AdminAuth: Entered")
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString) //
 	secretKey := os.Getenv("SECRET_KEY")

@@ -34,14 +34,6 @@ func (h *SellerHandler) GetLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, "token")
 }
 
-// Not developed
-func (h *SellerHandler) GetHome(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hai":   "dfdf",
-		"hello": "hello seller",
-	})
-}
-
 // @Summary Seller Sign Up Handler
 // @Description Seller Sign Up Handler
 // @Tags seller

@@ -24,7 +24,6 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 		return err
 	}
 	if doColourVariantExists {
-		fmt.Println("colourVariant already exists")
 		return errors.New("colourVariant already exists")
 	}
 
@@ -35,11 +34,9 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 		return err
 	}
 	if !doModelExists {
-		fmt.Println("model doesn't exist with this id")
-		return errors.New("model doesn't exist")
+		return errors.New("model doesn't exist with this id")
 	}
 	if !doModelBelongsToSeller {
-		fmt.Println("model doesn't belong to this seller")
 		return errors.New("model doesn't belong to this seller")
 	}
 
@@ -62,8 +59,7 @@ func (uc *ProductsUC) EditColourVariant(req *requestModels.EditColourVariantReq)
 		return err
 	}
 	if !doColourVariantExists {
-		fmt.Println("colourVariant doesn't exist with this id")
-		return errors.New("colourVariant doesn't exist")
+		return errors.New("colourVariant doesn't exist with this id")
 	}
 
 	var colourVariant entities.ColourVariant
@@ -77,8 +73,7 @@ func (uc *ProductsUC) EditColourVariant(req *requestModels.EditColourVariantReq)
 		return err
 	}
 	if doColourVariantExists {
-		fmt.Println("another colourVariant already exists in these attributes")
-		return errors.New("colourVariant already exists")
+		return errors.New("colourVariant already exists in these attributes")
 	}
 
 	//edit colourVariant

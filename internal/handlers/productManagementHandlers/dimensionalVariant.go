@@ -12,41 +12,24 @@ import (
 
 // add dimensional variant handler
 func (h *ProductHandler) AddDimensionalVariant(c *gin.Context) {
-	fmt.Println("Handler ::: add dimensional variant handler")
-	var req requestModels.AddDimensionalVariantReq
 
+	var req requestModels.AddDimensionalVariantReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//add dimensional variant
 	if err := h.productUseCase.AddDimensionalVariant(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding dimensional variant. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding dimensional variant. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Dimensional variant added successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Dimensional variant added successfully"))
 }

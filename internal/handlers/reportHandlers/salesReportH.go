@@ -20,25 +20,13 @@ func NewReportsHandler(reportsUseCase usecaseInterface.ReportsUC) *ReportsHandle
 
 //export dashBoardData handler
 func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
-	fmt.Println("Handler ::: export sales report handler")
-
-	//get url param
 	rangeType := c.Param("range")
-	fmt.Println("range type: ", rangeType)
-
-	//print url
-	fmt.Println("url: ", c.Request.URL)
 
 	switch rangeType {
 	case "full-time":
 		fileURL, err := h.reportsUC.ExportSalesReportFullTime()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for full time")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportFullTimeForAdmin.xlsx")
@@ -48,7 +36,6 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 		startDate := c.Query("sd")
 		endDate := c.Query("ed")
 		if startDate == "" && endDate == "" {
-			fmt.Println("No date range provided")
 			c.JSON(400, response.SME{
 				Status:  "failed",
 				Message: "No date range provided. Please recheck URL and try again",
@@ -80,12 +67,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 
 			fileURL, err := h.reportsUC.ExportSalesReportBetweenDates(startTime, endTime)
 			if err != nil {
-				fmt.Println("error occured in exporting sales report between dates")
-				c.JSON(400, response.SME{
-					Status:  "failed",
-					Message: "An Error occured!",
-					Error:   err.Error(),
-				})
+				c.JSON(500, response.FailedSME("An Error occured!", err))
 				return
 			} else {
 				c.Header("Content-Disposition", "attachment; filename=SalesReportBwCustomDatesForAdmin.xlsx")
@@ -95,12 +77,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "this-month":
 		fileURL, err := h.reportsUC.ExportSalesReportThisMonth()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for this month")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisMonthForAdmin.xlsx")
@@ -110,12 +87,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 		fmt.Println("last month entered")
 		fileURL, err := h.reportsUC.ExportSalesReportLastMonth()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for last month")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportLastMonth.xlsx")
@@ -125,12 +97,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "this-year":
 		fileURL, err := h.reportsUC.ExportSalesReportThisYear()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for this year")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisYearForAdmin.xlsx")
@@ -140,12 +107,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "last-year":
 		fileURL, err := h.reportsUC.ExportSalesReportLastYear()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for last year")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportLastYearForAdmin.xlsx")
@@ -155,12 +117,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "this-week":
 		fileURL, err := h.reportsUC.ExportSalesReportThisWeek()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for this week")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisWeekForAdmin.xlsx")
@@ -170,12 +127,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "last-week":
 		fileURL, err := h.reportsUC.ExportSalesReportLastWeek()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for last week")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportLastWeekForAdmin.xlsx")
@@ -185,12 +137,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "today":
 		fileURL, err := h.reportsUC.ExportSalesReportToday()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for today")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 			return
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportTodayForAdmin.xlsx")
@@ -200,12 +147,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "yesterday":
 		fileURL, err := h.reportsUC.ExportSalesReportYesterday()
 		if err != nil {
-			fmt.Println("error occured in exporting sales report for yesterday")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "An Error occured!",
-				Error:   err.Error(),
-			})
+			c.JSON(500, response.FailedSME("An Error occured!", err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportYesterdayForAdmin.xlsx")
 			c.File(fileURL)

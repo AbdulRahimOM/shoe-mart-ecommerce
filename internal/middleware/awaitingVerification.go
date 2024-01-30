@@ -23,7 +23,6 @@ func UserAwaitingVerification(c *gin.Context) {
 }
 func SellerAwaitingVerification(c *gin.Context) {
 	sellerModel, ok := c.Get("SellerModel")
-	fmt.Println("sellerModel=", sellerModel)
 	if !ok {
 		c.AbortWithStatusJSON(500, gin.H{
 			"error": "SellerModel not found",

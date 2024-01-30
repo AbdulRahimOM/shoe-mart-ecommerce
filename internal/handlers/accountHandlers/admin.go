@@ -222,7 +222,6 @@ func (h *AdminHandler) BlockUser(c *gin.Context) {
 		c.JSON(http.StatusOK, response.BlockUserResponse{
 			Status:  "success",
 			Message: "User blocked successfully",
-			Error:   "",
 		})
 	}
 
@@ -281,7 +280,6 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 		c.JSON(http.StatusOK, response.UnblockUserResponse{
 			Status:  "success",
 			Message: "User unblocked successfully",
-			Error:   "",
 		})
 	}
 
@@ -340,7 +338,6 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 		c.JSON(http.StatusOK, response.BlockSellerResponse{
 			Status:  "success",
 			Message: "Seller blocked successfully",
-			Error:   "",
 		})
 	}
 
@@ -399,7 +396,6 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 		c.JSON(http.StatusOK, response.UnblockSellerResponse{
 			Status:  "success",
 			Message: "Seller unblocked successfully",
-			Error:   "",
 		})
 	}
 

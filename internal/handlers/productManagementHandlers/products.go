@@ -22,17 +22,12 @@ func NewProductHandler(productUseCase usecaseInterface.IProductsUC) *ProductHand
 
 // get products handler
 func (h *ProductHandler) GetProducts(c *gin.Context) {
-	fmt.Println("Handler ::: get products handler")
-
+	
 	//get products
 	var products *[]response.ResponseProduct
 	products, err := h.productUseCase.GetProducts()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting products. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching products. Try Again", err))
 		return
 	}
 
@@ -46,37 +41,24 @@ func (h *ProductHandler) GetProducts(c *gin.Context) {
 
 // add stock handler
 func (h *ProductHandler) AddStock(c *gin.Context) {
-	fmt.Println("Enterred add stock handler")
 
 	var req requestModels.AddStockReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
+
 	//check if sellerID in token and request body match
 	sellerID, err := tools.GetSellerID(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding stock. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error occured", err))
 		return
 	}
 	if sellerID != req.SellerID {
@@ -91,45 +73,29 @@ func (h *ProductHandler) AddStock(c *gin.Context) {
 
 	//add stock
 	if err := h.productUseCase.AddStock(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding stock. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding stock. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Stock added successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Stock added successfully"))
 }
 
 // add stock handler
 func (h *ProductHandler) EditStock(c *gin.Context) {
-	fmt.Println("Enterred edit stock handler")
 
 	var req requestModels.EditStockReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
+
 	//check if sellerID in token and request body match
 	sellerID, err := tools.GetSellerID(c)
 	if err != nil {
@@ -152,16 +118,9 @@ func (h *ProductHandler) EditStock(c *gin.Context) {
 
 	//add stock
 	if err := h.productUseCase.EditStock(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing stock. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing stock. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Stock edited successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Stock edited successfully"))
 }

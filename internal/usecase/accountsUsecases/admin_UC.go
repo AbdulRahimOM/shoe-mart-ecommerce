@@ -32,7 +32,6 @@ func (uc *AdminUseCase) GetSellersList() (*[]entities.SellerDetails, error) {
 
 func (uc *AdminUseCase) BlockUser(req *requestModels.BlockUserReq) error {
 	//check if user exists
-	fmt.Println("**************2")
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
 	if err != nil {
 		fmt.Println("Error occured while searching email, error:", err)
@@ -42,7 +41,6 @@ func (uc *AdminUseCase) BlockUser(req *requestModels.BlockUserReq) error {
 		fmt.Println("\n-- No such user (This email is not registered as a user)\n.")
 		return e.ErrEmailNotRegistered
 	}
-	fmt.Println("**************3")
 	if err := uc.adminRepo.UpdateUserStatus(req.Email, "blocked"); err != nil {
 		fmt.Println("Error occured while blocking user")
 		return err
@@ -81,7 +79,6 @@ func (uc *AdminUseCase) BlockSeller(req *requestModels.BlockSellerReq) error {
 		return e.ErrEmailNotRegistered
 	}
 	
-
 	if err := uc.adminRepo.UpdateSellerStatus(req.Email, "blocked"); err != nil {
 		fmt.Println("Error occured while blocking seller")
 		return err

@@ -31,48 +31,29 @@ func NewModelHandler(modelsUseCase usecaseInterface.IModelsUC) *ModelHandler {
 // @Failure 400 {object} string
 // @Router /admin/addmodel [post]
 func (h *ModelHandler) AddModel(c *gin.Context) {
-	fmt.Println("Handler ::: add model handler")
+	
 	var req requestModels.AddModelReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
-		return
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 	}
 
 	//add model
 	if err := h.modelsUseCase.AddModel(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding model. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding model. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Model added successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Model added successfully"))
 }
 
 func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
-	fmt.Println("Handler ::: GetModelsByBrandsAndCategories handler")
 
 	// Get parameters from URL
 	brandIDParam := c.Query("brandID")
@@ -88,11 +69,7 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 		brandIDs, err = requestValidation.ValidateAndParseIDs(brandIDParam)
 		if err != nil {
 			fmt.Println("error parsing brand id. error:", err)
-			c.JSON(http.StatusBadRequest, response.GetModelsResponse{
-				Status:  "failed",
-				Message: "Error parsing brand id. Try Again",
-				Error:   err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, response.FailedSME("Invalid request. Try Again", err))
 			return
 		}
 	}
@@ -102,35 +79,26 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 		categoryIDs, err = requestValidation.ValidateAndParseIDs(categoryIDParam)
 		if err != nil {
 			fmt.Println("error parsing category id. error:", err)
-			c.JSON(http.StatusBadRequest, response.GetModelsResponse{
-				Status:  "failed",
-				Message: "Error parsing category id. Try Again",
-				Error:   err.Error(),
-			})
+			c.JSON(http.StatusBadRequest, response.FailedSME("Invalid request. Try Again", err))
 			return
 		}
 	}
 
 	fmt.Println("brandIDs:", brandIDs)
 	fmt.Println("categoryIDs:", categoryIDs)
+
 	//get models
 	var models *[]entities.Models
-	fmt.Println("brandExists:", brandExists, "categoryExists:", categoryExists)
 	models, err = h.modelsUseCase.GetModelsByBrandsAndCategories(brandExists, brandIDs, categoryExists, categoryIDs)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting models. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching models. Try Again", err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetModelsResponse{
 		Status:  "success",
 		Message: "Models fetched successfully",
-		Error:   "",
-		Models:  *models,
+		Models: *models,
 	})
 
 }
@@ -146,42 +114,25 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 // @Failure 400 {object} string
 // @Router /admin/editmodelname [patch]
 func (h *ModelHandler) EditModel(c *gin.Context) {
-	fmt.Println("Handler ::: edit model name handler")
+	
 	var req requestModels.EditModelReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//edit model name
 	if err := h.modelsUseCase.EditModelName(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing model name. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing model name. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Model name edited successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Model name edited successfully"))
 }

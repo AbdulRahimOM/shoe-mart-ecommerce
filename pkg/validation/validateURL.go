@@ -14,7 +14,6 @@ func ValidateAndParseID(id string) (int, error) {
 func ValidateAndParseIDs(param string) ([]uint, error) {
 	var ids []uint
 
-	// Split values using the comma ',' separator
 	idStrings := strings.Split(param, ",")
 
 	for _, idStr := range idStrings {

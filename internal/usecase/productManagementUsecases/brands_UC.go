@@ -27,7 +27,6 @@ func (uc *BrandsUC) AddBrand(req *requestModels.AddBrandReq) error {
 		return err
 	}
 	if doBrandExistsByName {
-		fmt.Println("Brand already exists")
 		return errors.New("brand already exists")
 	}
 	
@@ -56,7 +55,6 @@ func (uc *BrandsUC) EditBrand(req *requestModels.EditBrandReq) error {
 		return err
 	}
 	if !DoBrandExistsByName {
-		fmt.Println("Brand doesn't exist with this old name")
 		return errors.New("brand doesn't exist")
 	}
 
@@ -65,7 +63,6 @@ func (uc *BrandsUC) EditBrand(req *requestModels.EditBrandReq) error {
 		fmt.Println("Error occured while checking if brand exists")
 		return err
 	} else if DoBrandExistsByName {
-		fmt.Println("Brand already exists with the sugested new name")
 		return errors.New("brand already exists with the sugested new name")
 	}
 

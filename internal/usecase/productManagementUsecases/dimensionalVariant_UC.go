@@ -21,7 +21,6 @@ func (uc *ProductsUC) AddDimensionalVariant(req *requestModels.AddDimensionalVar
 		return err
 	}
 	if doDimensionalVariantExists {
-		fmt.Println("dimensionalVariant already exists")
 		return errors.New("dimensionalVariant already exists")
 	}
 

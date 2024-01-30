@@ -24,181 +24,111 @@ func NewWishListHandler(wishListUseCase usecaseInterface.IWishListsUC) *WishList
 
 // create new wishlist
 func (h *WishListHandler) CreateWishList(c *gin.Context) {
-	fmt.Println("Handler ::: create wishlist handler")
 	var req *requestModels.CreateWishListReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error creating wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error creating wishlist. Try Again", err))
 		return
 	}
 
 	//create wishlist
 	err = h.wishListUseCase.CreateWishList(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error creating wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error creating wishlist. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Wishlist created successfully",
-		Error:   "",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Created wishlist successfully"))
 }
 
 // add to wishlist
 func (h *WishListHandler) AddToWishList(c *gin.Context) {
-	fmt.Println("Handler ::: add to wishlist handler")
-	var req *requestModels.AddToWishListReq
 
+	var req *requestModels.AddToWishListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
+		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
 		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding to wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding to wishlist. Try Again", err))
 		return
 	}
 
 	//add to wishlist
 	err = h.wishListUseCase.AddToWishList(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding to wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding to wishlist. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Added to wishlist successfully",
-		Error:   "",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Added to wishlist successfully"))
 }
 
 // remove from wishlist
 func (h *WishListHandler) RemoveFromWishList(c *gin.Context) {
-	fmt.Println("Handler ::: remove from wishlist handler")
-	var req *requestModels.RemoveFromWishListReq
 
+	var req *requestModels.RemoveFromWishListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error removing from wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error removing from wishlist. Try Again", err))
 		return
 	}
 
 	//remove from wishlist
 	err = h.wishListUseCase.RemoveFromWishList(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error removing from wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error removing from wishlist. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Removed from wishlist successfully",
-		Error:   "",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Removed from wishlist successfully"))
 }
 
 // GetAllWishLists
 func (h *WishListHandler) GetAllWishLists(c *gin.Context) {
-	fmt.Println("Handler ::: get all wishlists handler")
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting wishlists. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting wishlists. Try Again", err))
 		return
 	}
 
@@ -206,18 +136,14 @@ func (h *WishListHandler) GetAllWishLists(c *gin.Context) {
 	var wishLists *[]entities.WishList
 	wishLists, totalCount, err := h.wishListUseCase.GetAllWishLists(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting wishlists. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting wishlists. Try Again", err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetAllWishListsResponse{
-		Status:     "success",
-		Message:    "Got wishlists successfully",
-		Error:      "",
+		Status:  "success",
+		Message: "Got wishlists successfully",
+
 		WishLists:  *wishLists,
 		TotalCount: totalCount,
 	})
@@ -225,7 +151,6 @@ func (h *WishListHandler) GetAllWishLists(c *gin.Context) {
 
 // GetWishListByID
 func (h *WishListHandler) GetWishListByID(c *gin.Context) {
-	fmt.Println("Handler ::: get wishlist by id handler")
 
 	//get query params
 	wishListID := c.Query("id")
@@ -243,33 +168,21 @@ func (h *WishListHandler) GetWishListByID(c *gin.Context) {
 	//convert string to uint
 	wishListIDUint, err := strconv.ParseUint(wishListID, 10, 64)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error parsing wishlist id. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error converting wishlist id to uint. Try Again", err))
 		return
 	}
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting wishlist. Try Again", err))
 		return
 	}
 
 	//get wishlist by id
 	wishListName, wishListItems, totalCount, err := h.wishListUseCase.GetWishListByID(userID, uint(wishListIDUint))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting wishlist. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting wishlist. Try Again", err))
 		return
 	}
 

@@ -22,41 +22,46 @@ func AdminRoutes(engine *gin.RouterGroup,
 	order *ordermanagementHandlers.OrderHandler,
 	reports *reporthandlers.ReportsHandler,
 ) {
-	engine.Use(middleware.ClearCache)
-	engine.GET("/login", middleware.NotLoggedOutCheck, admin.GetAdminLogin)
-
-	engine.GET("/", middleware.AdminAuth, admin.GetAdminHome)
-	engine.GET("/home", middleware.AdminAuth, admin.GetAdminHome)
-	engine.POST("/login", admin.PostLogIn)
-
-	engine.GET("/userslist", middleware.AdminAuth, admin.GetUsersList)
-	engine.POST("/blockuser", middleware.AdminAuth, admin.BlockUser)
-	engine.POST("/unblockuser", middleware.AdminAuth, admin.UnblockUser)
-
-	engine.GET("/sellerslist", middleware.AdminAuth, admin.GetSellersList)
-	engine.POST("/blockseller", middleware.AdminAuth, admin.BlockSeller)
-	engine.POST("/unblockseller", middleware.AdminAuth, admin.UnblockSeller)
 
 	//viewing
-	engine.GET("/categories", middleware.AdminAuth, category.GetCategories)
-	engine.GET("/brands", middleware.AdminAuth, brand.GetBrands)
-	engine.GET("/models", middleware.AdminAuth, model.GetModelsByBrandsAndCategories)
-	engine.GET("/products", middleware.AdminAuth, product.GetProducts)
+	{
+		engine.GET("/categories", category.GetCategories)
+		engine.GET("/brands", brand.GetBrands)
+		engine.GET("/models", model.GetModelsByBrandsAndCategories)
+		engine.GET("/products", product.GetProducts)
+	}
 
-	//get all orders
-	engine.GET("/orders", middleware.AdminAuth, order.GetOrders)
-	//cancel order
-	engine.PATCH("/cancelorder", middleware.AdminAuth, order.CancelOrderByAdmin)
+	loggedOutGroup := engine.Group("/")
+	loggedOutGroup.Use(middleware.ClearCache, middleware.NotLoggedOutCheck)
+	{
+		loggedOutGroup.GET("/login", admin.GetAdminLogin)
+		loggedOutGroup.POST("/login", admin.PostLogIn)
+	}
 
-	// dashBoardData
-	engine.GET("/dashboarddata/:range", middleware.AdminAuth, reports.GetDashBoardData)
+	authAdmin := engine.Group("/")
+	authAdmin.Use(middleware.ClearCache, middleware.AdminAuth)
+	{
+		authAdmin.GET("/userslist", admin.GetUsersList)
+		authAdmin.POST("/blockuser", admin.BlockUser)
+		authAdmin.POST("/unblockuser", admin.UnblockUser)
 
-	//salesreport
-	// engine.GET("/exportsalesreport/:range", middleware.AdminAuth, reports.ExportSalesReport)
-	engine.GET("/salesreport/:range", reports.ExportSalesReport)
+		authAdmin.GET("/sellerslist", admin.GetSellersList)
+		authAdmin.POST("/blockseller", admin.BlockSeller)
+		authAdmin.POST("/unblockseller", admin.UnblockSeller)
 
-	//mark order as delivered
-	engine.PATCH("/markdelivery", middleware.AdminAuth, order.MarkOrderAsDelivered)
-	//mark order as returned
-	engine.PATCH("/markorderasreturned", middleware.AdminAuth, order.MarkOrderAsReturned)
+		//get all orders
+		authAdmin.GET("/orders", order.GetOrders)
+		//mark order as delivered
+		authAdmin.PATCH("/markdelivery", order.MarkOrderAsDelivered)
+		//mark order as returned
+		authAdmin.PATCH("/markorderasreturned", order.MarkOrderAsReturned)
+		//cancel order
+		authAdmin.PATCH("/cancelorder", order.CancelOrderByAdmin)
+
+		// dashBoardData
+		authAdmin.GET("/dashboarddata/:range", reports.GetDashBoardData)
+
+		//salesreport
+		authAdmin.GET("/salesreport/:range", reports.ExportSalesReport)
+	}
 }

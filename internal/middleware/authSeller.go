@@ -45,6 +45,5 @@ func SellerAuth(c *gin.Context) {
 	seller := claims.Model
 
 	c.Set("SellerModel", seller)
-	fmt.Println("Seller ---> Authenticated")
 	c.Next()
 }

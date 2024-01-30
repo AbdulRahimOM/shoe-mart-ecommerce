@@ -31,46 +31,26 @@ func NewCategoryHandler(usecase usecaseInterface.ICategoryUC) *CategoryHandler {
 // @Failure 400 {object} string
 // @Router /admin/addcategory [post]
 func (h *CategoryHandler) AddCategory(c *gin.Context) {
-	fmt.Println("==================\nentered add category handler")
+
 	var addCategoryReq requestModels.AddCategoryReq
 	if err := c.ShouldBindJSON(&addCategoryReq); err != nil {
-		fmt.Println("error binding request")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(addCategoryReq); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Provide valid data",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Provide valid data", errResponse))
 		return
 	}
 
 	err := h.CategoryUseCase.AddCategory(&addCategoryReq)
 	if err != nil {
-		fmt.Println("error from usecase")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Couldn't add category. Some error occured. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't add category. Try Again", err))
 		return
 	} else {
-		fmt.Println("category added successfully")
-		c.JSON(http.StatusOK, response.SME{
-			Status:  "success",
-			Message: "Category added successfully",
-			Error:   "",
-		})
+		c.JSON(http.StatusOK, response.SuccessSME("Category added successfully"))
 		return
 	}
 }
@@ -85,16 +65,11 @@ func (h *CategoryHandler) AddCategory(c *gin.Context) {
 // @Failure 400 {object} string
 // @Router /admin/getcategories [get]
 func (h *CategoryHandler) GetCategories(c *gin.Context) {
-	fmt.Println("==================\nentered get categories handler")
+
 	var categories *[]entities.Categories
 	categories, err := h.CategoryUseCase.GetCategories()
 	if err != nil {
-		fmt.Println("error from usecase")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Couldn't get categories. Some error occured. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't fetch categories. Try Again", err))
 		return
 	} else {
 		fmt.Println("categories fetched successfully")
@@ -102,13 +77,12 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 			Status:     "success",
 			Message:    "Categories fetched successfully",
 			Categories: *categories,
-			Error:      "",
 		})
 		return
 	}
 }
 
-//edit category handler
+// edit category handler
 // @Summary Edit category
 // @Description Edit category
 // @Tags admin
@@ -119,46 +93,26 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 // @Failure 400 {object} string
 // @Router /admin/editcategory [post]
 func (h *CategoryHandler) EditCategory(c *gin.Context) {
-	fmt.Println("==================\nentered edit category handler")
+
 	var req requestModels.EditCategoryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		fmt.Println("error binding request")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Provide valid data",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Provide valid data", errResponse))
 		return
 	}
 
 	err := h.CategoryUseCase.EditCategory(&req)
 	if err != nil {
-		fmt.Println("error from usecase")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Couldn't edit category. Some error occured. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't edit category. Try Again", err))
 		return
 	} else {
-		fmt.Println("category edited successfully")
-		c.JSON(http.StatusOK, response.SME{
-			Status:  "success",
-			Message: "Category edited successfully",
-			Error:   "",
-		})
+		c.JSON(http.StatusOK, response.SuccessSME("Category edited successfully"))
 		return
 	}
 }

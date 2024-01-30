@@ -12,7 +12,6 @@ import (
 )
 
 func UserAuth(c *gin.Context) {
-	fmt.Println("#Middleware: UserAuth: Entered")
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString) //
 	secretKey := os.Getenv("SECRET_KEY")
@@ -45,8 +44,7 @@ func UserAuth(c *gin.Context) {
 	user := claims.Model
 
 	c.Set("UserModel", user)
-	fmt.Println("usermodel in c.context:", c.GetString("UserModel"))
-	fmt.Println("#Middleware Exited. Result: User Authenticated")
+	// fmt.Println("usermodel in c.context:", c.GetString("UserModel"))
 	c.Next()
 }
 

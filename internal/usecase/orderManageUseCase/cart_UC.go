@@ -33,12 +33,10 @@ func (uc *CartUseCase) DeleteFromCart(req *requestModels.DeleteFromCartReq) erro
 		return err
 	}
 	if !DoProductExists {
-		fmt.Println("Product doesn't exist in cart")
 		return errors.New("product doesn't exist in cart")
 	}
 	if quantityIfExist == 1 {
 		//delete product from cart
-		fmt.Println("Product exists in cart by only 1 quantity. So deleting product from cart")
 		err = uc.cartRepo.DeleteFromCart(req)
 		if err != nil {
 			fmt.Println("Error occured while deleting product from cart")
@@ -46,7 +44,6 @@ func (uc *CartUseCase) DeleteFromCart(req *requestModels.DeleteFromCartReq) erro
 		}
 	} else if quantityIfExist > 1 {
 		//decrease quantity
-		fmt.Println("Product exists in cart by more than 1 quantity. So decreasing quantity")
 		cart.Quantity = quantityIfExist - 1
 		err = uc.cartRepo.UpdateCartItemQuantity(&cart)
 		if err != nil {
@@ -94,7 +91,6 @@ func (c *CartUseCase) AddToCart(req *requestModels.AddToCartReq) error {
 		return err
 	}
 	if DoProductExists {
-		fmt.Println("Product already exists in cart. So adding quantity")
 		cart.Quantity = quantityIfExist + 1
 		//add quantity
 		err = c.cartRepo.UpdateCartItemQuantity(&cart)
@@ -105,7 +101,6 @@ func (c *CartUseCase) AddToCart(req *requestModels.AddToCartReq) error {
 		return nil
 	} else {
 		//add product to cart
-		fmt.Println("Product doesn't exist in cart. So adding product to cart")
 		cart.Quantity = 1
 		err = c.cartRepo.AddToCart(&cart)
 		if err != nil {

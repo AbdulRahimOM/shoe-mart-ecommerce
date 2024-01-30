@@ -17,3 +17,19 @@ type SMED struct {
 	Error   string      `json:"error"`
 	Data    interface{} `json:"data"`
 }
+
+func FailedSME(message string, err error) SME {
+	return SME{
+		Status:  "failed",
+		Message: message,
+		Error:   err.Error(),
+	}
+}
+
+func SuccessSME(message string) SME {
+	return SME{
+		Status:  "success",
+		Message: message,
+	}
+
+}

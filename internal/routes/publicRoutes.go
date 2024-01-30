@@ -3,7 +3,6 @@ package routes
 import (
 	ordermanagementHandlers "MyShoo/internal/handlers/orderManagementHandlers"
 	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
-	"MyShoo/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,12 +15,9 @@ func PublicRoutes(engine *gin.RouterGroup,
 	cart *ordermanagementHandlers.CartHandler,
 	wishList *ordermanagementHandlers.WishListHandler,
 ) {
-	engine.Use(middleware.ClearCache)
-
 	engine.GET("/categories", category.GetCategories)
 	engine.GET("/brands", brand.GetBrands)
 	engine.GET("/models", model.GetModelsByBrandsAndCategories)
-
 	engine.GET("/products", product.GetProducts)
-
+	engine.GET("/colourvariants/:modelID", product.GetColourVariantsUnderModel)
 }

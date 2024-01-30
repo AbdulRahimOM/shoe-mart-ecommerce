@@ -19,41 +19,45 @@ func SellerRoutes(engine *gin.RouterGroup,
 	wishList *ordermanagementHandlers.WishListHandler,
 ) {
 	engine.Use(middleware.ClearCache)
-	engine.GET("/login", middleware.NotLoggedOutCheck, seller.GetLogin)
+	loggedOutGroup := engine.Group("/")
+	loggedOutGroup.Use(middleware.NotLoggedOutCheck)
+	{
+		loggedOutGroup.GET("/login", middleware.NotLoggedOutCheck, seller.GetLogin)
+		loggedOutGroup.POST("/signup", middleware.NotLoggedOutCheck, seller.PostSignUp)
+		loggedOutGroup.POST("/login", middleware.NotLoggedOutCheck, seller.PostLogIn)
+	}
 
-	engine.GET("/", middleware.SellerAuth, middleware.VerifySellerStatus, seller.GetHome)
-	engine.GET("/home", middleware.SellerAuth, middleware.VerifySellerStatus, seller.GetHome)
-
-	engine.POST("/signup", middleware.NotLoggedOutCheck, seller.PostSignUp)
-	engine.POST("/login", seller.PostLogIn)
-
+	authSeller := engine.Group("/")
+	authSeller.Use(middleware.SellerAuth,middleware.VerifySellerStatus)
 	//product management//////////////=============================================================//////
 	//categories
-	engine.GET("/categories", middleware.SellerAuth, category.GetCategories)
-	engine.POST("/addcategory", middleware.SellerAuth, category.AddCategory)
-	engine.PATCH("/editcategory", middleware.SellerAuth, category.EditCategory)
+	{
+		authSeller.GET("/categories", category.GetCategories)
+		authSeller.POST("/addcategory", category.AddCategory)
+		authSeller.PATCH("/editcategory", category.EditCategory)
 
-	//brands
-	engine.GET("/brands",  middleware.SellerAuth, brand.GetBrands)
-	engine.POST("/addbrand", middleware.SellerAuth, brand.AddBrand)
-	engine.PATCH("/editbrand", middleware.SellerAuth, brand.EditBrand)
+		//brands
+		authSeller.GET("/brands", brand.GetBrands)
+		authSeller.POST("/addbrand", brand.AddBrand)
+		authSeller.PATCH("/editbrand", brand.EditBrand)
 
-	//models
-	engine.GET("/models", middleware.SellerAuth,  model.GetModelsByBrandsAndCategories)
-	engine.POST("/addmodel", middleware.SellerAuth, model.AddModel)
-	engine.PATCH("/editmodel", middleware.SellerAuth, model.EditModel)
+		//models
+		authSeller.GET("/models", model.GetModelsByBrandsAndCategories)
+		authSeller.POST("/addmodel", model.AddModel)
+		authSeller.PATCH("/editmodel", model.EditModel)
 
-	//Products
-	//colour variants
-	engine.POST("/addcolourvariant", middleware.SellerAuth, product.AddColourVariant)
-	engine.PATCH("/editcolourvariant", middleware.SellerAuth, product.EditColourVariant)
+		//Products
+		//colour variants
+		authSeller.POST("/addcolourvariant", product.AddColourVariant)
+		authSeller.PATCH("/editcolourvariant", product.EditColourVariant)
 
-	//dimensional variants
-	engine.POST("/adddimensionalvariant", middleware.SellerAuth, product.AddDimensionalVariant)
+		//dimensional variants
+		authSeller.POST("/adddimensionalvariant", product.AddDimensionalVariant)
 
-	//stock management
+		//stock management
 		//get stocks => get products is enough
-	engine.GET("/products", middleware.SellerAuth,product.GetProducts)
-	engine.POST("/addstock", middleware.SellerAuth, product.AddStock)	//add to stock (need not know existing stock)
-	engine.PATCH("/editstock", middleware.SellerAuth, product.EditStock) //need update: Add handler
+		authSeller.GET("/products", product.GetProducts)
+		authSeller.POST("/addstock", product.AddStock)    //add to stock (need not know existing stock)
+		authSeller.PATCH("/editstock", product.EditStock) //need update: Add handler
+	}
 }

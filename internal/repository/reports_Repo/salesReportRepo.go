@@ -25,11 +25,9 @@ func NewReportRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInt
 	}
 }
 
-// UploadExcelFile
 func (repo *DashboardDataRepo) UploadExcelFile(req *requestModels.ExcelFileReq) (string, error) {
 	fileUploadService := services.NewFileUploadService(repo.Cld)
 
-	var err error
 	url, err := fileUploadService.UploadExcelFile(req)
 	if err != nil {
 		return "", err
@@ -38,7 +36,6 @@ func (repo *DashboardDataRepo) UploadExcelFile(req *requestModels.ExcelFileReq) 
 	return url, nil
 }
 
-// GetSalesReportFullTime
 func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 	*[]entities.SalesReportOrderList,
 	*[]entities.SellerWiseReport,
@@ -69,8 +66,6 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 		INNER JOIN "brands" ON "models"."brandId" = "brands"."id"
 		ORDER BY "orders"."order_date_and_time" DESC
 	`).Scan(&orderList)
-
-	//
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")

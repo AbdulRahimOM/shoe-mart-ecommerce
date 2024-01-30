@@ -31,44 +31,27 @@ func NewBrandHandler(uc usecaseInterface.IBrandsUC) *BrandsHandler {
 // @Failure 400 {object} string
 // @Router /admin/addbrand [post]
 func (bh *BrandsHandler) AddBrand(c *gin.Context) {
-	fmt.Println("Handler ::: add brand handler")
-	var req requestModels.AddBrandReq
 
+	var req requestModels.AddBrandReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//add brand
 	if err := bh.brandsUseCase.AddBrand(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding brand. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding brand. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Brand added successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Brand added successfully"))
 }
 
 // get brands handler
@@ -81,24 +64,17 @@ func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 // @Failure 400 {object} string
 // @Router /admin/getbrands [get]
 func (bh *BrandsHandler) GetBrands(c *gin.Context) {
-	fmt.Println("Handler ::: get brands handler")
 
-	//get brands
 	var brands *[26]entities.BrandsByAlphabet
 	brands, err := bh.brandsUseCase.GetBrands()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting brands. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching brands. Try Again", err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetBrandsResponse{
 		Status:           "success",
 		Message:          "Brands fetched successfully",
-		Error:            "",
 		BrandsByAlphabet: *brands,
 	})
 }
@@ -114,42 +90,25 @@ func (bh *BrandsHandler) GetBrands(c *gin.Context) {
 // @Failure 400 {object} string
 // @Router /admin/editbrand [post]
 func (bh *BrandsHandler) EditBrand(c *gin.Context) {
-	fmt.Println("Handler ::: edit brand handler")
-	var req requestModels.EditBrandReq
 
+	var req requestModels.EditBrandReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	//edit brand
 	if err := bh.brandsUseCase.EditBrand(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing brand. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing brand. Try Again", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Brand edited successfully",
-	})
+	c.JSON(http.StatusOK, response.SuccessSME("Brand edited successfully"))
 }

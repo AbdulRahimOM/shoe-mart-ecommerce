@@ -29,21 +29,14 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	//get req from body
 	var paymentReq requestModels.ProceedToPaymentReq
 	if err := c.ShouldBindJSON(&paymentReq); err != nil {
-		c.HTML(http.StatusBadRequest, "payment.html", gin.H{
-			"message": "Error happened with request. Try Again",
-			"error":   err.Error(),
-		})
+		c.HTML(http.StatusBadRequest, "payment.html", response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
 	//validate request
 	if err := requestValidation.ValidateRequest(paymentReq); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.HTML(http.StatusBadRequest, "payment.html", gin.H{
-			"message": "Invalid request. Try again.",
-			"error":   errResponse,
-		})
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.HTML(http.StatusBadRequest, "payment.html", response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
@@ -52,7 +45,6 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 
 // temporary GET method
 func (h *PaymentHandler) ProceedToPayViaRazorPay2(c *gin.Context) {
-	fmt.Println("Handler ::: proceed to payment handler")
 
 	c.HTML(http.StatusOK, "payment.html", myshoo.ProceedToPaymentInfo)
 }
@@ -63,11 +55,7 @@ func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 
 	if err := c.Request.ParseForm(); err != nil {
 		fmt.Println("Error parsing form data:", err)
-		c.JSON(500, response.SME{
-			Status:  "failed",
-			Message: "Error parsing form data. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(500, response.FailedSME("Error parsing form data", err))
 		return
 	}
 
@@ -80,19 +68,11 @@ func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 	paymentValid,orderDetails, message, err := h.paymentUseCase.VerifyPayment(&request)
 	if err != nil {
 		fmt.Println("Error verifying payment:", err)
-		c.JSON(500, response.SME{
-			Status:  "failed",
-			Message: message,
-			Error:   err.Error(),
-		})
+		c.JSON(500, response.FailedSME("Error verifying payment", err))
 		return
 	}
 	if !paymentValid {
-		c.JSON(http.StatusExpectationFailed, response.SME{
-			Status:  "failed",	
-			Message: message,
-			Error:   "Payment failed",
-		})
+		c.JSON(http.StatusExpectationFailed, response.FailedSME("Payment failed", nil))
 		return
 	}
 

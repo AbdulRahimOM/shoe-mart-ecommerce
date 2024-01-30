@@ -22,64 +22,68 @@ func UserRoutes(engine *gin.RouterGroup,
 	payment *paymentHandlers.PaymentHandler,
 ) {
 	engine.Use(middleware.ClearCache)
-	engine.GET("/login", middleware.NotLoggedOutCheck, user.GetLogin)
+	{
+		loggedOutGroup := engine.Group("/")
+		loggedOutGroup.Use(middleware.NotLoggedOutCheck)
+		{
+			loggedOutGroup.GET("/login", user.GetLogin)
 
-	engine.POST("/signup", middleware.NotLoggedOutCheck, user.PostSignUp)
-	engine.POST("/login", middleware.NotLoggedOutCheck, user.PostLogIn)
+			loggedOutGroup.POST("/signup", user.PostSignUp)
+			loggedOutGroup.POST("/login", user.PostLogIn)
 
-	engine.GET("/sendotp", middleware.UserAuth, middleware.UserAwaitingVerification, user.SendOtp)
-	engine.POST("/verifyotp", middleware.UserAuth, middleware.UserAwaitingVerification, user.VerifyOtp)
+			loggedOutGroup.POST("/resetpasswordsendotp", user.SendOtpForPWChange)
+			loggedOutGroup.POST("/resetpasswordverifyotp", user.VerifyOtpForPWChange)
+			loggedOutGroup.POST("/resetpassword", user.ResetPassword)
+		}
 
-	engine.POST("/resetpasswordsendotp", middleware.NotLoggedOutCheck, user.SendOtpForPWChange)
-	engine.POST("/resetpasswordverifyotp", middleware.NotLoggedOutCheck, user.VerifyOtpForPWChange)
-	engine.POST("/resetpassword", middleware.NotLoggedOutCheck, user.ResetPassword)
+		signinUpGroup := engine.Group("/")
+		signinUpGroup.Use(middleware.UserAuth, middleware.UserAwaitingVerification)
+		{
+			signinUpGroup.GET("/sendotp", user.SendOtp)
+			signinUpGroup.POST("/verifyotp", user.VerifyOtp)
+		}
 
-	engine.GET("/", middleware.UserAuth, middleware.VerifyUserStatus, user.GetHome)
-	engine.GET("/home", middleware.UserAuth, middleware.VerifyUserStatus, user.GetHome)
+		authUser := engine.Group("/")
+		authUser.Use(middleware.UserAuth, middleware.VerifyUserStatus)
+		{
+			authUser.GET("/", user.GetHome)
+			authUser.GET("/home", user.GetHome)
 
-	//order management related_____________________________________
+			//cart related________________________________________________
+			authUser.GET("/cart", cart.GetCart)
+			authUser.PUT("/cart", cart.AddToCart)
+			authUser.DELETE("/cart", cart.DeleteFromCart)
+			//clear entire cart
+			authUser.DELETE("/clearcart", cart.ClearCart)
 
-	engine.GET("/colourvariants/:modelID", middleware.UserAuth, product.GetColourVariantsUnderModel)
+			//order_____________________________________________________
+			authUser.GET("/myorders", order.GetOrdersOfUser)
+			authUser.POST("/makeorder", order.MakeOrder)
+			authUser.PATCH("/cancelorder", order.CancelMyOrder)
+			authUser.PATCH("/returnorder", order.ReturnMyOrder)
 
-	//cart related________________________________________________
-	engine.GET("/cart", middleware.UserAuth, middleware.VerifyUserStatus, cart.GetCart)
-	engine.PUT("/cart", middleware.UserAuth, middleware.VerifyUserStatus, cart.AddToCart)
-	engine.DELETE("/cart", middleware.UserAuth, middleware.VerifyUserStatus, cart.DeleteFromCart)
-	//clear entire cart
-	engine.DELETE("/clearcart", middleware.UserAuth, middleware.VerifyUserStatus, cart.ClearCart)
+			//user address related_______________________________________
+			authUser.GET("/addresses", user.GetUserAddresses)
+			authUser.POST("/addaddress", user.AddUserAddress)
+			authUser.PATCH("/editaddress", user.EditUserAddress)
+			authUser.DELETE("/deleteaddress", user.DeleteUserAddress)
 
-	//order_____________________________________________________
-	//get orders of user
-	engine.GET("/myorders", middleware.UserAuth, middleware.VerifyUserStatus, order.GetOrdersOfUser)
-	//makeorder
-	engine.POST("/makeorder", middleware.UserAuth, middleware.VerifyUserStatus, order.MakeOrder)
-	//cancel order
-	engine.PATCH("/cancelorder", middleware.UserAuth, middleware.VerifyUserStatus, order.CancelMyOrder)
-	//return order
-	engine.PATCH("/returnorder", middleware.UserAuth, middleware.VerifyUserStatus, order.ReturnMyOrder)
+			//user profile related
+			authUser.GET("/profile", user.GetProfile)
+			authUser.PATCH("/editprofile", user.EditProfile)
 
-	//get user addresses
-	engine.GET("/addresses", middleware.UserAuth, middleware.VerifyUserStatus, user.GetUserAddresses)
-	//add new address
-	engine.POST("/addaddress", middleware.UserAuth, middleware.VerifyUserStatus, user.AddUserAddress)
-	//edit address
-	engine.PATCH("/editaddress", middleware.UserAuth, middleware.VerifyUserStatus, user.EditUserAddress)
-	//delete address
-	engine.DELETE("/deleteaddress", middleware.UserAuth, middleware.VerifyUserStatus, user.DeleteUserAddress)
+			//wishlist related____________________________________________
+			authUser.GET("/mywishlists", wishList.GetAllWishLists)
+			authUser.GET("/wishlist", wishList.GetWishListByID)
+			authUser.POST("/createwishlist", wishList.CreateWishList)
+			authUser.POST("/addtowishlist", wishList.AddToWishList)
+			authUser.DELETE("/removefromwishlist", wishList.RemoveFromWishList)
+		}
 
-	//user profile related
-	engine.GET("/profile", middleware.UserAuth, middleware.VerifyUserStatus, user.GetProfile)
-	engine.PATCH("/editprofile", middleware.UserAuth, middleware.VerifyUserStatus, user.EditProfile)
+		//payment related_____________________________________________
+		engine.POST("/payment", payment.ProceedToPayViaRazorPay)
+		engine.GET("/payment", payment.ProceedToPayViaRazorPay2)
+		engine.POST("/payment/verify", payment.VerifyPayment)
 
-	//wishlist related____________________________________________
-	engine.GET("/mywishlists", middleware.UserAuth, middleware.VerifyUserStatus, wishList.GetAllWishLists)
-	engine.GET("/wishlist", middleware.UserAuth, middleware.VerifyUserStatus, wishList.GetWishListByID)
-	engine.POST("/createwishlist", middleware.UserAuth, middleware.VerifyUserStatus, wishList.CreateWishList)
-	engine.POST("/addtowishlist", middleware.UserAuth, middleware.VerifyUserStatus, wishList.AddToWishList)
-	engine.DELETE("/removefromwishlist", middleware.UserAuth, middleware.VerifyUserStatus, wishList.RemoveFromWishList)
-
-	//payment related_____________________________________________
-	engine.POST("/payment", payment.ProceedToPayViaRazorPay)
-	engine.GET("/payment", payment.ProceedToPayViaRazorPay2)
-	engine.POST("/payment/verify", payment.VerifyPayment)
+	}
 }

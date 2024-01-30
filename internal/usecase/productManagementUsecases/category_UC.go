@@ -37,7 +37,6 @@ func (uc *CategoryUC) AddCategory(req *requestModels.AddCategoryReq) error {
 		return err
 	}
 	if DoCategoryExistsByName {
-		fmt.Println("Category already exists")
 		return errors.New("category already exists")
 	}
 
@@ -70,7 +69,6 @@ func (uc *CategoryUC) EditCategory(req *requestModels.EditCategoryReq) error {
 		return err
 	}
 	if !DoCategoryExistsByName {
-		fmt.Println("Category doesn't exist with this old name")
 		return errors.New("category doesn't exist with this old name")
 	}
 
@@ -79,7 +77,6 @@ func (uc *CategoryUC) EditCategory(req *requestModels.EditCategoryReq) error {
 		fmt.Println("Error occured while checking if category exists")
 		return err
 	} else if DoCategoryExistsByName {
-		fmt.Println("Category already exists with the sugested new name")
 		return errors.New("category already exists with the sugested new name")
 	}
 

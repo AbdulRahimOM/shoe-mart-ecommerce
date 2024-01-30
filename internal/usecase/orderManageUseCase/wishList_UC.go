@@ -32,7 +32,6 @@ func (uc *WishListsUseCase) CreateWishList(userID uint, req *requestModels.Creat
 		return err
 	}
 	if wishListExists {
-		fmt.Println("Wishlist with same name exists")
 		return fmt.Errorf("wishlist with same name exists")
 	}
 
@@ -59,7 +58,6 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *requestModels.AddToW
 		return err
 	}
 	if !thisWishListExistForUser {
-		fmt.Println("no such wishlist for this user")
 		return fmt.Errorf("no such wishlist for this user")
 	}
 
@@ -70,7 +68,6 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *requestModels.AddToW
 		return err
 	}
 	if !productExists {
-		fmt.Println("Product does not exist")
 		return fmt.Errorf("product does not exist")
 	}
 
@@ -81,7 +78,6 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *requestModels.AddToW
 		return err
 	}
 	if productInWishList {
-		fmt.Println("Product is already in wishlist")
 		return fmt.Errorf("product is already in wishlist")
 	}
 
@@ -104,7 +100,6 @@ func (uc *WishListsUseCase) RemoveFromWishList(userID uint, req *requestModels.R
 		return err
 	}
 	if !thisWishListExistForUser {
-		fmt.Println("no such wishlist for this user")
 		return fmt.Errorf("no such wishlist for this user")
 	}
 
@@ -115,7 +110,6 @@ func (uc *WishListsUseCase) RemoveFromWishList(userID uint, req *requestModels.R
 		return err
 	}
 	if !productInWishList {
-		fmt.Println("Product is not in wishlist")
 		return fmt.Errorf("product is not in wishlist")
 	}
 

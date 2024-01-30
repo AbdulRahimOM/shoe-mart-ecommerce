@@ -49,7 +49,6 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 	//validate payment method
 	paymentValid := tools.IsValidPaymentMethod(req.PaymentMethod)
 	if !paymentValid {
-		fmt.Println("Invalid payment method")
 		return &orderInfo, nil, "Invalid payment method", errors.New("invalid payment method")
 	}
 	//validate coupon //need update
