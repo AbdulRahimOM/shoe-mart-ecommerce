@@ -24,6 +24,10 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 
 	//get url param
 	rangeType := c.Param("range")
+	fmt.Println("range type: ", rangeType)
+
+	//print url
+	fmt.Println("url: ", c.Request.URL)
 
 	switch rangeType {
 	case "full-time":
@@ -37,8 +41,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportFullTimeForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportFullTimeForAdmin.xlsx")
+			c.File(fileURL)
 		}
 	case "date-range":
 		startDate := c.Query("sd")
@@ -84,8 +88,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 				})
 				return
 			} else {
-				c.Header("Content-Disposition", "attachment; filename=SalesReportBwCustomDatesForAdmin") 
-				c.Redirect(http.StatusFound, fileURL)
+				c.Header("Content-Disposition", "attachment; filename=SalesReportBwCustomDatesForAdmin.xlsx")
+				c.File(fileURL)
 			}
 		}
 	case "this-month":
@@ -99,8 +103,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportThisMonthForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportThisMonthForAdmin.xlsx")
+			c.File(fileURL)
 		}
 	case "last-month":
 		fmt.Println("last month entered")
@@ -114,8 +118,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportLastMonth") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportLastMonth.xlsx")
+			c.File(fileURL)
 		}
 
 	case "this-year":
@@ -129,8 +133,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportThisYearForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportThisYearForAdmin.xlsx")
+			c.File(fileURL)
 		}
 
 	case "last-year":
@@ -144,8 +148,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportLastYearForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportLastYearForAdmin.xlsx")
+			c.File(fileURL)
 		}
 
 	case "this-week":
@@ -159,8 +163,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportThisWeekForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportThisWeekForAdmin.xlsx")
+			c.File(fileURL)
 		}
 
 	case "last-week":
@@ -174,8 +178,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportLastWeekForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportLastWeekForAdmin.xlsx")
+			c.File(fileURL)
 		}
 
 	case "today":
@@ -189,8 +193,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			})
 			return
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportTodayForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportTodayForAdmin.xlsx")
+			c.File(fileURL)
 		}
 
 	case "yesterday":
@@ -203,8 +207,8 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 				Error:   err.Error(),
 			})
 		} else {
-			c.Header("Content-Disposition", "attachment; filename=SalesReportYesterdayForAdmin") 
-			c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportYesterdayForAdmin.xlsx")
+			c.File(fileURL)
 		}
 
 	default:
