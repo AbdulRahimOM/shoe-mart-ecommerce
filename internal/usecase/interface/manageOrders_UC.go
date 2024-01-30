@@ -34,4 +34,6 @@ type IOrderUC interface {
 	MarkOrderAsReturned(orderID uint) (string, error)
 	MarkOrderAsDelivered(orderID uint) (string, error)
 	// ProceedToPayment(req *requestModels.ProceedToPaymentReq) (*response.ProceedToPaymentInfo,string, error)
+
+	GetInvoiceOfOrder(userID uint, orderID uint) (*string,string, error)
 }

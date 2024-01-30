@@ -84,3 +84,11 @@ type ResponseProduct2 struct {
 	MRP                    float32 `gorm:"column:mrp;notNull"`
 	SalePrice              float32 `gorm:"column:salePrice;notNull"`
 }
+
+//GetInvoiceResponse
+type GetInvoiceResponse struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+	Error   string `json:"error"`
+	Invoice string `json:"invoice"`
+}

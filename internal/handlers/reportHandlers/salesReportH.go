@@ -27,23 +27,20 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 
 	switch rangeType {
 	case "full-time":
-		fileURL,err := h.reportsUC.ExportSalesReportFullTime()
+		fileURL, err := h.reportsUC.ExportSalesReportFullTime()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for full time")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-		// Setting Content-Disposition header to make the file downloadable
-		c.Header("Content-Disposition", "attachment; filename=SalesReportFullTimeForAdmin")
-		// Redirect to the file URL
-		c.Redirect(http.StatusFound, fileURL)
+			c.Header("Content-Disposition", "attachment; filename=SalesReportFullTimeForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 	case "date-range":
-		//get query params from url
 		startDate := c.Query("sd")
 		endDate := c.Query("ed")
 		if startDate == "" && endDate == "" {
@@ -77,163 +74,137 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 				return
 			}
 
-			err = h.reportsUC.ExportSalesReportBetweenDates(startTime, endTime)
+			fileURL, err := h.reportsUC.ExportSalesReportBetweenDates(startTime, endTime)
 			if err != nil {
 				fmt.Println("error occured in exporting sales report between dates")
 				c.JSON(400, response.SME{
 					Status:  "failed",
-					Message: "Error occured. Please recheck URL and try again",
+					Message: "An Error occured!",
 					Error:   err.Error(),
 				})
 				return
 			} else {
-				c.JSON(http.StatusOK, response.SME{
-					Status:  "success",
-					Message: "Sales report exported successfully",
-					Error:   "",
-				})
+				c.Header("Content-Disposition", "attachment; filename=SalesReportBwCustomDatesForAdmin") 
+				c.Redirect(http.StatusFound, fileURL)
 			}
 		}
 	case "this-month":
-		err := h.reportsUC.ExportSalesReportThisMonth()
+		fileURL, err := h.reportsUC.ExportSalesReportThisMonth()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for this month")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
-		} else {	
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+		} else {
+			c.Header("Content-Disposition", "attachment; filename=SalesReportThisMonthForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 	case "last-month":
-		err := h.reportsUC.ExportSalesReportLastMonth()
+		fmt.Println("last month entered")
+		fileURL, err := h.reportsUC.ExportSalesReportLastMonth()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for last month")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+			c.Header("Content-Disposition", "attachment; filename=SalesReportLastMonth") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	case "this-year":
-		err := h.reportsUC.ExportSalesReportThisYear()
+		fileURL, err := h.reportsUC.ExportSalesReportThisYear()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for this year")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+			c.Header("Content-Disposition", "attachment; filename=SalesReportThisYearForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	case "last-year":
-		err := h.reportsUC.ExportSalesReportLastYear()
+		fileURL, err := h.reportsUC.ExportSalesReportLastYear()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for last year")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+			c.Header("Content-Disposition", "attachment; filename=SalesReportLastYearForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	case "this-week":
-		err := h.reportsUC.ExportSalesReportThisWeek()
+		fileURL, err := h.reportsUC.ExportSalesReportThisWeek()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for this week")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})	
+			c.Header("Content-Disposition", "attachment; filename=SalesReportThisWeekForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	case "last-week":
-		err := h.reportsUC.ExportSalesReportLastWeek()
+		fileURL, err := h.reportsUC.ExportSalesReportLastWeek()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for last week")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+			c.Header("Content-Disposition", "attachment; filename=SalesReportLastWeekForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	case "today":
-		err := h.reportsUC.ExportSalesReportToday()
+		fileURL, err := h.reportsUC.ExportSalesReportToday()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for today")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 			return
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+			c.Header("Content-Disposition", "attachment; filename=SalesReportTodayForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	case "yesterday":
-		err := h.reportsUC.ExportSalesReportYesterday()
+		fileURL, err := h.reportsUC.ExportSalesReportYesterday()
 		if err != nil {
 			fmt.Println("error occured in exporting sales report for yesterday")
 			c.JSON(400, response.SME{
 				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
+				Message: "An Error occured!",
 				Error:   err.Error(),
 			})
 		} else {
-			c.JSON(http.StatusOK, response.SME{
-				Status:  "success",
-				Message: "Sales report exported successfully",
-				Error:   "",
-			})
+			c.Header("Content-Disposition", "attachment; filename=SalesReportYesterdayForAdmin") 
+			c.Redirect(http.StatusFound, fileURL)
 		}
 
 	default:

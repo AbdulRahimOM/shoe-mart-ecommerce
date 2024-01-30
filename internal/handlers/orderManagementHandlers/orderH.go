@@ -7,6 +7,7 @@ import (
 	"MyShoo/internal/tools"
 	usecaseInterface "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
+	"strconv"
 
 	"fmt"
 	"net/http"
@@ -465,5 +466,49 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 		Status:  "success",
 		Message: "Order marked as delivered successfully",
 		Error:   "",
+	})
+}
+
+// get invoice
+func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
+	fmt.Println("Handler ::: 'GetInvoiceOfOrder' handler")
+
+	userID, err := tools.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.SME{
+			Status:  "failed",
+			Message: "Error getting invoice. Try Again",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	orderIdParam := c.Query("id")
+	orderId, err := strconv.Atoi(orderIdParam)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.SME{
+			Status:  "failed",
+			Message: "Error getting invoice. Try Again",
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	//get invoice
+	invoice, message, err := h.orderUseCase.GetInvoiceOfOrder(uint(orderId), userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.SME{
+			Status:  "failed",
+			Message: message,
+			Error:   err.Error(),
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, response.GetInvoiceResponse{
+		Status:  "success",
+		Message: "Invoice fetched successfully",
+		Error:   "",
+		Invoice: *invoice,
 	})
 }

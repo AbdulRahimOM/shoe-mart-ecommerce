@@ -13,10 +13,18 @@ type IReportsRepo interface {
 	UploadExcelFile(req *requestModels.ExcelFileReq) (string, error)
 
 	GetSalesReportFullTime() (
-		*[]entities.SalesReportOrderList, 
+		*[]entities.SalesReportOrderList,
 		*[]entities.SellerWiseReport,
 		*[]entities.BrandWiseReport,
-		*[]entities.ModelWiseReport, 
+		*[]entities.ModelWiseReport,
+		*[]entities.SizeWiseReport,
+		*[]entities.RevenueGraph,
+		error)
+	GetSalesReportBetweenDates(startDate time.Time, endDate time.Time) (
+		*[]entities.SalesReportOrderList,
+		*[]entities.SellerWiseReport,
+		*[]entities.BrandWiseReport,
+		*[]entities.ModelWiseReport,
 		*[]entities.SizeWiseReport,
 		*[]entities.RevenueGraph,
 		error)

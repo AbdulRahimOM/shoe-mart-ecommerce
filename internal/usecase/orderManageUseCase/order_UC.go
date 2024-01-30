@@ -418,3 +418,9 @@ func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) (string, error) {
 
 	return "Order marked as delivered successfully", nil
 }
+
+func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string,string, error){
+
+
+	panic("unimplemented")
+}
