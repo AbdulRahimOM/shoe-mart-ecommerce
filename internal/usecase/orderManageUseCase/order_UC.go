@@ -420,6 +420,50 @@ func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) (string, error) {
 
 func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string,string, error){
 
+	// //check if order exists
+	// orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
+	// if err != nil {
+	// 	fmt.Println("Error occured while checking if order exists")
+	// 	return nil,"Some error occured.", err
+	// }
+	// if !orderExists {
+	// 	return nil,"Corrupt request. Invalid order ID.", errors.New("order doesn't exist by ID")
+	// }
+
+	// //check if order belongs to userID
+	// userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
+	// if err != nil {
+	// 	fmt.Println("Error occured while getting userID")
+	// 	return nil,"Some error occured.", err
+	// }
+
+	// if userID != userIDFromOrder {
+	// 	return nil,"Order doesn't belong to user", errors.New("order doesn't belong to user")
+	// }
+
+	// //check if payment status is "paid"
+	// paymentStatus, err := uc.orderRepo.GetPaymentStatusByID(orderID)
+	// if err != nil {
+	// 	fmt.Println("Error occured while getting payment status")
+	// 	return nil,"Some error occured.", err
+	// }
+	// if paymentStatus != "paid" {
+	// 	message := "Cannot generate invoice. Payment status is '" + paymentStatus + "'"
+	// 	fmt.Println(message)
+	// 	return nil,message, errors.New(message)
+	// }
+
+	// //get orderInfo
+	// var orderInfo *entities.OrderInfo
+	// order, err := uc.orderRepo.GetOrderSummaryByID(orderID)
+	// if err != nil {
+	// 	fmt.Println("Error occured while getting order summary")
+	// 	return nil,"Some error occured.", err
+	// }
+
+
+
+
 
 	panic("unimplemented")
 }

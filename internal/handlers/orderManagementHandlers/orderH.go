@@ -1,7 +1,6 @@
 package ordermanagementHandlers
 
 import (
-	myshoo "MyShoo"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -83,7 +82,6 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 			OrderInfo:            *orderInfo,
 			ProceedToPaymentInfo: *proceedToPaymentInfo,
 		})
-		myshoo.TemporarySolution(*proceedToPaymentInfo)
 	}
 }
 

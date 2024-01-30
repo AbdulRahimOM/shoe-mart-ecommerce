@@ -1,10 +1,10 @@
 package paymentHandlers
 
 import (
-	myshoo "MyShoo"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecaseInterface "MyShoo/internal/usecase/interface"
+	htmlRender "MyShoo/pkg/htmlTemplateRender"
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
@@ -30,6 +30,7 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	var paymentReq requestModels.ProceedToPaymentReq
 	if err := c.ShouldBindJSON(&paymentReq); err != nil {
 		c.HTML(http.StatusBadRequest, "payment.html", response.FailedSME("Error binding request. Try Again", err))
+		// c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
 
@@ -37,16 +38,21 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(paymentReq); err != nil {
 		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
 		c.HTML(http.StatusBadRequest, "payment.html", response.FailedSME("Error validating request. Try Again", errResponse))
+		// c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	c.HTML(http.StatusOK, "payment.html", paymentReq)
-}
+	// c.JSON(http.StatusOK, paymentReq)
 
-// temporary GET method
-func (h *PaymentHandler) ProceedToPayViaRazorPay2(c *gin.Context) {
+	//Rendering HTML for viewing payment (for testing)
+	err := htmlRender.RenderHTMLFromTemplate("internal/view/payment.html", paymentReq, "testKit/paymentOutput.html")
+	if err != nil {
+		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
+	} else {
+		fmt.Println("Page loaded successfully. testKit/paymentOutput.html file produced as rendered version.")
+	}
 
-	c.HTML(http.StatusOK, "payment.html", myshoo.ProceedToPaymentInfo)
 }
 
 // VerifyPayment
@@ -59,13 +65,13 @@ func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 		return
 	}
 
-	var request requestModels.VerifyPaymentReq= requestModels.VerifyPaymentReq{
-		RazorpayPaymentID: string(c.Request.Form.Get("razorpay_payment_id")),	
-		RazorpayOrderID: string(c.Request.Form.Get("razorpay_order_id")),
+	var request requestModels.VerifyPaymentReq = requestModels.VerifyPaymentReq{
+		RazorpayPaymentID: string(c.Request.Form.Get("razorpay_payment_id")),
+		RazorpayOrderID:   string(c.Request.Form.Get("razorpay_order_id")),
 		RazorpaySignature: string(c.Request.Form.Get("razorpay_signature")),
 	}
 
-	paymentValid,orderDetails, message, err := h.paymentUseCase.VerifyPayment(&request)
+	paymentValid, orderDetails, message, err := h.paymentUseCase.VerifyPayment(&request)
 	if err != nil {
 		fmt.Println("Error verifying payment:", err)
 		c.JSON(500, response.FailedSME("Error verifying payment", err))
@@ -77,8 +83,8 @@ func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, response.PaidOrderResponse{
-		Status:  "success",
-		Message: message,
+		Status:    "success",
+		Message:   message,
 		OrderInfo: *orderDetails,
 	})
 

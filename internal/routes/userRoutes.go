@@ -82,7 +82,6 @@ func UserRoutes(engine *gin.RouterGroup,
 
 		//payment related_____________________________________________
 		engine.POST("/payment", payment.ProceedToPayViaRazorPay)
-		engine.GET("/payment", payment.ProceedToPayViaRazorPay2)
 		engine.POST("/payment/verify", payment.VerifyPayment)
 
 	}

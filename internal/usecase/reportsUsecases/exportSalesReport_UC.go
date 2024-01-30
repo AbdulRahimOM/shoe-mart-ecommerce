@@ -36,7 +36,7 @@ func (uc *ReportsUseCase) ExportSalesReportFullTime() (string, error) {
 }
 
 func (uc *ReportsUseCase) ExportSalesReportLastMonth() (string, error) {
-	var start,end time.Time
+	var start, end time.Time
 	if time.Now().Month() == 1 {
 		start = time.Date(time.Now().Year()-1, 12, 1, 0, 0, 0, 0, time.Now().Location())
 	} else {
@@ -66,7 +66,7 @@ func (uc *ReportsUseCase) ExportSalesReportLastWeek() (string, error) {
 func (uc *ReportsUseCase) ExportSalesReportLastYear() (string, error) {
 	now := time.Now()
 	start := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, now.Location())
-	end:=start.AddDate(1,0,0)
+	end := start.AddDate(1, 0, 0)
 	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
 	if err != nil {
 		fmt.Println("error:", err)
@@ -270,7 +270,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 	err = file.SaveAs(tempFilePath)
 	defer os.Remove(tempFilePath)
 	if err != nil {
-		fmt.Println("Error saving Excel file:", err)
+		fmt.Println("Error saving Excel file:-", err)
 		return "", err
 	}
 
@@ -283,7 +283,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 		return url, nil
 	} else {
 		// Saving the Excel file locally (for dev/testing purposes)
-		localUrl := "output.xlsx"
+		localUrl := "testKit/salesReportOutput.xlsx"
 		if err := file.SaveAs(localUrl); err != nil {
 			fmt.Println("Error saving Excel file:", err)
 			return "", err

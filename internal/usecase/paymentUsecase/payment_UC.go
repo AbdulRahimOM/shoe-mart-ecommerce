@@ -49,7 +49,7 @@ func (uc *PaymentUC) VerifyPayment(req *requestModels.VerifyPaymentReq) (bool, *
 		return false, nil, "", err
 	}
 
-	return true, order, "Hoorray!!.. Payment recieved. Your order is place.", nil
+	return true, order, "Hoorray!!.. Payment recieved. Your order is placed.", nil
 
 
 
