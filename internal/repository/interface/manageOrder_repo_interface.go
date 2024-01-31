@@ -48,4 +48,5 @@ type IOrderRepo interface {
 	MarkOrderAsDelivered(orderID uint) error
 
 	GetOrderByTransactionID(transactionID string) (uint, error)
+	UpdateOrderTransactionID(orderID uint, transactionID string) error
 }

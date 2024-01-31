@@ -20,3 +20,8 @@ type VerifyPaymentReq struct {
 	RazorpayOrderID   string `json:"razorpay_order_id" validate:"required"`
 	RazorpaySignature string `json:"razorpay_signature" validate:"required"`
 }
+
+//retry payment
+type RetryPaymentReq struct {
+	OrderID uint `json:"order_id" validate:"required,number"`
+}

@@ -3,6 +3,7 @@ package paymentHandlers
 import (
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
+	"MyShoo/internal/tools"
 	usecaseInterface "MyShoo/internal/usecase/interface"
 	htmlRender "MyShoo/pkg/htmlTemplateRender"
 	requestValidation "MyShoo/pkg/validation"
@@ -29,7 +30,7 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	//get req from body
 	var paymentReq requestModels.ProceedToPaymentReq
 	if err := c.ShouldBindJSON(&paymentReq); err != nil {
-		c.HTML(http.StatusBadRequest, "payment.html", response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		// c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
 		return
 	}
@@ -37,13 +38,13 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	//validate request
 	if err := requestValidation.ValidateRequest(paymentReq); err != nil {
 		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.HTML(http.StatusBadRequest, "payment.html", response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		// c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
 	c.HTML(http.StatusOK, "payment.html", paymentReq)
-	// c.JSON(http.StatusOK, paymentReq)
+	// c.JSON(http.StatusOK, retryReq)
 
 	//Rendering HTML for viewing payment (for testing)
 	err := htmlRender.RenderHTMLFromTemplate("internal/view/payment.html", paymentReq, "testKit/paymentOutput.html")
@@ -87,5 +88,46 @@ func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 		Message:   message,
 		OrderInfo: *orderDetails,
 	})
+}
 
+// retry payment
+func (h *PaymentHandler) RetryPayment(c *gin.Context) {
+
+	//get req from body
+	var retryReq requestModels.RetryPaymentReq
+	if err := c.ShouldBindJSON(&retryReq); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		return
+	}
+
+	//validate request
+	if err := requestValidation.ValidateRequest(retryReq); err != nil {
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		return
+	}
+
+	//get userID from token
+	userID, err := tools.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error getting userID from token", err))
+		return
+	}
+
+	//do the retry payment
+	paymentReq, message, err := h.paymentUseCase.RetryPayment(&retryReq, userID)
+	if err != nil {
+		c.JSON(500, response.FailedSME(message, err))
+		return
+	}
+
+	c.HTML(http.StatusOK, "payment.html", paymentReq)
+
+	//Rendering HTML for viewing payment (for testing)
+	err = htmlRender.RenderHTMLFromTemplate("internal/view/payment.html", paymentReq, "testKit/paymentOutput.html")
+	if err != nil {
+		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
+	} else {
+		fmt.Println("Page loaded successfully. testKit/paymentOutput.html file produced as rendered version.")
+	}
 }

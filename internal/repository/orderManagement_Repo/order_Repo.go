@@ -254,6 +254,10 @@ func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, error) {
 		return 0, query.Error
 	}
 
+	if query.RowsAffected == 0 {
+		return 0, fmt.Errorf("record not found")
+	}
+
 	return order.UserID, nil
 }
 
@@ -476,6 +480,10 @@ func (repo *OrderRepo) GetOrderSummaryByID(orderID uint) (*entities.Order, error
 		return nil, query.Error
 	}
 
+	if query.RowsAffected == 0 {
+		return nil, fmt.Errorf("record not found")
+	}
+
 	return &order, nil
 }
 
@@ -563,4 +571,16 @@ func (repo *OrderRepo) GetOrderByTransactionID(transactionID string) (uint, erro
 	}
 
 	return order.ID, nil
+}
+
+func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID string) error {
+	result := repo.DB.Model(&entities.Order{}).Where("id = ?", orderID).Update("transaction_id", transactionID)
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't update transactionID. query.Error= ", result.Error, "\n----")
+		return result.Error
+	}else if result.RowsAffected == 0 {
+		return fmt.Errorf("no such order exists")
+	}
+
+	return nil
 }
