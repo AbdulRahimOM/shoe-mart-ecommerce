@@ -10,14 +10,14 @@ import (
 	infra "MyShoo/internal/infrastructure"
 	accRepository "MyShoo/internal/repository/accounts_Repo"
 	ordermanagementrepo "MyShoo/internal/repository/orderManagement_Repo"
+	// paymentrepo "MyShoo/internal/repository/payment_repo"
 	productRepository "MyShoo/internal/repository/productManagement_Repo"
 	reportsrepo "MyShoo/internal/repository/reports_Repo"
 	accountsUsecase "MyShoo/internal/usecase/accountsUsecases"
 	orderManageUseCase "MyShoo/internal/usecase/orderManageUseCase"
+	paymentusecase "MyShoo/internal/usecase/paymentUsecase"
 	prodManageUsecase "MyShoo/internal/usecase/productManagementUsecases"
 	reportsusecases "MyShoo/internal/usecase/reportsUsecases"
-	paymentusecase "MyShoo/internal/usecase/paymentUsecase"
-	paymentrepo "MyShoo/internal/repository/payment_repo"
 	"fmt"
 )
 
@@ -74,8 +74,8 @@ func InitializeAndStartAPI() {
 	reportsHandler := reporthandlers.NewReportsHandler(reportsUseCase)
 
 	//payment
-	paymentRepository := paymentrepo.NewPaymentRepository(infra.DB)
-	paymentUseCase := paymentusecase.NewPaymentUseCase(paymentRepository,orderRepository,cartRepository,productRepository)
+	// paymentRepository := paymentrepo.NewPaymentRepository(infra.DB)	//not needed
+	paymentUseCase := paymentusecase.NewPaymentUseCase(orderRepository)
 	paymentHandler := paymentHandlers.NewPaymentHandler(paymentUseCase)
 
 	serveHttp := myhttp.NewServerHTTP(

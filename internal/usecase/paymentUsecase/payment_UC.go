@@ -13,23 +13,14 @@ import (
 )
 
 type PaymentUC struct {
-	paymentRepo repository_interface.IPaymentRepo
 	orderRepo   repository_interface.IOrderRepo
-	cartRepo    repository_interface.ICartRepo		//not used
-	productRepo repository_interface.IProductsRepo	//not used
 }
 
 func NewPaymentUseCase(
-	paymentRepo repository_interface.IPaymentRepo,
 	orderRepo repository_interface.IOrderRepo,
-	cartRepo repository_interface.ICartRepo,
-	productRepo repository_interface.IProductsRepo,
 ) usecaseInterface.IPaymentUC {
 	return &PaymentUC{
-		paymentRepo: paymentRepo,
 		orderRepo:   orderRepo,
-		cartRepo:    cartRepo,
-		productRepo: productRepo,
 	}
 }
 
