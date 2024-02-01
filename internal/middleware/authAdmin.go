@@ -12,7 +12,6 @@ import (
 )
 
 func AdminAuth(c *gin.Context) {
-	fmt.Println("#Middleware: AdminAuth: Entered")
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString) //
 	secretKey := os.Getenv("SECRET_KEY")
@@ -45,7 +44,5 @@ func AdminAuth(c *gin.Context) {
 	admin := claims.Model
 
 	c.Set("AdminModel", admin)
-	fmt.Println("Admin model in c.context:", c.GetString("AdminModel"))
-	fmt.Println("#Middleware Exited. Result: Admin Authenticated")
 	c.Next()
 }
