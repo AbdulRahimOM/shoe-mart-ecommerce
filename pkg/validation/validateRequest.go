@@ -15,6 +15,10 @@ type ValidationErrorResponse struct {
 	// LenErr      string      `json:"len,omitempty"`
 }
 
+func init() {
+	validate.RegisterValidation("pincode", validatePincode)
+}
+
 var validate = validator.New()
 
 func ValidateRequest(req interface{}) []string {
@@ -38,4 +42,17 @@ func ValidateRequest(req interface{}) []string {
 		errResponse = append(errResponse, message)
 	}
 	return errResponse
+}
+
+func validatePincode(fl validator.FieldLevel) bool {
+	value := fl.Field().Uint()
+	digitCount := 0
+
+	// Count the number of digits
+	for value > 0 {
+		value /= 10
+		digitCount++
+	}
+
+	return (digitCount == 6 && value/100000 != 9)
 }
