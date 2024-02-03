@@ -1,7 +1,9 @@
 package main
 
 import (
+	myshoo "MyShoo"
 	_ "MyShoo/docs"
+	"MyShoo/internal/domain/config"
 	"MyShoo/internal/di"
 	infra "MyShoo/internal/infrastructure"
 	"MyShoo/internal/initializers"
@@ -14,6 +16,12 @@ import (
 func main() {
 	fmt.Println("Handler ::: main()")
 
+	//for dev purpose
+	myshoo.Test()
+	//don't remove this until the project is complete
+	//(to avoid frequent changes in main.go file just for testing purpose)
+	//which leads to frequent git tracking and commiting
+
 	if err := initializers.LoadEnvVariables(); err != nil {
 		fmt.Println("Couldn't load env variables")
 		return
@@ -24,6 +32,10 @@ func main() {
 	}
 	if err := infra.ConnectToCloud(); err != nil {
 		fmt.Println("Couldn't connect to Cloud")
+		return
+	}
+	if err := config.LoadConfig(); err != nil {
+		fmt.Println("Couldn't load config. Error: ", err)
 		return
 	}
 
