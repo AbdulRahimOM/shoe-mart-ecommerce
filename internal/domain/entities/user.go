@@ -35,7 +35,9 @@ type UserAddress struct {
 	LandMark    string `gorm:"column:landmark"`
 	City        string `gorm:"column:city;notNull"`
 	State       string `gorm:"column:state;notNull"`
-	Country     string `gorm:"column:country;notNull"`
+	Pincode     string `gorm:"column:pincode;notNull"`
+
+	// Country     string `gorm:"column:country;notNull"`	India only
 
 	// FkUser UserDetails `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
 }
