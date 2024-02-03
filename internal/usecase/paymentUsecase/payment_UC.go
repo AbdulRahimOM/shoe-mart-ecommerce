@@ -73,7 +73,7 @@ func (uc *PaymentUC) RetryPayment(req *requestModels.RetryPaymentReq, userID uin
 	if order.Status != "payment pending" {
 		return nil, msg.InvalidRequest, errors.New("order payment status is not 'payment pending'")
 	} else {
-		order.TransactionID, err = services.CreateRazorpayOrder(*order)
+		order.TransactionID, err = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo)
 		if err != nil {
 			return nil, "Service error", err
 		}

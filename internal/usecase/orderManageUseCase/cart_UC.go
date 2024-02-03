@@ -56,17 +56,12 @@ func (uc *CartUseCase) DeleteFromCart(req *requestModels.DeleteFromCartReq) erro
 }
 
 func (uc *CartUseCase) GetCart(userID uint) (*[]response.ResponseCartItems, float32, error) {
-	var totalValue float32
 	var responseCart []response.ResponseCartItems
 
-	cart, err := uc.cartRepo.GetCart(userID)
-	
+	cart,totalValue, err := uc.cartRepo.GetCart(userID)
 	if err != nil {
 		fmt.Println("Error occured while getting cart")
 		return &responseCart, totalValue, err
-	}
-	for _, v := range *cart {
-		totalValue += float32(v.FkProduct.FkDimensionalVariation.FkColourVariant.MRP)
 	}
 
 	if err := copier.Copy(&responseCart, &cart); err != nil {

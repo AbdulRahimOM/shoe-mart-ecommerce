@@ -63,5 +63,12 @@ func AdminRoutes(engine *gin.RouterGroup,
 
 		//salesreport
 		authAdmin.GET("/salesreport/:range", reports.ExportSalesReport)
+
+		//coupon
+		authAdmin.GET("/coupons", order.GetCoupons)
+		authAdmin.POST("/newcoupon", order.NewCouponHandler)
+		authAdmin.PATCH("/blockcoupon", order.BlockCouponHandler)
+		authAdmin.PATCH("/unblockcoupon", order.UnblockCouponHandler)
+
 	}
 }

@@ -17,20 +17,20 @@ func NewOrderRepository(db *gorm.DB) repoInterface.IOrderRepo {
 }
 
 // MakeOrder implements repository_interface.IOrderRepo.
-func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error) {
+func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error) {
 	//add order
 	result := repo.DB.Create(&order)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add order. query.Error= ", result.Error, "\n----")
-		return order, result.Error
+		return 0, result.Error
 	}
 
-	//preload order
-	result = repo.DB.Preload("FkAddress").First(&order)
-	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't preload order. query.Error= ", result.Error, "\n----")
-		return order, result.Error
-	}
+	// //preload order
+	// result = repo.DB.Preload("FkAddress").First(&order)
+	// if result.Error != nil {
+	// 	fmt.Println("-------\nquery error happened. couldn't preload order. query.Error= ", result.Error, "\n----")
+	// 	return 0, result.Error
+	// }
 
 	//create order items
 	for _, item := range *orderItems {
@@ -41,11 +41,11 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 		result := repo.DB.Create(&item)
 		if result.Error != nil {
 			fmt.Println("-------\nquery error happened. couldn't add order item. query.Error= ", result.Error, "\n----")
-			return order, result.Error
+			return 0, result.Error
 		}
 	}
 
-	return order, nil
+	return order.ID, nil
 }
 
 // GetOrdersOfUser
@@ -261,7 +261,7 @@ func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, error) {
 	return order.UserID, nil
 }
 
-func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error) {
+func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error) {
 	//start transaction
 	tx := repo.DB.Begin()
 	var result *gorm.DB
@@ -279,16 +279,16 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return order, result.Error
+		return 0, result.Error
 	}
 
-	//preload order
-	result = tx.Preload("FkAddress").First(&order)
-	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't preload order. query.Error= ", result.Error, "\n----")
-		tx.Rollback()
-		return order, result.Error
-	}
+	// //preload order
+	// result = tx.Preload("FkAddress").First(&order)
+	// if result.Error != nil {
+	// 	fmt.Println("-------\nquery error happened. couldn't preload order. query.Error= ", result.Error, "\n----")
+	// 	tx.Rollback()
+	// 	return order, result.Error
+	// }
 
 	//create order items
 	for _, item := range *orderItems {
@@ -300,7 +300,7 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 		if result.Error != nil {
 			fmt.Println("-------\nquery error happened. couldn't add order item. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return order, result.Error
+			return 0, result.Error
 		}
 
 		//update stock
@@ -308,7 +308,7 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 		if result.Error != nil {
 			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return order, result.Error
+			return 0, result.Error
 		}
 	}
 
@@ -317,13 +317,13 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return order, result.Error
+		return 0, result.Error
 	}
 
 	//commit transaction
 	tx.Commit()
 
-	return order, nil
+	return order.ID, nil
 }
 
 // ReturnOrder

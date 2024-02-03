@@ -4,6 +4,7 @@ import (
 	"MyShoo/internal/domain/entities"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
+	myMath "MyShoo/pkg/math"
 	"errors"
 	"fmt"
 	"os"
@@ -28,7 +29,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 	}
 
 	//check if modelID exists and belongs to the seller
-	doModelExists,doModelBelongsToSeller, err := uc.ModelsRepo.DoModelExistByIDAndBelongsToUser(req.ModelID, sellerID)
+	doModelExists, doModelBelongsToSeller, err := uc.ModelsRepo.DoModelExistByIDAndBelongsToUser(req.ModelID, sellerID)
 	if err != nil {
 		fmt.Println("Error occured while checking if model exists")
 		return err
@@ -39,6 +40,10 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 	if !doModelBelongsToSeller {
 		return errors.New("model doesn't belong to this seller")
 	}
+	
+	//round off MRP and SalePrice to 2 decimal places
+	colourVariant.MRP = myMath.RoundFloat32(colourVariant.MRP, 2)
+	colourVariant.SalePrice = myMath.RoundFloat32(colourVariant.SalePrice, 2)
 
 	//add colourVariant
 	err = uc.ProductsRepo.AddColourVariant(&colourVariant, file)
@@ -75,6 +80,10 @@ func (uc *ProductsUC) EditColourVariant(req *requestModels.EditColourVariantReq)
 	if doColourVariantExists {
 		return errors.New("colourVariant already exists in these attributes")
 	}
+
+	//round off MRP and SalePrice to 2 decimal places
+	colourVariant.MRP = myMath.RoundFloat32(colourVariant.MRP, 2)
+	colourVariant.SalePrice = myMath.RoundFloat32(colourVariant.SalePrice, 2)
 
 	//edit colourVariant
 	err = uc.ProductsRepo.EditColourVariant(&colourVariant)

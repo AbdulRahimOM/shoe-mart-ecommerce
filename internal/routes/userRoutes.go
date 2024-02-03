@@ -56,9 +56,14 @@ func UserRoutes(engine *gin.RouterGroup,
 			//clear entire cart
 			authUser.DELETE("/clearcart", cart.ClearCart)
 
+			// checkOut
+			authUser.GET("/checkout/selectaddress", order.GetAddressForCheckout)
+			authUser.POST("/checkout/setaddr-selectcoupon", order.SetAddressGetCoupons)
+			authUser.POST("/checkout/setcoupon-getpaymentmethods", order.SetCouponGetPaymentMethods)
+
 			//order_____________________________________________________
-			authUser.GET("/myorders", order.GetOrdersOfUser)
 			authUser.POST("/makeorder", order.MakeOrder)
+			authUser.GET("/myorders", order.GetOrdersOfUser)
 			authUser.PATCH("/cancelorder", order.CancelMyOrder)
 			authUser.PATCH("/returnorder", order.ReturnMyOrder)
 

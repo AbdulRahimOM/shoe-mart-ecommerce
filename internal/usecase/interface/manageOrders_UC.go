@@ -24,6 +24,10 @@ type IWishListsUC interface {
 }
 
 type IOrderUC interface {
+	GetAddressForCheckout(userID uint) (*[]entities.UserAddress, uint, float32, string, error)
+	SetAddressGetCoupons(userID uint, req *requestModels.SetAddressForCheckOutReq) (*response.SetAddrGetCouponsResponse, string, error)
+	SetCouponGetPaymentMethods(userID uint, req *requestModels.SetCouponForCheckoutReq) (*response.GetPaymentMethodsForCheckoutResponse, string, error)
+
 	//returns orderInfo, message, error
 	MakeOrder(req *requestModels.MakeOrderReq) (*entities.OrderInfo, *response.ProceedToPaymentInfo, string, error)
 	GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, string, error)
@@ -35,5 +39,13 @@ type IOrderUC interface {
 	MarkOrderAsDelivered(orderID uint) (string, error)
 	// ProceedToPayment(req *requestModels.ProceedToPaymentReq) (*response.ProceedToPaymentInfo,string, error)
 
-	GetInvoiceOfOrder(userID uint, orderID uint) (*string,string, error)
+	GetInvoiceOfOrder(userID uint, orderID uint) (*string, string, error)
+
+	CreateNewCoupon(req *requestModels.NewCouponReq) (string, error)
+	BlockCoupon(req *requestModels.BlockCouponReq) (string, error)
+	UnblockCoupon(req *requestModels.UnblockCouponReq) (string, error)
+	GetAllCoupons() (*[]entities.Coupon, string, error)
+	GetExpiredCoupons() (*[]entities.Coupon, string, error)
+	GetActiveCoupons() (*[]entities.Coupon, string, error)
+	GetUpcomingCoupons() (*[]entities.Coupon, string, error)
 }

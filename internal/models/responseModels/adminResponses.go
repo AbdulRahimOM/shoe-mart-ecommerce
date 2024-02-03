@@ -31,16 +31,23 @@ type GetSellersListResponse struct {
 	SellersList []entities.SellerDetails `json:"sellersList"`
 }
 
-//BlockSellerResponse
+// BlockSellerResponse
 type BlockSellerResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 	Error   string `json:"error"`
 }
 
-//UnblockSellerResponse
+// UnblockSellerResponse
 type UnblockSellerResponse struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 	Error   string `json:"error"`
+}
+
+// GetCouponRes
+type GetCouponRes struct {
+	Status  string          `json:"status"`
+	Message string          `json:"message"`
+	Coupons []entities.Coupon `json:"coupons"`
 }

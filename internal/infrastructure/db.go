@@ -91,5 +91,11 @@ func ConnectToDB() error {
 		fmt.Println("Failed to migrate table wishListItems", err)
 		return err
 	}
+
+	//coupon
+	if err := DB.AutoMigrate(&entities.Coupon{}); err != nil {
+		fmt.Println("Failed to migrate table coupon", err)
+		return err
+	}
 	return nil
 }

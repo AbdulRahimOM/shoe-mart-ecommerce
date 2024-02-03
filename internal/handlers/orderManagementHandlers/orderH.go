@@ -32,25 +32,17 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 		return
 	}
 
-	//validate request
-	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
-		return
-	}
-
-	//check if userID in token and request body match
 	userID, err := tools.GetUserID(c)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.FailedSME("Error making order. Try Again", err))
 		return
 	}
-	if userID != req.UserID {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error making order. Try Again",
-			Error:   "User ID in token and request body do not match. Corrupted request!!",
-		})
+	req.UserID = userID
+
+	//validate request
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
 		return
 	}
 
@@ -364,4 +356,168 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 		Message: "Invoice fetched successfully",
 		Invoice: *invoice,
 	})
+}
+
+// // checkout page
+// func (h *OrderHandler) GetCheckout(c *gin.Context) {
+// 	fmt.Println("Handler ::: 'GetCheckout' handler")
+
+// 	userID, err := tools.GetUserID(c)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting checkout. Try Again", err))
+// 		return
+// 	}
+
+// 	//get checkout
+// 	checkOutInfo, message, err := h.orderUseCase.GetCheckOutInfo(userID)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+// 		return
+// 	}
+// 	var checkOutIsnfo *response.CheckOutInfo
+// 	c.JSON(http.StatusOK, response.GetCheckoutResponse{
+// 		Status:       "success",
+// 		Message:      "Checkout fetched successfully",
+// 		CheckOutInfo: *checkOutInfo,
+// 	})
+// }
+//
+// // get checkout estimate
+// func (h *OrderHandler) GetCheckoutEstimate(c *gin.Context) {
+// 	fmt.Println("Handler ::: 'GetCheckoutEstimate' handler")
+//
+// 	userID, err := tools.GetUserID(c)
+// 	if err != nil {
+// 		fmt.Println("error getting userID from token. error:", err)
+// 		c.JSON(http.StatusInternalServerError, response.FailedSME(msg.ServerSideErr, err))
+// 		return
+// 	}
+//
+// 	//get req from body
+// 	var req *requestModels.GetCheckoutEstimateReq
+// 	if err := c.ShouldBindJSON(&req); err != nil {
+// 		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+// 		return
+// 	}
+//
+// 	//validate request
+// 	if err := requestValidation.ValidateRequest(req); err != nil {
+// 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
+// 		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
+// 		return
+// 	}
+//
+// 	//get checkout estimate
+// 	checkOutEstimate, paymentMethods, message, err := h.orderUseCase.GetCheckOutEstimate(userID, req)
+// 	if err != nil {
+// 		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+// 		return
+// 	}
+//
+// 	c.JSON(http.StatusOK, response.CheckoutEstimateResponse{
+// 		Status:         "success",
+// 		Message:        message,
+// 		ProductsValue:  checkOutEstimate.ProductsValue,
+// 		ShippingCharge: checkOutEstimate.ShippingCharge,
+// 		Discount:       checkOutEstimate.Discount,
+// 		GrandTotal:     checkOutEstimate.GrandTotal,
+// 		PaymentMethods: *paymentMethods,
+// 	})
+// }
+
+// -----v
+// GetAddressForCheckout
+func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
+	fmt.Println("Handler ::: 'GetAddressForCheckout' handler")
+
+	userID, err := tools.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting address for checkout. Try Again", err))
+		return
+	}
+
+	//get address for checkout
+	address, totalQuantiy, totalValue, message, err := h.orderUseCase.GetAddressForCheckout(userID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.GetAddressesForCheckoutResponse{
+		Status:       "success",
+		Message:      "Address fetched successfully",
+		Addresses:    *address,
+		TotalQuantiy: totalQuantiy,
+		TotalValue:   totalValue,
+	})
+}
+
+// SetAddressGetCoupons
+func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
+	fmt.Println("Handler ::: 'SetAddressGetCoupons' handler")
+
+	//get req from body
+	var req *requestModels.SetAddressForCheckOutReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		return
+	}
+
+	//validate request
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		return
+	}
+
+	//get userID from token
+	userID, err := tools.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error setting address. Try Again", err))
+		return
+	}
+
+	//set address and get coupons
+	resp, message, err := h.orderUseCase.SetAddressGetCoupons(userID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+//SetCouponGetPaymentMethods
+func (h *OrderHandler) SetCouponGetPaymentMethods(c *gin.Context) {
+	fmt.Println("Handler ::: 'SetCouponGetPaymentMethods' handler")
+
+	//get req from body
+	var req *requestModels.SetCouponForCheckoutReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		return
+	}
+
+	//validate request
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		return
+	}
+
+	//get userID from token
+	userID, err := tools.GetUserID(c)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.FailedSME("Error setting coupon. Try Again", err))
+		return
+	}
+
+	//set coupon and get payment methods
+	resp, message, err := h.orderUseCase.SetCouponGetPaymentMethods(userID, req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }

@@ -1,13 +1,17 @@
 package orderManageUseCase
 
 import (
+	"MyShoo/internal/domain/config"
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
+	msg "MyShoo/internal/domain/messages"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	repository_interface "MyShoo/internal/repository/interface"
 	"MyShoo/internal/services"
 	"MyShoo/internal/tools"
 	usecaseInterface "MyShoo/internal/usecase/interface"
+	myMath "MyShoo/pkg/math"
 	"errors"
 	"fmt"
 	"os"
@@ -40,119 +44,148 @@ func NewOrderUseCase(
 
 func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.OrderInfo, *response.ProceedToPaymentInfo, string, error) {
 	var orderInfo entities.OrderInfo
-	var order entities.Order
+	var couponDiscount, totalProductValue float32
 	var orderItems []entities.OrderItem
-	var totalCartOriginalAmount float32
-	var message string
-	var responseOrder *entities.Order
+	var status, message string
+	var transactionID string
 
 	//validate payment method
 	paymentValid := tools.IsValidPaymentMethod(req.PaymentMethod)
 	if !paymentValid {
-		return &orderInfo, nil, "Invalid payment method", errors.New("invalid payment method")
+		return nil, nil, "Invalid payment method", errors.New("invalid payment method")
 	}
-	//validate coupon //need update
 
 	//check if address exists
-	var addressExists bool
-	var err error
-	addressExists, err = uc.userRepo.DoAddressExistsByIDForUser(req.AddressID, req.UserID)
+	addressExists, err := uc.userRepo.DoAddressExistsByIDForUser(req.AddressID, req.UserID)
 	if err != nil {
 		fmt.Println("Error occured while checking if address exists")
-		return &orderInfo, nil, "Some error occured.", err
+		return nil, nil, "Some error occured.", err
 	}
 
 	if !addressExists {
-		return &orderInfo, nil, "Invalid address ID.", errors.New("address doesn't exist by ID")
+		return nil, nil, "Invalid address ID.", errors.New("address doesn't exist by ID")
 	}
+	address, err := uc.userRepo.GetUserAddress(req.AddressID)
+	if err != nil {
+		return nil, nil, "Some error occured.", err
+	}
+
 	//check if cart is empty
 	cartEmpty, err := uc.cartRepo.IsCartEmpty(req.UserID)
 	if err != nil {
 		fmt.Println("Error occured while checking if cart is empty")
-		return &orderInfo, nil, "Some error occured.", err
+		return nil, nil, "Some error occured.", err
 	}
 	if cartEmpty {
-		return &orderInfo, nil, "Cart is empty", errors.New("cart is empty")
+		return nil, nil, "Cart is empty", errors.New("cart is empty")
 	}
 	//get cart
 	var cart *[]entities.Cart
-	cart, err = uc.cartRepo.GetCart(req.UserID)
+	cart, totalProductValue, err = uc.cartRepo.GetCart(req.UserID)
 	if err != nil {
 		fmt.Println("Error occured while getting cart")
-		return &orderInfo, nil, "Some error occured.", err
+		return nil, nil, "Some error occured.", err
 	}
 
 	for _, cartItem := range *cart {
 		//check for stock availability
-		var stock uint
-		stock, err = uc.productRepo.GetStockOfProduct(cartItem.ProductID)
+		stock, err := uc.productRepo.GetStockOfProduct(cartItem.ProductID)
 		if err != nil {
 			fmt.Println("Error occured while getting stock")
-			return &orderInfo, nil, "Error occured while getting stock", err
+			return nil, nil, "Error occured while getting stock", err
 		}
 		if stock < cartItem.Quantity {
 			message := fmt.Sprint("Stock not available for product with product ID:", cartItem.ProductID, ". Available stock left:", stock)
-			return &orderInfo, nil, message, errors.New("stock not available")
+			return nil, nil, message, errors.New("stock not available") //update needed
 		}
 
-		//append cart's productID and Quantity to orderItems
-		var orderItem entities.OrderItem
-		orderItem.ProductID = cartItem.ProductID
-		orderItem.Quantity = cartItem.Quantity
-		orderItem.SalePriceOnOrder, err = uc.productRepo.GetPriceOfProduct(cartItem.ProductID)
-		if err != nil {
-			return &orderInfo, nil, "Error occured while getting price", err
-		}
-		orderItems = append(orderItems, orderItem)
-		totalCartOriginalAmount += orderItem.SalePriceOnOrder * float32(orderItem.Quantity)
-
-		var pq entities.PQ //PQ indicates product-quantity pairs
-		pq.ProductID = cartItem.ProductID
-		pq.Quantity = cartItem.Quantity
-		orderInfo.OrderItems = append(orderInfo.OrderItems, pq)
-
+		orderInfo.OrderItems = append(orderInfo.OrderItems, entities.PQ{
+			ProductID: cartItem.ProductID,
+			Quantity:  cartItem.Quantity,
+		})
 	}
 
-	//define/get order fields
-	order.ReferenceNo, err = tools.MakeRandomUUID()
+	referenceNo, err := tools.MakeRandomUUID()
 	if err != nil {
 		fmt.Println("Error occured while generating reference number")
-		return &orderInfo, nil, "Some error occured.", err
-	}
-	order.OrderDateAndTime = time.Now()
-	order.UserID = req.UserID
-	order.OriginalAmount = totalCartOriginalAmount
-	order.CouponDiscount = 0                 //discount not yet ready. //need update
-	order.FinalAmount = order.OriginalAmount //discount not yet ready. //need update
-	// order.CouponID = req.CouponID		//not yet ready. //need update
-	order.PaymentMethod = req.PaymentMethod
-	order.PaymentStatus = "not paid"
-	order.AddressID = req.AddressID
-	if strings.ToUpper(req.PaymentMethod) == "COD" {
-		order.Status = "placed"
-	} else {
-		order.Status = "payment pending"
-		order.TransactionID, err = services.CreateRazorpayOrder(order)
-		if err != nil {
-			return &orderInfo, nil, "Some error occured.", err
-		}
-	}
-	if order.Status == "payment pending" {
-		message = "Order placed successfully. "
-		responseOrder, err = uc.orderRepo.MakeOrder_UpdateStock_ClearCart(&order, &orderItems)
-	} else {
-		message = "Proceed to payment"
-		responseOrder, err = uc.orderRepo.MakeOrder(&order, &orderItems)
-	}
-	//make order
-	
-	
-	if err != nil {
-		fmt.Println("Error occured while placing order")
-		return &orderInfo, nil, "Error occured while placing order. Try again or", err
+		return nil, nil, "Some error occured.", err
 	}
 
-	orderInfo.OrderDetails = *responseOrder
+	shippingCharges := getShippingCharge(address, totalProductValue)
+
+	if req.CouponID != 0 {
+		coupon, message, err := uc.orderRepo.GetCouponByID(req.CouponID)
+		if err != nil {
+			return nil, nil, message, err
+		}
+
+		couponUsageCount, message, err := uc.orderRepo.GetCouponUsageCount(req.UserID, req.CouponID)
+		if err != nil {
+			return nil, nil, message, err
+		}
+
+		couponDiscount, message, err = getCouponDiscount(coupon, totalProductValue, couponUsageCount)
+		if err != nil {
+			return nil, nil, message, err
+		}
+	}
+
+	finalAmount := totalProductValue + shippingCharges - couponDiscount
+
+	if strings.ToUpper(req.PaymentMethod) == "COD" {
+		if !config.DeliveryConfig.CashOnDeliveryAvailable {
+			return nil, nil, msg.Forbidden, e.ErrCODNotAvailable
+		}
+		if totalProductValue > config.DeliveryConfig.MaxOrderAmountForCOD {
+			return nil, nil, msg.Forbidden, e.ErrOrderExceedsMaxAmountForCOD
+		}
+		status = "placed"
+	} else {
+
+		status = "payment pending"
+		transactionID, err = services.CreateRazorpayOrder(finalAmount, referenceNo)
+		if err != nil {
+			return nil, nil, "Some error occured.", err
+		}
+	}
+	order := entities.Order{
+		ReferenceNo:      referenceNo,
+		OrderDateAndTime: time.Now(),
+		UserID:           req.UserID,
+		// DeliveredDate:    "",
+		OriginalAmount: totalProductValue,
+		CouponDiscount: couponDiscount,
+		ShippingCharge: shippingCharges,
+		FinalAmount:    finalAmount,
+		CouponID:       req.CouponID,
+		PaymentMethod:  req.PaymentMethod,
+		Status:         status,
+		AddressID:      req.AddressID,
+		PaymentStatus:  "not paid",
+		TransactionID:  transactionID,
+		FkAddress:      *address,
+	}
+
+	fmt.Println("order.finalAmount=", order.FinalAmount)
+
+	if order.Status == "payment pending" {
+		message = "Order placed successfully. "
+		order.ID, err = uc.orderRepo.MakeOrder_UpdateStock_ClearCart(&order, &orderItems)
+		if err != nil {
+			fmt.Println("Error occured while placing order")
+			return nil, nil, "Error occured while placing order. Try again or", err
+		}
+	} else {
+		message = "Proceed to payment"
+		order.ID, err = uc.orderRepo.MakeOrder(&order, &orderItems)
+		if err != nil {
+			fmt.Println("Error occured while placing order")
+			return nil, nil, "Error occured while placing order. Try again or", err
+		}
+	}
+	//make order
+
+	orderInfo.OrderDetails = order
 
 	proceedToPaymentInfo := response.ProceedToPaymentInfo{
 		PaymentKey:         os.Getenv("RAZORPAY_KEY_ID"),
@@ -166,7 +199,6 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 		Email:              order.FkAddress.Email,
 		Phone:              order.FkAddress.Phone,
 	}
-
 
 	return &orderInfo, &proceedToPaymentInfo, message, nil
 }
@@ -245,7 +277,7 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) (string, er
 		return "Some error occured.", err
 	}
 
-	if orderStatus != "placed" && orderStatus != "payment pending"{
+	if orderStatus != "placed" && orderStatus != "payment pending" {
 		if orderStatus == "cancelled" {
 			message := "Order is already in '" + orderStatus + "' status"
 			return message, errors.New(message)
@@ -283,7 +315,7 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) (string, error) {
 		fmt.Println("Error occured while getting order status")
 		return "Some error occured.", err
 	}
-	if orderStatus != "placed" && orderStatus != "payment pending"{
+	if orderStatus != "placed" && orderStatus != "payment pending" {
 		if orderStatus == "cancelled" {
 			message := "Order is already in '" + orderStatus + "' status"
 			return message, errors.New(message)
@@ -418,7 +450,302 @@ func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) (string, error) {
 	return "Order marked as delivered successfully", nil
 }
 
-func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string,string, error){
+// // GetCheckOutInfo
+// func (uc *OrderUseCase) GetCheckOutInfo(userID uint) (*response.CheckOutInfo, string, error) {
+// 	var checkOutInfo response.CheckOutInfo
+// 	var err error
+// 	var message string
+// 	//get quantity and price of cart
+// 	checkOutInfo.ItemCount, checkOutInfo.TotalValue, message, err = uc.cartRepo.GetQuantityAndPriceOfCart(userID)
+// 	if err != nil {
+// 		return nil, message, err
+// 	}
+
+// 	//get address
+// 	var address *[]entities.UserAddress
+// 	address, err = uc.userRepo.GetUserAddresses(userID)
+// 	if err != nil {
+// 		return nil, "Some error occured.", err
+// 	}
+
+// 	//get coupons
+// 	coupons, message, err := uc.orderRepo.GetActiveCoupons()
+// 	if err != nil {
+// 		return nil, message, err
+// 	}
+
+// 	checkOutInfo.Addresses = *address
+// 	checkOutInfo.Coupons = *coupons
+
+// 	return &checkOutInfo, "Checkout info fetched successfully", nil
+
+// }
+
+// func (uc *OrderUseCase) GetCheckOutEstimate(userID uint, req *requestModels.GetCheckoutEstimateReq) (*response.CheckoutEstimateResponse, *[]string, string, error) {
+// 	var estimateResponse response.CheckoutEstimateResponse
+// 	var message string
+// 	var usageCount uint
+// 	var address *entities.UserAddress
+
+// 	//check if address exists for user
+// 	addressExists, err := uc.userRepo.DoAddressExistsByIDForUser(req.AddressID, userID)
+// 	if err != nil {
+// 		fmt.Println("Error occured while checking if address exists")
+// 		return nil, nil, "Some error occured.", err
+// 	} else if !addressExists {
+// 		return nil, nil, msg.InvalidRequest, errors.New("address doesn't exist by ID")
+// 	}
+
+// 	//get coupon by id
+// 	coupon, message, err := uc.orderRepo.GetCouponByID(req.CouponID)
+// 	if err != nil {
+// 		return nil, nil, message, err
+// 	}
+
+// 	if usageCount, message, err = uc.orderRepo.GetCouponUsageCount(userID, req.CouponID); err != nil {
+// 		return nil, nil, message, err
+// 	}
+
+// 	fmt.Println("userID=", userID)
+
+// 	//get quantity and price of cart
+// 	_, estimateResponse.ProductsValue, message, err = uc.cartRepo.GetQuantityAndPriceOfCart(userID)
+// 	if err != nil {
+// 		return nil, nil, message, err
+// 	}
+
+// 	estimateResponse.Discount, message, err = getCouponDiscount(coupon, estimateResponse.ProductsValue, usageCount)
+// 	if err != nil {
+// 		return nil, nil, message, err
+// 	}
+
+// 	address, err = uc.userRepo.GetUserAddress(req.AddressID)
+// 	if err != nil {
+// 		return nil, nil, "Some error occured.", err
+// 	}
+
+// 	estimateResponse.ShippingCharge, message, err = getShippingCharge(address, estimateResponse.ProductsValue)
+// 	if err != nil {
+// 		return nil, nil, message, err
+// 	}
+
+// 	estimateResponse.GrandTotal = estimateResponse.ProductsValue - estimateResponse.Discount + estimateResponse.ShippingCharge
+
+// 	estimateResponse.PaymentMethods = *getPaymentMethods() //check if getting all payment methods here
+
+// 	return &estimateResponse, getPaymentMethods(), "Estimate fetched successfully", nil
+// }
+
+func getPaymentMethods(orderValue float32) (*[]string, bool, string) {
+	var paymentMethods []string
+	var codAvailability bool = true
+	var codAvailabilityNote string //if COD not available
+	for _, method := range entities.PaymentMethod {
+		if method == "COD" {
+			if !config.DeliveryConfig.CashOnDeliveryAvailable {
+				codAvailability = false
+				codAvailabilityNote = "COD not available"
+				continue
+			} else if orderValue > config.DeliveryConfig.MaxOrderAmountForCOD {
+				codAvailability = false
+				codAvailabilityNote = "COD not available for order amount greater than " + fmt.Sprint(config.DeliveryConfig.MaxOrderAmountForCOD)
+				continue
+			} else {
+				paymentMethods = append(paymentMethods, method)
+				codAvailability = true
+			}
+		}
+	}
+
+	return &paymentMethods, codAvailability, codAvailabilityNote
+}
+
+func getShippingCharge(address *entities.UserAddress, productsValue float32) float32 {
+	var pincode uint = address.Pincode
+
+	if productsValue >= config.DeliveryConfig.OrderAmountForFreeDelivery {
+		return 0
+	}
+
+	for _, v := range config.DeliveryConfig.FreeDeliveryPincodeRanges {
+		if pincode >= v.Start && pincode <= v.End {
+			return 0
+		}
+	}
+
+	for _, v := range config.DeliveryConfig.IntermediatePincodeRanges {
+		if pincode >= v.Start && pincode <= v.End {
+			return config.DeliveryConfig.IntermediateDeliveryCharge
+		}
+	}
+
+	return config.DeliveryConfig.DistantDeliveryCharge
+}
+
+func getCouponDiscount(coupon *entities.Coupon, orderValue float32, usageCount uint) (float32, string, error) {
+	var discount float32
+	switch {
+	case coupon.Blocked:
+		return 0, msg.Forbidden, errors.New("coupon is blocked")
+	case coupon.StartDate.After(time.Now()):
+		return 0, msg.Forbidden, errors.New("coupon is not active yet")
+	case coupon.EndDate.Before(time.Now()):
+		return 0, msg.Forbidden, errors.New("coupon is expired")
+	case coupon.MinOrderValue > orderValue:
+		return 0, msg.Forbidden, errors.New("order amount is less than required for coupon")
+	case usageCount >= coupon.UsageLimit:
+		return 0, msg.Forbidden, errors.New("coupon usage limit exceeded")
+	default:
+		if coupon.Type == "fixed" {
+			discount = myMath.RoundFloat32(coupon.MaxDiscount, 2)
+		} else { //if coupon.Type == "percentage" {
+			discount = max(orderValue*coupon.Percentage/100, coupon.MaxDiscount)
+			discount = myMath.RoundFloat32(discount, 2)
+		}
+		return discount, "", nil
+	}
+}
+
+// GetAddressForCheckout implements usecaseInterface.IOrderUC.
+func (uc *OrderUseCase) GetAddressForCheckout(userID uint) (*[]entities.UserAddress, uint, float32, string, error) {
+	quantity, totalValue, message, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
+	if err != nil {
+		return nil, 0, 0, message, err
+	}
+
+	addresses, err := uc.userRepo.GetUserAddresses(userID)
+	if err != nil {
+		return nil, 0, 0, "Some error occured.", err
+	}
+
+	return addresses, quantity, totalValue, "Addresses fetched successfully", nil
+}
+
+// SetAddressGetCoupons implements usecaseInterface.IOrderUC.
+func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *requestModels.SetAddressForCheckOutReq) (*response.SetAddrGetCouponsResponse, string, error) {
+	// var resp response.SetAddrGetCouponsResponse
+	var message string
+	var err error
+	address, err := uc.userRepo.GetUserAddress(req.AddressID)
+	if err != nil {
+		return nil, "Some error occured.", err
+	} else if address.UserID != userID {
+		return nil, "Address doesn't belong to user", errors.New("address doesn't belong to user")
+	}
+
+	totalQuantiy, totalProductsValue, message, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
+	if err != nil {
+		return nil, message, err
+	}
+
+	//get shipping charge
+	shippingCharge := getShippingCharge(address, totalProductsValue)
+	if err != nil {
+		return nil, message, err
+	}
+
+	//get coupons
+	coupons, message, err := uc.orderRepo.GetActiveCoupons()
+	if err != nil {
+		return nil, message, err
+	}
+	var respCoupons []response.ResponseCoupon
+	err = copier.Copy(&respCoupons, &coupons)
+	if err != nil {
+		fmt.Println("Error occured while copying coupons to responseCoupons, error:", err)
+		return nil, "Some error occured.", err
+	}
+
+	response := response.SetAddrGetCouponsResponse{
+		Status:       "success",
+		Message:      "Address and coupons fetched successfully",
+		Coupons:      respCoupons,
+		Address:      *address,
+		TotalQuantiy: totalQuantiy,
+		BillSumary: response.BillBeforeCoupon{
+			TotalProductsValue: totalProductsValue,
+			ShippingCharge:     shippingCharge,
+		},
+	}
+
+	return &response, "", nil
+}
+
+// SetCouponGetPaymentMethods implements usecaseInterface.IOrderUC.
+func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *requestModels.SetCouponForCheckoutReq) (*response.GetPaymentMethodsForCheckoutResponse, string, error) {
+
+	address, err := uc.userRepo.GetUserAddress(req.AddressID)
+	if err != nil {
+		return nil, "Some error occured.", err
+	} else if address.UserID != userID {
+		return nil, "Address doesn't belong to user", errors.New("address doesn't belong to user")
+	}
+
+	//get coupon by id
+
+	totalQuantiy, totalProductsValue, message, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
+	if err != nil {
+		return nil, message, err
+	}
+
+	shippingCharge := getShippingCharge(address, totalProductsValue)
+	if err != nil {
+		return nil, message, err
+	}
+
+	coupon, message, err := uc.orderRepo.GetCouponByID(req.CouponID)
+	if err != nil {
+		return nil, message, err
+	}
+
+	usageCount, message, err := uc.orderRepo.GetCouponUsageCount(userID, req.CouponID)
+	if err != nil {
+		return nil, message, err
+	}
+
+	couponDiscount, message, err := getCouponDiscount(coupon, totalProductsValue, usageCount)
+	if err != nil {
+		return nil, message, err
+	}
+
+	walletBalance, err := uc.userRepo.GetWalletBalance(userID)
+	if err != nil {
+		return nil, "Some error occured.", err
+	}
+
+	grandTotal := totalProductsValue - couponDiscount + shippingCharge
+	paymentMethods, codAvailability, codAvailabilityNote := getPaymentMethods(grandTotal)
+
+	var respCoupon response.ResponseCoupon
+	err = copier.Copy(&respCoupon, &coupon)
+	if err != nil {
+		fmt.Println("Error occured while copying coupon to responseCoupon")
+		return nil, "Some error occured.", err
+	}
+
+	resp := response.GetPaymentMethodsForCheckoutResponse{
+		Status:       "success",
+		Message:      "Payment methods fetched successfully",
+		Address:      *address,
+		TotalQuantiy: totalQuantiy,
+		BillSumary: response.BillAfterCoupon{
+			TotalProductsValue: totalProductsValue,
+			CouponApplied:      true,
+			Coupon:             respCoupon,
+			CouponDiscount:     couponDiscount,
+			ShippingCharge:     shippingCharge,
+			GrandTotal:         grandTotal,
+		},
+		CODAvailability:     codAvailability,
+		CODAvailabilityNote: codAvailabilityNote,
+		PaymentMethods:      *paymentMethods,
+		WalletBalance:       walletBalance,
+	}
+
+	return &resp, "", nil
+}
+
+func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, string, error) {
 
 	// //check if order exists
 	// orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
@@ -460,10 +787,6 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string,st
 	// 	fmt.Println("Error occured while getting order summary")
 	// 	return nil,"Some error occured.", err
 	// }
-
-
-
-
 
 	panic("unimplemented")
 }

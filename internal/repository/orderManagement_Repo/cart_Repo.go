@@ -2,6 +2,7 @@ package ordermanagementrepo
 
 import (
 	"MyShoo/internal/domain/entities"
+	msg "MyShoo/internal/domain/messages"
 	"MyShoo/internal/models/requestModels"
 	repository_interface "MyShoo/internal/repository/interface"
 	"errors"
@@ -63,7 +64,8 @@ func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, er
 	}
 }
 
-func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, error) {
+//returns cart, totalValue of cart products, error
+func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart,float32, error) {
 	var cart []entities.Cart
 	// var totalValue float32
 	query := repo.DB.
@@ -73,10 +75,15 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, error) {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, query.Error
+		return nil,0, query.Error
+	}
+	var totalValue float32=0
+	for i:=range cart {
+		totalValue += float32(cart[i].Quantity) * cart[i].FkProduct.FkDimensionalVariation.FkColourVariant.SalePrice
 	}
 
-	return &cart, nil
+
+	return &cart,totalValue, nil
 }
 
 func (repo *CartRepo) UpdateCartItemQuantity(cart *entities.Cart) error {
@@ -119,4 +126,32 @@ func (repo *CartRepo) ClearCartOfUser(userID uint) error {
 	}
 
 	return nil
+}
+
+func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, string, error) {
+	// fmt.Println("userID= ", userID)
+	type data struct {
+		TotalQuantity uint    `gorm:"column:totalQuantity"`
+		TotalValue    float32 `gorm:"column:totalValue"`
+	}
+	var queryData data
+
+	query := repo.DB.Raw(`
+		SELECT 
+			SUM(carts.quantity) as "totalQuantity",
+			SUM(carts.quantity * colour_variants."salePrice") as "totalValue"
+		FROM carts
+		INNER JOIN product ON carts."productId" = product.id
+		INNER JOIN dimensional_variants ON product."dimensionalVariationID" = dimensional_variants.id
+		INNER JOIN colour_variants ON dimensional_variants."colourVariantId" = colour_variants.id
+		WHERE user_id = ?`,
+		userID).Scan(&queryData)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't get quantity and price of cart. query.Error= ", query.Error, "\n----")
+		return 0, 0, msg.RepoError, query.Error
+	} else if queryData.TotalQuantity == 0 {
+		return 0, 0, msg.Forbidden, errors.New("cart is empty")
+	}
+	return queryData.TotalQuantity, queryData.TotalValue, "", nil
 }

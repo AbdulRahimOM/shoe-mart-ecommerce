@@ -1,7 +1,6 @@
 package services
 
 import (
-	"MyShoo/internal/domain/entities"
 	"fmt"
 	"os"
 
@@ -9,18 +8,18 @@ import (
 	razorpayUtils "github.com/razorpay/razorpay-go/utils"
 )
 
-func CreateRazorpayOrder(order entities.Order) (string, error) {
+func CreateRazorpayOrder(amount float32, referenceNo string) (string, error) {
 
 	razorpayID := os.Getenv("RAZORPAY_KEY_ID")
 	razorpaySecret := os.Getenv("RAZORPAY_KEY_SECRET")
 	client := razorpay.NewClient(razorpayID, razorpaySecret)
 	data := map[string]interface{}{
-		"amount":   uint(order.FinalAmount * 100),
+		"amount":   uint(amount * 100),
 		"currency": "INR",
 		// "receipt":         "some_receipt_id",	//may add at future, along with invoice
 		"partial_payment": false,
 		"notes": map[string]interface{}{
-			"ReferenceNo": order.ReferenceNo,
+			"ReferenceNo": referenceNo,
 		},
 	}
 	body, err := client.Order.Create(data, nil)
@@ -51,4 +50,3 @@ func VerifyPayment(razorpay_order_id string, razorpay_payment_id string, signatu
 	}
 
 }
-

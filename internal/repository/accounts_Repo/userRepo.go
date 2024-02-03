@@ -333,3 +333,19 @@ func (repo *UserRepo) GetUserAddress(addressID uint) (*entities.UserAddress, err
 
 	return &address, nil
 }
+
+// GetWalletBalance
+func (repo *UserRepo) GetWalletBalance(userID uint) (float32, error) {
+	var balance float32
+	query := repo.DB.Raw(`
+		SELECT wallet_balance
+		FROM users
+		WHERE id = ?`,
+		userID).Scan(&balance)
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't get wallet balance. query.Error= ", query.Error, "\n----")
+		return 0, query.Error
+	}
+
+	return balance, nil
+}

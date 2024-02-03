@@ -9,11 +9,12 @@ type ICartRepo interface {
 	//returns true if product exists in cart, quantity of product in cart, error
 	DoProductExistAlready(cart *entities.Cart) (bool, uint, error)
 	AddToCart(cart *entities.Cart) error
-	GetCart(userID uint) (*[]entities.Cart, error)
+	GetCart(userID uint) (*[]entities.Cart, float32, error)
 	DeleteFromCart(req *requestModels.DeleteFromCartReq) error
 	UpdateCartItemQuantity(cart *entities.Cart) error
 	IsCartEmpty(userID uint) (bool, error)
 	ClearCartOfUser(userID uint) error
+	GetQuantityAndPriceOfCart(userID uint) (uint, float32, string, error)
 }
 
 type IWishListsRepo interface {
@@ -28,11 +29,10 @@ type IWishListsRepo interface {
 }
 
 type IOrderRepo interface {
-	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error)
-
-	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (*entities.Order, error)
+	//order related_____________________________________________________________
+	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error)
+	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error)
 	UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*entities.Order, error)
-
 	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
 	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
 	GetAllOrders() (*[]entities.Order, error)
@@ -47,6 +47,19 @@ type IOrderRepo interface {
 	//mark order as delivered and change payment-status to "paid" in case of COD
 	MarkOrderAsDelivered(orderID uint) error
 
+	//Online transaction related_______________________________________________________
 	GetOrderByTransactionID(transactionID string) (uint, error)
 	UpdateOrderTransactionID(orderID uint, transactionID string) error
+
+	//coupon related_______________________________________________________
+	DoCouponExistByCode(code string) (bool, error)
+	CreateNewCoupon(coupon *entities.Coupon) error
+	BlockCoupon(couponID uint) error
+	UnblockCoupon(couponID uint) error
+	GetAllCoupons() (*[]entities.Coupon, string, error)
+	GetExpiredCoupons() (*[]entities.Coupon, string, error)
+	GetActiveCoupons() (*[]entities.Coupon, string, error)
+	GetUpcomingCoupons() (*[]entities.Coupon, string, error)
+	GetCouponByID(couponID uint) (*entities.Coupon, string, error)
+	GetCouponUsageCount(userID uint, couponID uint) (uint, string, error)
 }

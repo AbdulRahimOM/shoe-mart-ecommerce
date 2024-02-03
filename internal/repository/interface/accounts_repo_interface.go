@@ -52,4 +52,6 @@ type IUserRepo interface {
 	GetProfile(userID uint) (*entities.UserDetails, error)
 	GetEmailByID(userID uint) (string, error)
 	EditProfile(userID uint, req *requestModels.EditProfileReq) error
+
+	GetWalletBalance(userID uint) (float32, error)
 }

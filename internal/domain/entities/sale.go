@@ -2,19 +2,6 @@ package entities
 
 import "time"
 
-//	Table Orders{
-//		ID UUID [primary key]
-//		Reference_no CHAR(13)
-//		OrderDate TimeStamp
-//		UserID UUID
-//		DeliveredDate TimeStamp
-//		TotalAmount DECIMAL(10,2)
-//		Discount DECIMAL(10,2)
-//		AppliedCoupon UUID
-//		Payment_Method ENUM('COD', 'UPI','BANK')
-//		Status ENUM ('PROCESSING','DELIVERED','CANCELLED')
-//		AddressID UUID
-//	  }
 type Order struct {
 	ID               uint      `gorm:"primaryKey"`
 	ReferenceNo      string    `gorm:"column:reference_no;notNull"`
@@ -23,8 +10,9 @@ type Order struct {
 	DeliveredDate    string    `gorm:"column:delivered_date;notNull"`
 	OriginalAmount   float32   `gorm:"column:original_amount;notNull"`
 	CouponDiscount   float32   `gorm:"column:coupon_discount;notNull"`
+	ShippingCharge   float32   `gorm:"column:shipping_charge"`
 	FinalAmount      float32   `gorm:"column:final_amount;notNull"`
-	CouponID         uint      `gorm:"column:applied_coupon;notNull"`
+	CouponID         uint      `gorm:"column:coupon_id"`
 	PaymentMethod    string    `gorm:"column:payment_method;notNull"`
 	Status           string    `gorm:"column:status;notNull"`
 	AddressID        uint      `gorm:"column:address_id;notNull"`
@@ -59,9 +47,3 @@ type PQ struct {
 	ProductID uint `gorm:"column:product_id;notNull"`
 	Quantity  uint `gorm:"column:quantity;notNull"`
 }
-
-// type PQS struct {
-// 	ProductID uint `json:"productID" validate:"required,number"`
-// 	Quantity  uint `json:"quantity" validate:"required,number"`
-// 	SalePriceOnOrder float32 `json:"salePriceOnOrder" validate:"required,number"`
-// }
