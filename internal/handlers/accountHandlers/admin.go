@@ -400,3 +400,13 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 	}
 
 }
+
+//ReloadConfig
+func (h *AdminHandler) RestartConfig(c *gin.Context) {
+	err:=h.AdminUseCase.RestartConfig()
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Failed to reload config", err))
+		return
+	}
+	c.JSON(http.StatusOK, response.SuccessSME("Config reloaded successfully"))
+}

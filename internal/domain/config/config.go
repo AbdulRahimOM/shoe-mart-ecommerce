@@ -27,23 +27,34 @@ var DeliveryConfig struct {
 	CashOnDeliveryAvailable    bool
 }
 
-func RestartConfig() error {
-	return LoadConfig()
-}
 func LoadConfig() error {
 	if err := loadDeliveryConfig(); err != nil {
 		return err
 	}
 	return nil
 }
+
+func RestartConfig() error {
+	preDiagram()
+	if err := LoadConfig(); err != nil {
+		failedDiagram()
+		return err
+	} else {
+		successDiagram()
+		return LoadConfig()
+	}
+}
+
 func loadDeliveryConfig() error {
 	filePath := "config/shippingCharges.json"
 	data, err := os.ReadFile(filePath)
 	if err != nil {
+		fmt.Println("Error reading file. err= ", err)
 		return err
 	}
 
 	if err := json.Unmarshal(data, &configRead); err != nil {
+		fmt.Println("Error unmarshalling data. err= ", err)
 		return err
 	}
 
@@ -51,6 +62,7 @@ func loadDeliveryConfig() error {
 		var start, end uint
 		_, err := fmt.Sscanf(v, "%d-%d", &start, &end)
 		if err != nil {
+			fmt.Println("Error scanning data. err= ", err, "v= ", v)
 			return err
 		}
 		DeliveryConfig.FreeDeliveryPincodeRanges = append(DeliveryConfig.FreeDeliveryPincodeRanges, struct{ Start, End uint }{start, end})
@@ -59,14 +71,15 @@ func loadDeliveryConfig() error {
 		var start, end uint
 		_, err := fmt.Sscanf(v, "%d-%d", &start, &end)
 		if err != nil {
+			fmt.Println("Error scanning data. err= ", err, "v= ", v)
 			return err
 		}
 		DeliveryConfig.IntermediatePincodeRanges = append(DeliveryConfig.IntermediatePincodeRanges, struct{ Start, End uint }{start, end})
 	}
-	DeliveryConfig.IntermediateDeliveryCharge = myMath.RoundFloat32(configRead.IntermediateDeliveryCharge,2)
-	DeliveryConfig.DistantDeliveryCharge = myMath.RoundFloat32(configRead.DistantDeliveryCharge,2)
-	DeliveryConfig.MaxOrderAmountForCOD = myMath.RoundFloat32(configRead.MaxOrderAmountForCOD,2)
-	DeliveryConfig.OrderAmountForFreeDelivery = myMath.RoundFloat32(configRead.OrderAmountForFreeDelivery,2)
+	DeliveryConfig.IntermediateDeliveryCharge = myMath.RoundFloat32(configRead.IntermediateDeliveryCharge, 2)
+	DeliveryConfig.DistantDeliveryCharge = myMath.RoundFloat32(configRead.DistantDeliveryCharge, 2)
+	DeliveryConfig.MaxOrderAmountForCOD = myMath.RoundFloat32(configRead.MaxOrderAmountForCOD, 2)
+	DeliveryConfig.OrderAmountForFreeDelivery = myMath.RoundFloat32(configRead.OrderAmountForFreeDelivery, 2)
 	DeliveryConfig.CashOnDeliveryAvailable = configRead.CashOnDeliveryAvailable
 
 	//validate
@@ -87,4 +100,41 @@ func loadDeliveryConfig() error {
 	}
 
 	return nil
+}
+
+func preDiagram() { //who doesn't love art?
+	fmt.Println("        ╔═╗╔═╗╔╗╔╔═╗╦╔═╗  ╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗╔╦╗╦╔╗╔╔═╗")
+	fmt.Println("        ║  ║ ║║║║╠╣ ║║ ╦  ╠╦╝║╣ ╚═╗ ║ ╠═╣╠╦╝ ║ ║║║║║ ╦")
+	fmt.Println("        ╚═╝╚═╝╝╚╝╚  ╩╚═╝  ╩╚═╚═╝╚═╝ ╩ ╩ ╩╩╚═ ╩ ╩╝╚╝╚═╝")
+	fmt.Println()
+	fmt.Println("        ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗ ")
+	fmt.Println("       ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝ ")
+	fmt.Println("       ██║     ██║   ██║██╔██╗ ██║█████╗  ██║██║  ███╗")
+	fmt.Println("       ██║     ██║   ██║██║╚██╗██║██╔══╝  ██║██║   ██║")
+	fmt.Println("       ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝")
+	fmt.Println("        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝ ")
+	fmt.Println()
+}
+func successDiagram() {
+	fmt.Println("        ╔═╗╔═╗╔╗╔╔═╗╦╔═╗  ╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗╔╦╗╔═╗╔╦╗")
+	fmt.Println("        ║  ║ ║║║║╠╣ ║║ ╦  ╠╦╝║╣ ╚═╗ ║ ╠═╣╠╦╝ ║ ║╣  ║║")
+	fmt.Println("        ╚═╝╚═╝╝╚╝╚  ╩╚═╝  ╩╚═╚═╝╚═╝ ╩ ╩ ╩╩╚═ ╩ ╚═╝═╩╝")
+	fmt.Println()
+	fmt.Println("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
+	fmt.Println("░░      ░░░  ░░░░  ░░░      ░░░░      ░░░        ░░░      ░░░░      ░░")
+	fmt.Println("▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒  ▒▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒▒  ▒▒▒▒▒▒▒")
+	fmt.Println("▓▓      ▓▓▓  ▓▓▓▓  ▓▓  ▓▓▓▓▓▓▓▓  ▓▓▓▓▓▓▓▓      ▓▓▓▓▓      ▓▓▓▓      ▓▓")
+	fmt.Println("███████  ██  ████  ██  ████  ██  ████  ██  ██████████████  ████████  █")
+	fmt.Println("██      ████      ████      ████      ███        ███      ████      ██")
+	fmt.Println("██████████████████████████████████████████████████████████████████████")
+	fmt.Print("\n\n")
+}
+func failedDiagram() {
+	fmt.Println("	_____ _    ___ _     _____ ____  ")
+	fmt.Println("	|  ___/ \\  |_ _| |   | ____|  _ \\ ")
+	fmt.Println("	| |_ / _ \\  | || |   |  _| | | | |")
+	fmt.Println("	|  _/ ___ \\ | || |___| |___| |_| |")
+	fmt.Println("	|_|/_/   \\_\\___|_____|_____|____/ ")
+	fmt.Println("===================================================================")
+
 }

@@ -1,6 +1,7 @@
 package accountsUsecase
 
 import (
+	"MyShoo/internal/domain/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	requestModels "MyShoo/internal/models/requestModels"
@@ -143,4 +144,13 @@ func (uc *AdminUseCase) SignIn(req *requestModels.AdminSignInReq) (*string, erro
 		return nil, err
 	}
 	return &tokenString, nil
+}
+
+func (uc *AdminUseCase) RestartConfig() error {
+	err:=config.RestartConfig()
+	if err!=nil{
+		fmt.Println("Error occured while reloading config")
+		return err
+	}
+	return nil
 }

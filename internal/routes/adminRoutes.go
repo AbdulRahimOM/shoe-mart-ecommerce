@@ -41,10 +41,15 @@ func AdminRoutes(engine *gin.RouterGroup,
 	authAdmin := engine.Group("/")
 	authAdmin.Use(middleware.ClearCache, middleware.AdminAuth)
 	{
+		//system related
+		authAdmin.GET("/system/restart-Configuration", admin.RestartConfig)
+
+		//user related
 		authAdmin.GET("/userslist", admin.GetUsersList)
 		authAdmin.POST("/blockuser", admin.BlockUser)
 		authAdmin.POST("/unblockuser", admin.UnblockUser)
 
+		//seller related
 		authAdmin.GET("/sellerslist", admin.GetSellersList)
 		authAdmin.POST("/blockseller", admin.BlockSeller)
 		authAdmin.POST("/unblockseller", admin.UnblockSeller)

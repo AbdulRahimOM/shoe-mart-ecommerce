@@ -6,10 +6,18 @@ import (
 )
 
 type IAdminUC interface {
+	//system related
+	RestartConfig() error
+
+	//self
 	SignIn(req *requestModels.AdminSignInReq) (*string, error)
+
+	//user related
 	GetUsersList() (*[]entities.UserDetails, error)
 	BlockUser(req *requestModels.BlockUserReq) error
 	UnblockUser(req *requestModels.UnblockUserReq) error
+
+	//seller related
 	GetSellersList() (*[]entities.SellerDetails, error)
 	BlockSeller(req *requestModels.BlockSellerReq) error
 	UnblockSeller(req *requestModels.UnblockSellerReq) error
