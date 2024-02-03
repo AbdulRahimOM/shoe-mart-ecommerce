@@ -35,18 +35,18 @@ func LoadConfig() error {
 }
 
 func RestartConfig() error {
-	preDiagram()
-	if err := LoadConfig(); err != nil {
-		failedDiagram()
-		return err
-	} else {
-		successDiagram()
-		return LoadConfig()
-	}
+	return LoadConfig()
 }
 
 func loadDeliveryConfig() error {
+	preDiagram()
 	filePath := "config/shippingCharges.json"
+	var err error
+	defer func() {
+		if err != nil {
+			failedDiagram()
+		}
+	}()
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Println("Error reading file. err= ", err)
@@ -99,13 +99,11 @@ func loadDeliveryConfig() error {
 		return fmt.Errorf("IntermediateDeliveryCharge, DistantDeliveryCharge, MaxOrderAmountForCOD should not be negative")
 	}
 
+	successDiagram()
 	return nil
 }
 
 func preDiagram() { //who doesn't love art?
-	fmt.Println("        ╔═╗╔═╗╔╗╔╔═╗╦╔═╗  ╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗╔╦╗╦╔╗╔╔═╗")
-	fmt.Println("        ║  ║ ║║║║╠╣ ║║ ╦  ╠╦╝║╣ ╚═╗ ║ ╠═╣╠╦╝ ║ ║║║║║ ╦")
-	fmt.Println("        ╚═╝╚═╝╝╚╝╚  ╩╚═╝  ╩╚═╚═╝╚═╝ ╩ ╩ ╩╩╚═ ╩ ╩╝╚╝╚═╝")
 	fmt.Println()
 	fmt.Println("        ██████╗ ██████╗ ███╗   ██╗███████╗██╗ ██████╗ ")
 	fmt.Println("       ██╔════╝██╔═══██╗████╗  ██║██╔════╝██║██╔════╝ ")
@@ -114,11 +112,12 @@ func preDiagram() { //who doesn't love art?
 	fmt.Println("       ╚██████╗╚██████╔╝██║ ╚████║██║     ██║╚██████╔╝")
 	fmt.Println("        ╚═════╝ ╚═════╝ ╚═╝  ╚═══╝╚═╝     ╚═╝ ╚═════╝ ")
 	fmt.Println()
+	fmt.Println("                ╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗╔╦╗╦╔╗╔╔═╗")
+	fmt.Println("                ╠╦╝║╣ ╚═╗ ║ ╠═╣╠╦╝ ║ ║║║║║ ╦")
+	fmt.Println("                ╩╚═╚═╝╚═╝ ╩ ╩ ╩╩╚═ ╩ ╩╝╚╝╚═╝")
 }
+
 func successDiagram() {
-	fmt.Println("        ╔═╗╔═╗╔╗╔╔═╗╦╔═╗  ╦═╗╔═╗╔═╗╔╦╗╔═╗╦═╗╔╦╗╔═╗╔╦╗")
-	fmt.Println("        ║  ║ ║║║║╠╣ ║║ ╦  ╠╦╝║╣ ╚═╗ ║ ╠═╣╠╦╝ ║ ║╣  ║║")
-	fmt.Println("        ╚═╝╚═╝╝╚╝╚  ╩╚═╝  ╩╚═╚═╝╚═╝ ╩ ╩ ╩╩╚═ ╩ ╚═╝═╩╝")
 	fmt.Println()
 	fmt.Println("░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░░")
 	fmt.Println("░░      ░░░  ░░░░  ░░░      ░░░░      ░░░        ░░░      ░░░░      ░░")
@@ -129,12 +128,13 @@ func successDiagram() {
 	fmt.Println("██████████████████████████████████████████████████████████████████████")
 	fmt.Print("\n\n")
 }
+
 func failedDiagram() {
-	fmt.Println("	_____ _    ___ _     _____ ____  ")
-	fmt.Println("	|  ___/ \\  |_ _| |   | ____|  _ \\ ")
-	fmt.Println("	| |_ / _ \\  | || |   |  _| | | | |")
-	fmt.Println("	|  _/ ___ \\ | || |___| |___| |_| |")
-	fmt.Println("	|_|/_/   \\_\\___|_____|_____|____/ ")
+	fmt.Println("            _____ _    ___ _     _____ ____  ")
+	fmt.Println("           |  ___/ \\  |_ _| |   | ____|  _ \\ ")
+	fmt.Println("           | |_ / _ \\  | || |   |  _| | | | |")
+	fmt.Println("           |  _/ ___ \\ | || |___| |___| |_| |")
+	fmt.Println("           |_|/_/   \\_\\___|_____|_____|____/ ")
 	fmt.Println("===================================================================")
 
 }
