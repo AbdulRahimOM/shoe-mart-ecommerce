@@ -3,6 +3,7 @@ package repository_interface
 import (
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
+	response "MyShoo/internal/models/responseModels"
 	"time"
 )
 
@@ -20,6 +21,7 @@ type IReportsRepo interface {
 		*[]entities.SizeWiseReport,
 		*[]entities.RevenueGraph,
 		error)
+
 	GetSalesReportBetweenDates(startDate time.Time, endDate time.Time) (
 		*[]entities.SalesReportOrderList,
 		*[]entities.SellerWiseReport,
@@ -28,4 +30,9 @@ type IReportsRepo interface {
 		*[]entities.SizeWiseReport,
 		*[]entities.RevenueGraph,
 		error)
+
+	GetTopModels(limit int) (*[]response.TopModels, error)
+	GetTopProducts(limit int) (*[]response.TopProducts, error)
+	GetTopBrands(limit int) (*[]response.TopBrands, error)
+	GetTopSellers(limit int) (*[]response.TopSellers, error)
 }

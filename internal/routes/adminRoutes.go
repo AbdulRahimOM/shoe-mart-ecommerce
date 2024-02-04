@@ -75,5 +75,11 @@ func AdminRoutes(engine *gin.RouterGroup,
 		authAdmin.PATCH("/blockcoupon", order.BlockCouponHandler)
 		authAdmin.PATCH("/unblockcoupon", order.UnblockCouponHandler)
 
+		//top performers
+		authAdmin.GET("/top-products", reports.TopProductsHandler)
+		authAdmin.GET("/top-sellers/", reports.TopSellersHandler)
+		authAdmin.GET("/top-brands/", reports.TopBrandsHandler)
+		authAdmin.GET("/top-models/", reports.TopModelsHandler)
+
 	}
 }

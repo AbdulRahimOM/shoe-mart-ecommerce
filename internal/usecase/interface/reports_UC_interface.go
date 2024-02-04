@@ -2,6 +2,7 @@ package usecaseInterface
 
 import (
 	"MyShoo/internal/domain/entities"
+	response "MyShoo/internal/models/responseModels"
 	"time"
 )
 
@@ -28,4 +29,9 @@ type ReportsUC interface {
 	ExportSalesReportLastWeek() (string, error)
 	ExportSalesReportToday() (string, error)
 	ExportSalesReportYesterday() (string, error)
+
+	GetTopProducts(limit int) (*[]response.TopProducts, error)
+	GetTopSellers(limit int) (*[]response.TopSellers, error)
+	GetTopBrands(limit int) (*[]response.TopBrands, error)
+	GetTopModels(limit int) (*[]response.TopModels, error)
 }
