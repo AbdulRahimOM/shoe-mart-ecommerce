@@ -42,3 +42,8 @@ type SetCouponForCheckoutReq struct{
 	AddressID uint `json:"addressID" validate:"required,number"`
 	CouponID uint `json:"couponID" validate:"required,number"`
 }
+
+type InvoiceUploadParams struct {
+	FilePath string
+	NameToSaveAs string
+}

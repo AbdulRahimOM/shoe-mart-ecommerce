@@ -66,6 +66,7 @@ func UserRoutes(engine *gin.RouterGroup,
 			authUser.GET("/myorders", order.GetOrdersOfUser)
 			authUser.PATCH("/cancelorder", order.CancelMyOrder)
 			authUser.PATCH("/returnorder", order.ReturnMyOrder)
+			authUser.GET("/order-invoice", order.GetInvoiceOfOrder)
 
 			//user address related_______________________________________
 			authUser.GET("/addresses", user.GetUserAddresses)

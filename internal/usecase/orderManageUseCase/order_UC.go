@@ -15,10 +15,12 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/jinzhu/copier"
+	"github.com/jung-kurt/gofpdf"
 )
 
 type OrderUseCase struct {
@@ -99,9 +101,10 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 			return nil, nil, message, errors.New("stock not available") //update needed
 		}
 
-		orderInfo.OrderItems = append(orderInfo.OrderItems, entities.PQ{
-			ProductID: cartItem.ProductID,
-			Quantity:  cartItem.Quantity,
+		orderItems = append(orderItems, entities.OrderItem{
+			ProductID:        cartItem.ProductID,
+			Quantity:         cartItem.Quantity,
+			SalePriceOnOrder: cartItem.FkProduct.FkDimensionalVariation.FkColourVariant.SalePrice,
 		})
 	}
 
@@ -169,14 +172,15 @@ func (uc *OrderUseCase) MakeOrder(req *requestModels.MakeOrderReq) (*entities.Or
 	fmt.Println("order.finalAmount=", order.FinalAmount)
 
 	if order.Status == "payment pending" {
-		message = "Order placed successfully. "
+		message = "Proceed to payment"
 		order.ID, err = uc.orderRepo.MakeOrder_UpdateStock_ClearCart(&order, &orderItems)
 		if err != nil {
 			fmt.Println("Error occured while placing order")
 			return nil, nil, "Error occured while placing order. Try again or", err
 		}
 	} else {
-		message = "Proceed to payment"
+		message = "Order placed successfully. "
+		fmt.Println("_____________+++++++++++")
 		order.ID, err = uc.orderRepo.MakeOrder(&order, &orderItems)
 		if err != nil {
 			fmt.Println("Error occured while placing order")
@@ -450,92 +454,6 @@ func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) (string, error) {
 	return "Order marked as delivered successfully", nil
 }
 
-// // GetCheckOutInfo
-// func (uc *OrderUseCase) GetCheckOutInfo(userID uint) (*response.CheckOutInfo, string, error) {
-// 	var checkOutInfo response.CheckOutInfo
-// 	var err error
-// 	var message string
-// 	//get quantity and price of cart
-// 	checkOutInfo.ItemCount, checkOutInfo.TotalValue, message, err = uc.cartRepo.GetQuantityAndPriceOfCart(userID)
-// 	if err != nil {
-// 		return nil, message, err
-// 	}
-
-// 	//get address
-// 	var address *[]entities.UserAddress
-// 	address, err = uc.userRepo.GetUserAddresses(userID)
-// 	if err != nil {
-// 		return nil, "Some error occured.", err
-// 	}
-
-// 	//get coupons
-// 	coupons, message, err := uc.orderRepo.GetActiveCoupons()
-// 	if err != nil {
-// 		return nil, message, err
-// 	}
-
-// 	checkOutInfo.Addresses = *address
-// 	checkOutInfo.Coupons = *coupons
-
-// 	return &checkOutInfo, "Checkout info fetched successfully", nil
-
-// }
-
-// func (uc *OrderUseCase) GetCheckOutEstimate(userID uint, req *requestModels.GetCheckoutEstimateReq) (*response.CheckoutEstimateResponse, *[]string, string, error) {
-// 	var estimateResponse response.CheckoutEstimateResponse
-// 	var message string
-// 	var usageCount uint
-// 	var address *entities.UserAddress
-
-// 	//check if address exists for user
-// 	addressExists, err := uc.userRepo.DoAddressExistsByIDForUser(req.AddressID, userID)
-// 	if err != nil {
-// 		fmt.Println("Error occured while checking if address exists")
-// 		return nil, nil, "Some error occured.", err
-// 	} else if !addressExists {
-// 		return nil, nil, msg.InvalidRequest, errors.New("address doesn't exist by ID")
-// 	}
-
-// 	//get coupon by id
-// 	coupon, message, err := uc.orderRepo.GetCouponByID(req.CouponID)
-// 	if err != nil {
-// 		return nil, nil, message, err
-// 	}
-
-// 	if usageCount, message, err = uc.orderRepo.GetCouponUsageCount(userID, req.CouponID); err != nil {
-// 		return nil, nil, message, err
-// 	}
-
-// 	fmt.Println("userID=", userID)
-
-// 	//get quantity and price of cart
-// 	_, estimateResponse.ProductsValue, message, err = uc.cartRepo.GetQuantityAndPriceOfCart(userID)
-// 	if err != nil {
-// 		return nil, nil, message, err
-// 	}
-
-// 	estimateResponse.Discount, message, err = getCouponDiscount(coupon, estimateResponse.ProductsValue, usageCount)
-// 	if err != nil {
-// 		return nil, nil, message, err
-// 	}
-
-// 	address, err = uc.userRepo.GetUserAddress(req.AddressID)
-// 	if err != nil {
-// 		return nil, nil, "Some error occured.", err
-// 	}
-
-// 	estimateResponse.ShippingCharge, message, err = getShippingCharge(address, estimateResponse.ProductsValue)
-// 	if err != nil {
-// 		return nil, nil, message, err
-// 	}
-
-// 	estimateResponse.GrandTotal = estimateResponse.ProductsValue - estimateResponse.Discount + estimateResponse.ShippingCharge
-
-// 	estimateResponse.PaymentMethods = *getPaymentMethods() //check if getting all payment methods here
-
-// 	return &estimateResponse, getPaymentMethods(), "Estimate fetched successfully", nil
-// }
-
 func getPaymentMethods(orderValue float32) (*[]string, bool, string) {
 	var paymentMethods []string
 	var codAvailability bool = true
@@ -747,46 +665,246 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *requestMode
 
 func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, string, error) {
 
-	// //check if order exists
-	// orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
-	// if err != nil {
-	// 	fmt.Println("Error occured while checking if order exists")
-	// 	return nil,"Some error occured.", err
-	// }
-	// if !orderExists {
-	// 	return nil,"Corrupt request. Invalid order ID.", errors.New("order doesn't exist by ID")
-	// }
+	//check if order exists
+	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while checking if order exists")
+		return nil, "Some error occured.", err
+	}
+	if !orderExists {
+		return nil, "Corrupt request. Invalid order ID.", errors.New("order doesn't exist by ID")
+	}
 
-	// //check if order belongs to userID
-	// userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
-	// if err != nil {
-	// 	fmt.Println("Error occured while getting userID")
-	// 	return nil,"Some error occured.", err
-	// }
+	//check if order belongs to userID
+	userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting userID")
+		return nil, "Some error occured.", err
+	}
 
-	// if userID != userIDFromOrder {
-	// 	return nil,"Order doesn't belong to user", errors.New("order doesn't belong to user")
-	// }
+	if userID != userIDFromOrder {
+		return nil, "Order doesn't belong to user", errors.New("order doesn't belong to user")
+	}
 
-	// //check if payment status is "paid"
-	// paymentStatus, err := uc.orderRepo.GetPaymentStatusByID(orderID)
-	// if err != nil {
-	// 	fmt.Println("Error occured while getting payment status")
-	// 	return nil,"Some error occured.", err
-	// }
-	// if paymentStatus != "paid" {
-	// 	message := "Cannot generate invoice. Payment status is '" + paymentStatus + "'"
-	// 	fmt.Println(message)
-	// 	return nil,message, errors.New(message)
-	// }
+	//check if payment status is "paid"
+	paymentStatus, err := uc.orderRepo.GetPaymentStatusByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting payment status")
+		return nil, "Some error occured.", err
+	}
+	if paymentStatus != "paid" {
+		message := "Cannot generate invoice. Payment status is '" + paymentStatus + "'"
+		return nil, message, errors.New(message)
+	}
 
-	// //get orderInfo
-	// var orderInfo *entities.OrderInfo
-	// order, err := uc.orderRepo.GetOrderSummaryByID(orderID)
-	// if err != nil {
-	// 	fmt.Println("Error occured while getting order summary")
-	// 	return nil,"Some error occured.", err
-	// }
+	//get orderInfo
+	order, err := uc.orderRepo.GetOrderSummaryByID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting order summary")
+		return nil, "Some error occured.", err
+	}
+	orderItems, err := uc.orderRepo.GetOrderItemsPQRByOrderID(orderID)
+	if err != nil {
+		fmt.Println("Error occured while getting order items")
+		return nil, "Some error occured.", err
+	}
 
-	panic("unimplemented")
+	//get user details
+	userInfo, err := uc.userRepo.GetUserBasicInfoByID(userID)
+	if err != nil {
+		fmt.Println("Error occured while getting user basic info")
+		return nil, "Some error occured.", err
+	}
+
+	invoiceInfo := response.InvoiceInfo{
+		OrderDetails: *order,
+		OrderItems:   *orderItems,
+		UserInfo:     *userInfo,
+	}
+
+	pdf := makeInvoicePDF(&invoiceInfo)
+
+	if os.Getenv("UploadInvoice") == "false" {
+		fmt.Println("Uploading invoice to cloud is disabled. Invoice will be saved locally.")
+		// Output the PDF to a file
+		outputPath := "internal/view/op.pdf"
+		err = pdf.OutputFileAndClose(outputPath)
+		if err != nil {
+			fmt.Println("Error saving PDF:", err)
+			return nil, "Some error occured.", err
+		} else {
+			return &outputPath, "Invoice generated successfully(Locally, not via cloud. /Dev note)", nil
+		}
+	} else {
+		fmt.Println("Uploading invoice to cloud is enabled. Invoice will be saved to cloud.")
+		tempFilePath := filepath.Join(os.TempDir(), "invoice.pdf")
+		defer os.Remove(tempFilePath)
+		err = pdf.OutputFileAndClose(tempFilePath)
+		if err != nil {
+			fmt.Println("Error saving PDF:", err)
+			return nil, "Some error occured.", err
+		}
+		fmt.Println("tempFilePath:", tempFilePath)
+		url, err := uc.orderRepo.UploadInvoice(tempFilePath,fmt.Sprint("invoice_", orderID))
+		if err != nil {
+			fmt.Println("Error uploading PDF:", err)
+			return nil, "Some error occured.", err
+		}
+
+		return &url, "Invoice generated successfully", nil
+	}
+}
+
+func makeInvoicePDF(data *response.InvoiceInfo) *gofpdf.Fpdf {
+	var billingUserStr, orderInfoStr, paymentInfoStr, shippingAddrStr string
+	var productTotalStr, shippingChargeStr, couponDiscountStr, netSumStr string
+	type item struct {
+		Name      string
+		MRP       string
+		SalePrice string
+		Quantity  string
+		Net       string
+	}
+
+	orderItems := make([]item, len(data.OrderItems))
+
+	{ //set strings/datas
+		billingUserStr = "Name: " + data.UserInfo.FirstName + " " + data.UserInfo.LastName +
+			"\nEmail: " + data.UserInfo.Email +
+			"\nMobile: " + data.UserInfo.Phone
+
+		orderInfoStr = "Ref No: " + data.OrderDetails.ReferenceNo +
+			"\nOrder Date: " + data.OrderDetails.OrderDateAndTime.Format("02-01-2006") +
+			"\nOrder Time: " + data.OrderDetails.OrderDateAndTime.Format("03:04PM")
+
+		paymentInfoStr = "Payment Method: " + data.OrderDetails.PaymentMethod +
+			"\nTransaction ID: " + data.OrderDetails.TransactionID
+
+		shippingAddrStr = "Name: " + data.OrderDetails.FkAddress.FirstName + " " + data.OrderDetails.FkAddress.LastName +
+			"\nEmail: " + data.OrderDetails.FkAddress.Email +
+			"\nMobile: " + data.OrderDetails.FkAddress.Phone +
+			"\n" + data.OrderDetails.FkAddress.Street +
+			"\n" + data.OrderDetails.FkAddress.City +
+			"\n" + data.OrderDetails.FkAddress.State +
+			"\nPIN CODE- " + fmt.Sprint(data.OrderDetails.FkAddress.Pincode)
+
+		for i, dataItem := range data.OrderItems {
+			orderItems[i] = item{
+				Name:      dataItem.ProductName,
+				MRP:       fmt.Sprint(dataItem.MRP),
+				SalePrice: fmt.Sprint(dataItem.SalePrice),
+				Quantity:  fmt.Sprint(dataItem.Quantity),
+				Net:       fmt.Sprint(dataItem.SalePrice * float32(dataItem.Quantity)),
+			}
+		}
+
+		productTotalStr = fmt.Sprint(data.OrderDetails.OriginalAmount)
+		shippingChargeStr = fmt.Sprint(data.OrderDetails.ShippingCharge)
+		couponDiscountStr = fmt.Sprint(data.OrderDetails.CouponDiscount)
+		netSumStr = fmt.Sprint(data.OrderDetails.FinalAmount)
+	}
+
+	pdf := gofpdf.New("P", "mm", "A4", "")
+	pdf.AddPage()
+
+	pdf.SetFont("Arial", "", 18)
+	multiCellHeight := 7.0
+	headLineSpacing := 8.0
+
+	{ //left top
+		leftWidth := 110.0
+		{ // Logo
+			logoPath := "internal/view/images.png"
+			pdf.Image(logoPath, 10, 10, 70, 0, false, "", 0, "")
+		}
+		{ // Billing-to info
+			pdf.SetY(35)
+			pdf.SetFont("Arial", "B", 12)
+			pdf.CellFormat(0, headLineSpacing, "Billing to:", "", 1, "L", false, 0, "")
+
+			pdf.SetFont("Arial", "", 11)
+			pdf.MultiCell(leftWidth, multiCellHeight, billingUserStr, "", "L", false)
+		}
+		{ // Order info
+			pdf.SetY(pdf.GetY() + 7)
+			pdf.SetFont("Arial", "B", 12)
+			pdf.CellFormat(0, headLineSpacing, "Order Information:", "", 1, "L", false, 0, "")
+			pdf.SetFont("Arial", "", 11)
+			pdf.MultiCell(leftWidth, multiCellHeight, orderInfoStr, "", "L", false)
+		}
+		{ // Payment info
+			pdf.SetY(pdf.GetY() + 7)
+			pdf.SetFont("Arial", "B", 12)
+			pdf.CellFormat(0, headLineSpacing, "Payment Information:", "", 1, "L", false, 0, "")
+			pdf.SetFont("Arial", "", 11)
+			pdf.MultiCell(leftWidth, multiCellHeight, paymentInfoStr, "", "L", false)
+			pdf.Ln(10)
+		}
+	}
+	{ //right top
+		{ // Invoice label
+			pdf.SetXY(85, 10)
+			pdf.SetFont("Arial", "B", 18)
+			pdf.CellFormat(0, 10, "Order Invoice #", "", 1, "R", false, 0, "")
+			pdf.SetFont("Arial", "", 8)
+			pdf.CellFormat(0, 10, "Order Ref No: "+data.OrderDetails.ReferenceNo, "B", 0, "R", false, 0, "")
+		}
+
+		{ //shipping address
+			pdf.SetXY(125, pdf.GetY()+20)
+			pdf.SetFont("Arial", "B", 12)
+			pdf.CellFormat(80, headLineSpacing, "Shipping Address:", "", 2, "L", false, 0, "")
+			pdf.SetX(pdf.GetX() + 3)
+			pdf.SetFont("Arial", "", 11)
+			pdf.MultiCell(70, multiCellHeight, shippingAddrStr, "", "L", false)
+		}
+	}
+
+	{ // Item details table
+		pdf.SetXY(5, 150)
+		pdf.SetFillColor(170, 170, 170)
+		pdf.CellFormat(88, 10, "Item", "B", 0, "L", true, 0, "")
+		pdf.CellFormat(30, 10, "MRP", "B", 0, "L", true, 0, "")
+		pdf.CellFormat(30, 10, "Sale Price", "B", 0, "L", true, 0, "")
+		pdf.CellFormat(20, 10, "Quantity", "B", 0, "L", true, 0, "")
+		pdf.CellFormat(30, 10, "Net", "B", 1, "L", true, 0, "")
+
+		for _, item := range orderItems {
+			pdf.SetX(5)
+			// pdf.CellFormat(88, 10, item.Name, "", 0, "L", false, 0, "")
+			pdf.MultiCell(88, 10, item.Name, "", "L", false)
+			pdf.SetXY(93, pdf.GetY()-10)
+			pdf.CellFormat(28, 10, item.MRP, "", 0, "R", false, 0, "")
+			pdf.CellFormat(30, 10, item.SalePrice, "", 0, "R", false, 0, "")
+			pdf.CellFormat(17, 10, item.Quantity, "", 0, "R", false, 0, "")
+			pdf.CellFormat(33, 10, item.Net, "", 1, "R", false, 0, "")
+		}
+
+		pdf.Line(5, pdf.GetY(), 200, pdf.GetY())
+	}
+
+	{ //Add additional charges
+		widthTitle := 40.0
+		widthValue := 30.0
+		lineSpacing := 8.0
+		x := 131.0
+		pdf.SetX(x)
+		pdf.CellFormat(widthTitle, lineSpacing, "Products Total:", "", 0, "L", false, 0, "")
+		pdf.CellFormat(widthValue, lineSpacing, productTotalStr, "", 1, "R", false, 0, "")
+
+		pdf.SetX(x)
+		pdf.CellFormat(widthTitle, lineSpacing, "Shipping Charge:", "", 0, "L", false, 0, "")
+		pdf.CellFormat(widthValue, lineSpacing, shippingChargeStr, "", 1, "R", false, 0, "")
+
+		pdf.SetX(x)
+		pdf.CellFormat(widthTitle, lineSpacing, "Coupon Discount:", "", 0, "L", false, 0, "")
+		pdf.CellFormat(widthValue, lineSpacing, couponDiscountStr, "", 1, "R", false, 0, "")
+
+		pdf.SetX(x)
+		pdf.SetFontStyle("B")
+		pdf.CellFormat(widthTitle, lineSpacing, "Net Sum:", "T", 0, "L", false, 0, "")
+		pdf.CellFormat(widthValue, lineSpacing, netSumStr, "T", 1, "R", false, 0, "")
+	}
+
+	return pdf
 }

@@ -183,3 +183,18 @@ type ResponseCoupon struct {
 	Percentage    float32 `json:"percentage"`
 	Description   string  `json:"description"`
 }
+
+//InvoiceInfo
+type InvoiceInfo struct {
+	OrderDetails entities.Order `json:"orderDetails"`
+	OrderItems []PQMS `json:"orderItems"`
+	UserInfo UserInfoForInvoice `json:"userInfo"`
+}
+
+type PQMS struct {
+	ProductID uint `json:"productID" gorm:"column:productID"`
+	ProductName string `json:"productName" gorm:"column:productName"`
+	Quantity  uint `json:"quantity" gorm:"column:quantity"`
+	MRP       float32 `json:"mrp" gorm:"column:mrp"`
+	SalePrice float32 `json:"salePrice" gorm:"column:salePrice"`
+}

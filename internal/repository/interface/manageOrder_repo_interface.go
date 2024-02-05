@@ -3,6 +3,7 @@ package repository_interface
 import (
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
+	response "MyShoo/internal/models/responseModels"
 )
 
 type ICartRepo interface {
@@ -36,6 +37,8 @@ type IOrderRepo interface {
 	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
 	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
 	GetAllOrders() (*[]entities.Order, error)
+	// GetOrderItemsByOrderID(orderID uint) (*[]entities.OrderItem, error)
+	GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS, error)
 	DoOrderExistByID(orderID uint) (bool, error)
 	GetUserIDByOrderID(orderID uint) (uint, error)
 	GetOrderStatusByID(orderID uint) (string, error)
@@ -50,6 +53,7 @@ type IOrderRepo interface {
 	//Online transaction related_______________________________________________________
 	GetOrderByTransactionID(transactionID string) (uint, error)
 	UpdateOrderTransactionID(orderID uint, transactionID string) error
+	GetPaymentStatusByID(orderID uint) (string, error)
 
 	//coupon related_______________________________________________________
 	DoCouponExistByCode(code string) (bool, error)
@@ -62,4 +66,7 @@ type IOrderRepo interface {
 	GetUpcomingCoupons() (*[]entities.Coupon, string, error)
 	GetCouponByID(couponID uint) (*entities.Coupon, string, error)
 	GetCouponUsageCount(userID uint, couponID uint) (uint, string, error)
+
+	//upload related_______________________________________________________
+	UploadInvoice(filePath string, nameToSaveAs string) (string, error)
 }

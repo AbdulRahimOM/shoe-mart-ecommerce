@@ -3,6 +3,7 @@ package repository_interface
 import (
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
+	response "MyShoo/internal/models/responseModels"
 )
 
 type IAdminRepo interface {
@@ -30,6 +31,7 @@ type IUserRepo interface {
 	CreateUser(*entities.User) error
 	IsEmailRegistered(string) (bool, error)
 	GetUserByEmail(email string) (*entities.User, error)
+	GetUserBasicInfoByID(id uint) (*response.UserInfoForInvoice, error)
 	ResetPassword(id uint, newPassword *string) error
 
 	//returns hashed password, user details as entities.UserDetails struct and error (if any, else nil)

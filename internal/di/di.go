@@ -64,7 +64,7 @@ func InitializeAndStartAPI() {
 	wishListHandler := orderManagementHandlers.NewWishListHandler(wishListUseCase)
 
 	//order
-	orderRepository := ordermanagementrepo.NewOrderRepository(infra.DB)
+	orderRepository := ordermanagementrepo.NewOrderRepository(infra.DB, infra.CloudinaryClient)
 	orderUseCase := orderManageUseCase.NewOrderUseCase(userRepository, orderRepository, cartRepository, productRepository)
 	orderHandler := orderManagementHandlers.NewOrderHandler(orderUseCase)
 

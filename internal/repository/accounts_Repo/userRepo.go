@@ -3,6 +3,7 @@ package accRepository
 import (
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
+	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	"fmt"
 
@@ -11,6 +12,10 @@ import (
 
 type UserRepo struct {
 	DB *gorm.DB
+}
+
+func NewUserRepository(db *gorm.DB) repoInterface.IUserRepo {
+	return &UserRepo{DB: db}
 }
 
 func (repo *UserRepo) GetAddressNameByID(id uint) (string, error) {
@@ -89,9 +94,6 @@ func (repo *UserRepo) DoAddressNameExists(name string) (bool, error) {
 	}
 }
 
-func NewUserRepository(db *gorm.DB) repoInterface.IUserRepo {
-	return &UserRepo{DB: db}
-}
 func (repo *UserRepo) UpdateUserStatus(email string, newStatus string) error {
 	var user entities.User
 	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
@@ -348,4 +350,25 @@ func (repo *UserRepo) GetWalletBalance(userID uint) (float32, error) {
 	}
 
 	return balance, nil
+}
+
+// GetUserByID implements repository_interface.IUserRepo.
+func (repo *UserRepo) GetUserBasicInfoByID(id uint) (*response.UserInfoForInvoice, error) {
+	var user *response.UserInfoForInvoice
+	query := repo.DB.Raw(`
+		SELECT 
+			"firstName",
+			"lastName",
+			email,
+			phone
+		FROM users
+		WHERE id = ?`,
+		id).Scan(&user)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't get user basic info by id. query.Error= ", query.Error, "\n----")
+		return nil, query.Error
+	}
+
+	return user, nil
 }

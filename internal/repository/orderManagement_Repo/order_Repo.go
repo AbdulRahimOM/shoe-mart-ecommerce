@@ -2,48 +2,74 @@ package ordermanagementrepo
 
 import (
 	"MyShoo/internal/domain/entities"
+	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
+	"MyShoo/internal/services"
 	"fmt"
 
+	"github.com/cloudinary/cloudinary-go"
 	"gorm.io/gorm"
 )
 
 type OrderRepo struct {
-	DB *gorm.DB
+	DB  *gorm.DB
+	Cld *cloudinary.Cloudinary
 }
 
-func NewOrderRepository(db *gorm.DB) repoInterface.IOrderRepo {
-	return &OrderRepo{DB: db}
+func NewOrderRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInterface.IOrderRepo {
+	return &OrderRepo{
+		DB:  db,
+		Cld: cloudinary,
+	}
 }
 
 // MakeOrder implements repository_interface.IOrderRepo.
 func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error) {
+	//start transaction
+	tx := repo.DB.Begin()
+	var result *gorm.DB
+
+	//defer rollback if error happened
+	defer func() {
+		if r := recover(); r != nil || result.Error != nil {
+			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
+			tx.Rollback()
+		}
+	}()
+
 	//add order
-	result := repo.DB.Create(&order)
+	result = tx.Create(&order)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add order. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
 		return 0, result.Error
 	}
-
-	// //preload order
-	// result = repo.DB.Preload("FkAddress").First(&order)
-	// if result.Error != nil {
-	// 	fmt.Println("-------\nquery error happened. couldn't preload order. query.Error= ", result.Error, "\n----")
-	// 	return 0, result.Error
-	// }
 
 	//create order items
 	for _, item := range *orderItems {
 		//update orderItems with orderID
 		item.OrderID = order.ID
+		fmt.Println("item= ", item)
 
 		//add order item to db
-		result := repo.DB.Create(&item)
+		result = tx.Create(&item)
 		if result.Error != nil {
 			fmt.Println("-------\nquery error happened. couldn't add order item. query.Error= ", result.Error, "\n----")
+			tx.Rollback()
 			return 0, result.Error
 		}
 	}
+
+	//clear cart
+	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
+	if result.Error != nil {
+		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
+		tx.Rollback()
+		return 0, result.Error
+	}
+
+	//commit transaction
+	tx.Commit()
 
 	return order.ID, nil
 }
@@ -578,9 +604,63 @@ func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID stri
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't update transactionID. query.Error= ", result.Error, "\n----")
 		return result.Error
-	}else if result.RowsAffected == 0 {
+	} else if result.RowsAffected == 0 {
 		return fmt.Errorf("no such order exists")
 	}
 
 	return nil
+}
+
+// GetPaymentStatusByID implements repository_interface.IOrderRepo.
+func (repo *OrderRepo) GetPaymentStatusByID(orderID uint) (string, error) {
+	var order entities.Order
+	query := repo.DB.
+		Select("payment_status").
+		Where("id = ?", orderID).
+		Find(&order)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		return "", query.Error
+	} else if query.RowsAffected == 0 {
+		return "", fmt.Errorf("no such order exists")
+	}
+
+	return order.PaymentStatus, nil
+}
+
+// GetOrderItemsPQRByOrderID implements repository_interface.IOrderRepo.
+func (repo *OrderRepo) GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS, error) {
+	var orderItems []response.PQMS
+	query := repo.DB.Raw(`
+		SELECT
+			product.id AS "productID",
+			product.name AS "productName",
+			order_items.quantity AS "quantity",
+			colour_variants.mrp AS "mrp",
+			colour_variants."salePrice" AS "salePrice"
+		FROM order_items
+		JOIN product ON order_items."product_id" = product.id
+		JOIN dimensional_variants ON product."dimensionalVariationID" = dimensional_variants.id
+		JOIN colour_variants ON dimensional_variants."colourVariantId" = colour_variants.id
+		WHERE order_items."order_id" = ?`,
+		orderID).Scan(&orderItems)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		return nil, query.Error
+	}
+
+	return &orderItems, nil
+}
+
+// UploadInvoice
+func (repo *OrderRepo) UploadInvoice(filePath string, nameToSaveAs string) (string, error) {
+	fileUploadService := services.NewFileUploadService(repo.Cld)
+	url, err := fileUploadService.UploadInvoice(filePath, nameToSaveAs)
+	if err != nil {
+		return "", err
+	}
+
+	return url, nil
 }

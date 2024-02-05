@@ -24,7 +24,7 @@ func NewOrderHandler(orderUseCase usecaseInterface.IOrderUC) *OrderHandler {
 
 // MakeOrder
 func (h *OrderHandler) MakeOrder(c *gin.Context) {
-	fmt.Println("Handler ::: make order handler")
+
 	var req *requestModels.MakeOrderReq
 
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -79,7 +79,6 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 
 // Get Orders of the user
 func (h *OrderHandler) GetOrdersOfUser(c *gin.Context) {
-	fmt.Println("Handler ::: get orders of user handler")
 
 	//get pagination params
 	page := c.Query("p")
@@ -124,7 +123,6 @@ func (h *OrderHandler) GetOrdersOfUser(c *gin.Context) {
 
 // Get All Orders (for admin)
 func (h *OrderHandler) GetOrders(c *gin.Context) {
-	fmt.Println("Handler ::: get all orders handler")
 
 	//get pagination params
 	page := c.Query("p")
@@ -161,7 +159,6 @@ func (h *OrderHandler) GetOrders(c *gin.Context) {
 
 // cancel order of user
 func (h *OrderHandler) CancelMyOrder(c *gin.Context) {
-	fmt.Println("Handler ::: cancel order handler")
 
 	//get req from body
 	var req *requestModels.CancelOrderReq
@@ -329,7 +326,6 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 
 // get invoice
 func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
-	fmt.Println("Handler ::: 'GetInvoiceOfOrder' handler")
 
 	userID, err := tools.GetUserID(c)
 	if err != nil {
@@ -337,7 +333,7 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 		return
 	}
 
-	orderIdParam := c.Query("id")
+	orderIdParam := c.Query("orderID")
 	orderId, err := strconv.Atoi(orderIdParam)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Error getting invoice. Try Again", err))
@@ -345,90 +341,18 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 	}
 
 	//get invoice
-	invoice, message, err := h.orderUseCase.GetInvoiceOfOrder(uint(orderId), userID)
+	invoiceURL, message, err := h.orderUseCase.GetInvoiceOfOrder(userID, uint(orderId))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.GetInvoiceResponse{
-		Status:  "success",
-		Message: "Invoice fetched successfully",
-		Invoice: *invoice,
-	})
+	c.Header("Content-Disposition", "attachment; filename=invoice.pdf")
+	c.File(*invoiceURL)
 }
 
-// // checkout page
-// func (h *OrderHandler) GetCheckout(c *gin.Context) {
-// 	fmt.Println("Handler ::: 'GetCheckout' handler")
-
-// 	userID, err := tools.GetUserID(c)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting checkout. Try Again", err))
-// 		return
-// 	}
-
-// 	//get checkout
-// 	checkOutInfo, message, err := h.orderUseCase.GetCheckOutInfo(userID)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
-// 		return
-// 	}
-// 	var checkOutIsnfo *response.CheckOutInfo
-// 	c.JSON(http.StatusOK, response.GetCheckoutResponse{
-// 		Status:       "success",
-// 		Message:      "Checkout fetched successfully",
-// 		CheckOutInfo: *checkOutInfo,
-// 	})
-// }
-//
-// // get checkout estimate
-// func (h *OrderHandler) GetCheckoutEstimate(c *gin.Context) {
-// 	fmt.Println("Handler ::: 'GetCheckoutEstimate' handler")
-//
-// 	userID, err := tools.GetUserID(c)
-// 	if err != nil {
-// 		fmt.Println("error getting userID from token. error:", err)
-// 		c.JSON(http.StatusInternalServerError, response.FailedSME(msg.ServerSideErr, err))
-// 		return
-// 	}
-//
-// 	//get req from body
-// 	var req *requestModels.GetCheckoutEstimateReq
-// 	if err := c.ShouldBindJSON(&req); err != nil {
-// 		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
-// 		return
-// 	}
-//
-// 	//validate request
-// 	if err := requestValidation.ValidateRequest(req); err != nil {
-// 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-// 		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
-// 		return
-// 	}
-//
-// 	//get checkout estimate
-// 	checkOutEstimate, paymentMethods, message, err := h.orderUseCase.GetCheckOutEstimate(userID, req)
-// 	if err != nil {
-// 		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
-// 		return
-// 	}
-//
-// 	c.JSON(http.StatusOK, response.CheckoutEstimateResponse{
-// 		Status:         "success",
-// 		Message:        message,
-// 		ProductsValue:  checkOutEstimate.ProductsValue,
-// 		ShippingCharge: checkOutEstimate.ShippingCharge,
-// 		Discount:       checkOutEstimate.Discount,
-// 		GrandTotal:     checkOutEstimate.GrandTotal,
-// 		PaymentMethods: *paymentMethods,
-// 	})
-// }
-
-// -----v
 // GetAddressForCheckout
 func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
-	fmt.Println("Handler ::: 'GetAddressForCheckout' handler")
 
 	userID, err := tools.GetUserID(c)
 	if err != nil {
@@ -454,7 +378,6 @@ func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
 
 // SetAddressGetCoupons
 func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
-	fmt.Println("Handler ::: 'SetAddressGetCoupons' handler")
 
 	//get req from body
 	var req *requestModels.SetAddressForCheckOutReq
@@ -487,9 +410,8 @@ func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//SetCouponGetPaymentMethods
+// SetCouponGetPaymentMethods
 func (h *OrderHandler) SetCouponGetPaymentMethods(c *gin.Context) {
-	fmt.Println("Handler ::: 'SetCouponGetPaymentMethods' handler")
 
 	//get req from body
 	var req *requestModels.SetCouponForCheckoutReq

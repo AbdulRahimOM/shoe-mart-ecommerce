@@ -25,3 +25,11 @@ type GetProfileResponse struct {
 	} `json:"profile"`
 	Error string `json:"error"`
 }
+
+//UserInfoForInvoice
+type UserInfoForInvoice struct {
+	FirstName string `json:"firstName" gorm:"column:firstName"`
+	LastName  string `json:"lastName" gorm:"column:lastName"`
+	Email     string `json:"email" gorm:"column:email"`
+	Phone     string `json:"phone" gorm:"column:phone"`
+}
