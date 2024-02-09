@@ -4,10 +4,12 @@ import (
 	"MyShoo/internal/domain/entities"
 	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	"MyShoo/internal/services"
+	"context"
+	"errors"
 	"fmt"
 
 	"github.com/cloudinary/cloudinary-go"
+	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"gorm.io/gorm"
 )
 
@@ -654,13 +656,19 @@ func (repo *OrderRepo) GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS
 	return &orderItems, nil
 }
 
-// UploadInvoice
-func (repo *OrderRepo) UploadInvoice(filePath string, nameToSaveAs string) (string, error) {
-	fileUploadService := services.NewFileUploadService(repo.Cld)
-	url, err := fileUploadService.UploadInvoice(filePath, nameToSaveAs)
+func (repo *OrderRepo) UploadInvoice(file string, fileName string) (string, error) {
+	result, err := repo.Cld.Upload.Upload(context.Background(), file, uploader.UploadParams{
+		Folder:    "MyShoo/invoices",
+		PublicID:  fileName,
+		Overwrite: true,
+	})
 	if err != nil {
-		return "", err
+		return "", errors.New("error while uploading file to cloudinary. err: " + err.Error())
 	}
 
-	return url, nil
+	if result.Error.Message != "" {
+		return "", errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message)
+	}
+
+	return result.SecureURL, nil
 }

@@ -90,6 +90,7 @@ func UserRoutes(engine *gin.RouterGroup,
 		engine.POST("/payment", middleware.UserAuth, middleware.VerifyUserStatus, payment.ProceedToPayViaRazorPay)
 		engine.POST("/payment/verify", payment.VerifyPayment)
 		engine.POST("/retrypayment", middleware.UserAuth, middleware.VerifyUserStatus, payment.RetryPayment)
+		// engine.GET("/order-invoice", order.GetInvoiceOfOrder)
 
 	}
 }

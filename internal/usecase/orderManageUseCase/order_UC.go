@@ -721,11 +721,11 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 		OrderItems:   *orderItems,
 		UserInfo:     *userInfo,
 	}
-
+	
 	pdf := makeInvoicePDF(&invoiceInfo)
 
 	if os.Getenv("UploadInvoice") == "false" {
-		fmt.Println("Uploading invoice to cloud is disabled. Invoice will be saved locally.")
+		fmt.Println("Uploading invoice to cloud is disabled. Invoice will be saved locally and link will be provided from that.")
 		// Output the PDF to a file
 		outputPath := "internal/view/op.pdf"
 		err = pdf.OutputFileAndClose(outputPath)
@@ -736,7 +736,6 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 			return &outputPath, "Invoice generated successfully(Locally, not via cloud. /Dev note)", nil
 		}
 	} else {
-		fmt.Println("Uploading invoice to cloud is enabled. Invoice will be saved to cloud.")
 		tempFilePath := filepath.Join(os.TempDir(), "invoice.pdf")
 		defer os.Remove(tempFilePath)
 		err = pdf.OutputFileAndClose(tempFilePath)
@@ -744,15 +743,35 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 			fmt.Println("Error saving PDF:", err)
 			return nil, "Some error occured.", err
 		}
-		fmt.Println("tempFilePath:", tempFilePath)
-		url, err := uc.orderRepo.UploadInvoice(tempFilePath,fmt.Sprint("invoice_", orderID))
+		url, err := uc.orderRepo.UploadInvoice(tempFilePath, fmt.Sprint("invoice", orderID))
 		if err != nil {
 			fmt.Println("Error uploading PDF:", err)
 			return nil, "Some error occured.", err
 		}
 
+		fmt.Println("url: ", url)
+
 		return &url, "Invoice generated successfully", nil
 	}
+
+	// // Output the PDF to a file
+	// outputPath := "internal/view/op.pdf"
+	// err = pdf.OutputFileAndClose(outputPath)
+	// if err != nil {
+	// 	fmt.Println("Error saving PDF:", err)
+	// 	return nil, "Some error occured.", err
+	// }
+
+	// outputPath = "testKit/salesReportOutput.xlsx"
+
+	// url, err := uc.orderRepo.UploadInvoice(outputPath,fmt.Sprint("invoice", orderID))
+	// if err != nil {
+	// 	fmt.Println("Error uploading PDF:", err)
+	// 	return nil, "Some error occured.", err
+	// }
+
+	// return &url, "Invoice generated successfully", nil
+
 }
 
 func makeInvoicePDF(data *response.InvoiceInfo) *gofpdf.Fpdf {
@@ -814,7 +833,7 @@ func makeInvoicePDF(data *response.InvoiceInfo) *gofpdf.Fpdf {
 	{ //left top
 		leftWidth := 110.0
 		{ // Logo
-			logoPath := "internal/view/images.png"
+			logoPath := "internal/domain/config/invoiceLogo.png"
 			pdf.Image(logoPath, 10, 10, 70, 0, false, "", 0, "")
 		}
 		{ // Billing-to info

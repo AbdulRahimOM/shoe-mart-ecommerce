@@ -2,14 +2,15 @@ package reportsrepo
 
 import (
 	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/models/requestModels"
-	"MyShoo/internal/services"
+	"context"
+	"errors"
 	"fmt"
 	"time"
 
 	repoInterface "MyShoo/internal/repository/interface"
 
 	"github.com/cloudinary/cloudinary-go"
+	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"gorm.io/gorm"
 )
 
@@ -25,15 +26,22 @@ func NewReportRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInt
 	}
 }
 
-func (repo *DashboardDataRepo) UploadExcelFile(req *requestModels.ExcelFileReq) (string, error) {
-	fileUploadService := services.NewFileUploadService(repo.Cld)
-
-	url, err := fileUploadService.UploadExcelFile(req)
+func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabel string) (string, error) {
+	uploadParams := uploader.UploadParams{
+		Folder:    "MyShoo/adminreports",
+		PublicID:  rangeLabel + "ReportForAdmin",
+		Overwrite: true,
+	}
+	result, err := repo.Cld.Upload.Upload(context.Background(), filePath, uploadParams)
 	if err != nil {
-		return "", err
+		return "", errors.New("error while uploading file to cloudinary. err: " + err.Error())
 	}
 
-	return url, nil
+	if result.Error.Message != "" {
+		return "", errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message)
+	}
+
+	return result.SecureURL, nil
 }
 
 func (repo *DashboardDataRepo) GetSalesReportFullTime() (

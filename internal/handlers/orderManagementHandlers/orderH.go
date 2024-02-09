@@ -347,6 +347,9 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 		return
 	}
 
+	// c.Header("Content-Disposition", "attachment; filename=invoice.pdf")
+	// c.Header("Content-Type", "application/pdf") // Set the correct content type for PDF
+	// c.Redirect(http.StatusFound, *invoiceURL)
 	c.Header("Content-Disposition", "attachment; filename=invoice.pdf")
 	c.File(*invoiceURL)
 }

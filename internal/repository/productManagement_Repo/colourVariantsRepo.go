@@ -2,8 +2,8 @@ package manageProductRepository
 
 import (
 	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/models/requestModels"
-	"MyShoo/internal/services"
+	"context"
+	"errors"
 	"fmt"
 	"os"
 
@@ -12,7 +12,7 @@ import (
 )
 
 func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os.File) error {
-	// fmt.Println("repo file: ", file)
+
 	//initiate transaction
 	tx := repo.DB.Begin()
 
@@ -24,32 +24,30 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 		}
 	}()
 
-	//add image
-	imageUploadService := services.NewFileUploadService(repo.Cld)
-	imageFileReq := requestModels.ImageFileReq{
-		File: file,
-		UploadParams: uploader.UploadParams{
-			Folder:   "MyShoo/colourVariants",
-			PublicID: uuid.New().String()[:7],
-		},
+	//add image to cloudinary
+	uploadParams := uploader.UploadParams{
+		Folder:    "MyShoo/colourVariants",
+		PublicID:  uuid.New().String()[:7],
+		Overwrite: true,
 	}
-	// fmt.Println("imageFileReq.File: ", imageFileReq.File)
-	// fmt.Println("imageFileReq: ", imageFileReq)
-	var err error
-	req.ImageURL, err = imageUploadService.UploadImage(&imageFileReq)
+
+	result, err := repo.Cld.Upload.Upload(context.Background(), file, uploadParams)
 	if err != nil {
-		fmt.Println("-------\nerror happened while uploading image to cloudinary. err: ", err, "\n----")
-		tx.Rollback()
-		return err
+		return errors.New("error while uploading file to cloudinary. err: " + err.Error())
 	}
+
+	if result.Error.Message != "" {
+		return errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message)
+	}
+
 	fmt.Println("req.ImageURL: ", req.ImageURL) //url printing,.. may be required for checking purposes
 
 	//add colourVariant
-	result := tx.Create(&req)
-	if result.Error != nil {
+	resultGorm := tx.Create(&req)
+	if resultGorm.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add colourVariant. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return result.Error
+		return resultGorm.Error
 	}
 
 	tx.Commit()
