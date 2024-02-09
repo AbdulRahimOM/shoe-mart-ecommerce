@@ -2,7 +2,6 @@ package reportsusecases
 
 import (
 	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecaseInterface "MyShoo/internal/usecase/interface"
 	"fmt"
@@ -10,7 +9,6 @@ import (
 	"path/filepath"
 	"time"
 
-	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"github.com/xuri/excelize/v2"
 )
 
@@ -275,7 +273,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 	}
 
 	if os.Getenv("UPLOAD_EXCEL") == "true" {
-		url, err = uc.reportsRepo.UploadExcelFile(newAdminExcelUploadReq(tempFilePath, "myrange"))
+		url, err = uc.reportsRepo.UploadSalesReportExcel(tempFilePath, "myrange")
 		if err != nil {
 			fmt.Println("Error uploading Excel file:", err)
 			return "", err
@@ -291,16 +289,4 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 			return localUrl, nil
 		}
 	}
-}
-
-func newAdminExcelUploadReq(tempFilePath string, rangeName string) *requestModels.ExcelFileReq {
-	return &requestModels.ExcelFileReq{
-		File: tempFilePath,
-		UploadParams: uploader.UploadParams{
-			Folder:    "MyShoo/adminreports",
-			PublicID:  rangeName + "ReportForAdmin",
-			Overwrite: true,
-		},
-	}
-
 }
