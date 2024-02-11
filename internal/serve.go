@@ -34,7 +34,7 @@ func NewServerHTTP(
 ) *ServerHttp {
 	engine := gin.Default()
 	// engine.LoadHTMLGlob("./web/templates/*.html")
-	engine.LoadHTMLGlob("./internal/view/*.html")
+	engine.LoadHTMLGlob("./internal/templates/*.html")
 
 	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order,payment)
 	routes.AdminRoutes(engine.Group("/admin"), admin, category, brand, model, product, cart, wishList, order, reports)
