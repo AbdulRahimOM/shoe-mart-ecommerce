@@ -721,13 +721,13 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 		OrderItems:   *orderItems,
 		UserInfo:     *userInfo,
 	}
-	
+
 	pdf := makeInvoicePDF(&invoiceInfo)
 
 	if os.Getenv("UploadInvoice") == "false" {
 		fmt.Println("Uploading invoice to cloud is disabled. Invoice will be saved locally and link will be provided from that.")
 		// Output the PDF to a file
-		outputPath := "internal/view/op.pdf"
+		outputPath := "testKit/invoiceOutput.pdf"
 		err = pdf.OutputFileAndClose(outputPath)
 		if err != nil {
 			fmt.Println("Error saving PDF:", err)
@@ -755,7 +755,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 	}
 
 	// // Output the PDF to a file
-	// outputPath := "internal/view/op.pdf"
+	// outputPath := "testKit/invoiceOutput.pdf"
 	// err = pdf.OutputFileAndClose(outputPath)
 	// if err != nil {
 	// 	fmt.Println("Error saving PDF:", err)

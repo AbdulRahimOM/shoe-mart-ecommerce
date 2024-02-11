@@ -47,7 +47,7 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	// c.JSON(http.StatusOK, retryReq)
 
 	//Rendering HTML for viewing payment (for testing)
-	err := htmlRender.RenderHTMLFromTemplate("internal/view/payment.html", paymentReq, "testKit/paymentOutput.html")
+	err := htmlRender.RenderHTMLFromTemplate("internal/templates/payment.html", paymentReq, "testKit/paymentOutput.html")
 	if err != nil {
 		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
 	} else {
@@ -124,7 +124,7 @@ func (h *PaymentHandler) RetryPayment(c *gin.Context) {
 	c.HTML(http.StatusOK, "payment.html", paymentReq)
 
 	//Rendering HTML for viewing payment (for testing)
-	err = htmlRender.RenderHTMLFromTemplate("internal/view/payment.html", paymentReq, "testKit/paymentOutput.html")
+	err = htmlRender.RenderHTMLFromTemplate("internal/templates/payment.html", paymentReq, "testKit/paymentOutput.html")
 	if err != nil {
 		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
 	} else {
