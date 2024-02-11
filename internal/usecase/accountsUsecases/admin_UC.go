@@ -21,8 +21,8 @@ func NewAdminUseCase(repo repoInterface.IAdminRepo) usecaseInterface.IAdminUC {
 	return &AdminUseCase{adminRepo: repo}
 }
 
-func (uc *AdminUseCase) GetSellersList() (*[]entities.SellerDetails, error) {
-	var sellerlist *[]entities.SellerDetails
+func (uc *AdminUseCase) GetSellersList() (*[]entities.PwMaskedSeller, error) {
+	var sellerlist *[]entities.PwMaskedSeller
 	sellerlist, err := uc.adminRepo.GetSellersList()
 	if err != nil {
 		fmt.Println("Error occured while getting sellers list from database")
@@ -79,7 +79,7 @@ func (uc *AdminUseCase) BlockSeller(req *requestModels.BlockSellerReq) error {
 		fmt.Println("\n-- No such seller (This email is not registered as a seller)\n.")
 		return e.ErrEmailNotRegistered
 	}
-	
+
 	if err := uc.adminRepo.UpdateSellerStatus(req.Email, "blocked"); err != nil {
 		fmt.Println("Error occured while blocking seller")
 		return err
@@ -147,8 +147,8 @@ func (uc *AdminUseCase) SignIn(req *requestModels.AdminSignInReq) (*string, erro
 }
 
 func (uc *AdminUseCase) RestartConfig() error {
-	err:=config.RestartConfig()
-	if err!=nil{
+	err := config.RestartConfig()
+	if err != nil {
 		fmt.Println("Error occured while reloading config")
 		return err
 	}

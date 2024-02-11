@@ -1,5 +1,5 @@
 definitions:
-  entities.SellerDetails:
+  entities.PwMaskedSeller:
     properties:
       email:
         type: string
@@ -196,7 +196,7 @@ definitions:
         type: string
       sellersList:
         items:
-          $ref: '#/definitions/entities.SellerDetails'
+          $ref: '#/definitions/entities.PwMaskedSeller'
         type: array
       status:
         type: string

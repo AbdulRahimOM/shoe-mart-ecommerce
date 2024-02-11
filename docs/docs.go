@@ -785,7 +785,7 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "entities.SellerDetails": {
+        "entities.PwMaskedSeller": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1079,7 +1079,7 @@ const docTemplate = `{
                 "sellersList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entities.SellerDetails"
+                        "$ref": "#/definitions/entities.PwMaskedSeller"
                     }
                 },
                 "status": {

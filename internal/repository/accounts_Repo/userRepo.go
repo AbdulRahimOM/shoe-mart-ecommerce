@@ -105,34 +105,21 @@ func (repo *UserRepo) UpdateUserStatus(email string, newStatus string) error {
 	return nil
 }
 
-func (repo *UserRepo) GetPasswordAndUserDetailsByEmail(email string) (string, entities.UserDetails, error) {
-	//getting password
-	var hashedPassword string
+func (repo *UserRepo) GetPasswordAndUserDetailsByEmail(email string) (*entities.User, error) {
+
+	var user entities.User
 	query := repo.DB.Raw(`
-	SELECT password 
-	FROM users 
-	WHERE email = ?`,
-		email).Scan(&hashedPassword)
-
-	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return "", entities.UserDetails{}, query.Error
-	}
-
-	//getting other userdetails
-	var userDetails entities.UserDetails
-	query = repo.DB.Raw(`
 	SELECT * 
 	FROM users 
 	WHERE email = ?`,
-		email).Scan(&userDetails)
+		email).Scan(&user)
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return "", entities.UserDetails{}, query.Error
+		return nil, query.Error
 	}
 
-	return hashedPassword, userDetails, nil
+	return &user, nil
 }
 
 func (repo *UserRepo) IsEmailRegistered(email string) (bool, error) {
@@ -229,19 +216,26 @@ func (repo *UserRepo) GetUserAddresses(userId uint) (*[]entities.UserAddress, er
 }
 
 func (repo *UserRepo) GetProfile(userID uint) (*entities.UserDetails, error) {
-	var user *entities.UserDetails
+	var userDetails *entities.UserDetails
 	query := repo.DB.Raw(`
-		SELECT *
+		SELECT 
+			id,
+			"firstName",
+			"lastName",
+			email,
+			phone,
+			status
 		FROM users
 		WHERE id = ?`,
-		userID).Scan(&user)
+		userID).Scan(&userDetails)
+
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get user profile. query.Error= ", query.Error, "\n----")
 		return nil, query.Error
 	}
 
-	return user, nil
+	return userDetails, nil
 }
 
 // EditProfile implements repository_interface.IUserRepo.
@@ -274,7 +268,7 @@ func (repo *UserRepo) GetEmailByID(userID uint) (string, error) {
 	return email, nil
 }
 
-func (repo *UserRepo) GetUserByEmail(email string)  (*entities.User, error) {
+func (repo *UserRepo) GetUserByEmail(email string) (*entities.User, error) {
 	var user entities.User
 	query := repo.DB.Raw(`
 		SELECT *
@@ -300,7 +294,7 @@ func (repo *UserRepo) ResetPassword(id uint, newPassword *string) error {
 	return nil
 }
 
-//DoAddressExistsByIDForUser
+// DoAddressExistsByIDForUser
 func (repo *UserRepo) DoAddressExistsByIDForUser(id uint, userID uint) (bool, error) {
 	var temp entities.UserAddress
 	query := repo.DB.Raw(`
@@ -320,7 +314,7 @@ func (repo *UserRepo) DoAddressExistsByIDForUser(id uint, userID uint) (bool, er
 	}
 }
 
-//	GetUserAddress(userID uint, addressID uint) (*entities.UserAddress, error)
+// GetUserAddress(userID uint, addressID uint) (*entities.UserAddress, error)
 func (repo *UserRepo) GetUserAddress(addressID uint) (*entities.UserAddress, error) {
 	var address entities.UserAddress
 	query := repo.DB.Raw(`

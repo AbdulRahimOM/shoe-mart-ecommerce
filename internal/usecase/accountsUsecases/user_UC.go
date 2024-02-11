@@ -64,20 +64,20 @@ func (uc *UserUseCase) SignIn(req *requestModels.UserSignInReq) (*string, error)
 	}
 
 	//get userpassword from database
-	hashedPassword, userInToken, err := uc.userRepo.GetPasswordAndUserDetailsByEmail(req.Email)
+	userForToken, err := uc.userRepo.GetPasswordAndUserDetailsByEmail(req.Email)
 	if err != nil {
 		fmt.Println("Error occured while getting password from record")
 		return nil, err
 	}
 
 	//check for password
-	if hashpassword.CompareHashedPassword(hashedPassword, req.Password) != nil {
+	if hashpassword.CompareHashedPassword(userForToken.Password, req.Password) != nil {
 		fmt.Println("Password Mismatch")
 		return nil, e.ErrInvalidPassword
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("user", userInToken, time.Hour*24*30)
+	tokenString, err := jwttoken.GenerateToken("user", userForToken, time.Hour*24*30)
 	if err != nil {
 		return nil, err
 	}
@@ -120,7 +120,7 @@ func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error)
 		return nil, err
 	}
 
-	var userInToken = entities.UserDetails{
+	var userForToken = entities.UserDetails{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
@@ -129,7 +129,7 @@ func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error)
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("user", userInToken, time.Hour*5)
+	tokenString, err := jwttoken.GenerateToken("user", userForToken, time.Hour*5)
 	if err != nil {
 		return nil, err
 	}

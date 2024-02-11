@@ -16,38 +16,25 @@ func NewSellerRepository(db *gorm.DB) repoInterface.ISellerRepo {
 	return &SellerRepo{DB: db}
 }
 
-func (repo *SellerRepo) GetPasswordAndSellerDetailsByEmail(email string) (string, entities.SellerDetails, error) {
-	//getting password
-	var hashedPassword string
+func (repo *SellerRepo) GetSellerWithPwByEmail(email string) (*entities.Seller, error) {
+	
+	var seller entities.Seller
 	query := repo.DB.Raw(`
-	SELECT password 
-	FROM sellers 
-	WHERE email = ?`,
-		email).Scan(&hashedPassword)
-
-	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return "", entities.SellerDetails{}, query.Error
-	}
-
-	//getting other sellerdetails
-	var sellerDetails entities.SellerDetails
-	query = repo.DB.Raw(`
 	SELECT * 
 	FROM sellers 
 	WHERE email = ?`,
-		email).Scan(&sellerDetails)
+		email).Scan(&seller) //update required#1  also look  above
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return "", entities.SellerDetails{}, query.Error
+		return nil, query.Error
 	}
 
-	return hashedPassword, sellerDetails, nil
+	return &seller, nil
 }
 
 func (repo *SellerRepo) IsEmailRegistered(email string) (bool, error) {
-	// fmt.Println("at repo: email=", email)
+	
 	var emptyStruct struct{}
 	query := repo.DB.Raw(`
         SELECT * 

@@ -777,7 +777,7 @@
         }
     },
     "definitions": {
-        "entities.SellerDetails": {
+        "entities.PwMaskedSeller": {
             "type": "object",
             "properties": {
                 "email": {
@@ -1071,7 +1071,7 @@
                 "sellersList": {
                     "type": "array",
                     "items": {
-                        "$ref": "#/definitions/entities.SellerDetails"
+                        "$ref": "#/definitions/entities.PwMaskedSeller"
                     }
                 },
                 "status": {

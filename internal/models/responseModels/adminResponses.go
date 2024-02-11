@@ -25,10 +25,10 @@ type UnblockUserResponse struct {
 	Error   string `json:"error"`
 }
 type GetSellersListResponse struct {
-	Status      string                   `json:"status"`
-	Message     string                   `json:"message"`
-	Error       string                   `json:"error"`
-	SellersList []entities.SellerDetails `json:"sellersList"`
+	Status      string                    `json:"status"`
+	Message     string                    `json:"message"`
+	Error       string                    `json:"error"`
+	SellersList []entities.PwMaskedSeller `json:"sellersList"`
 }
 
 // BlockSellerResponse
@@ -47,7 +47,7 @@ type UnblockSellerResponse struct {
 
 // GetCouponRes
 type GetCouponRes struct {
-	Status  string          `json:"status"`
-	Message string          `json:"message"`
+	Status  string            `json:"status"`
+	Message string            `json:"message"`
 	Coupons []entities.Coupon `json:"coupons"`
 }

@@ -18,7 +18,7 @@ type IAdminUC interface {
 	UnblockUser(req *requestModels.UnblockUserReq) error
 
 	//seller related
-	GetSellersList() (*[]entities.SellerDetails, error)
+	GetSellersList() (*[]entities.PwMaskedSeller, error)
 	BlockSeller(req *requestModels.BlockSellerReq) error
 	UnblockSeller(req *requestModels.UnblockSellerReq) error
 }
@@ -34,10 +34,9 @@ type IUserUC interface {
 
 	//forgot password related
 	GetUserByEmail(email string) (*entities.User, error)
-	SendOtpForPWChange(*entities.User) (*string,error)
-	VerifyOtpForPWChange(id uint, phone string, otp string) (bool,*string, error)
+	SendOtpForPWChange(*entities.User) (*string, error)
+	VerifyOtpForPWChange(id uint, phone string, otp string) (bool, *string, error)
 	ResetPassword(id uint, newPassword *string) error
-
 
 	//address related
 	AddUserAddress(req *requestModels.AddUserAddress) error
@@ -46,5 +45,5 @@ type IUserUC interface {
 	GetUserAddresses(userID uint) (*[]entities.UserAddress, error)
 
 	GetProfile(userID uint) (*entities.UserDetails, error)
-	EditProfile(userID uint,req *requestModels.EditProfileReq) error
+	EditProfile(userID uint, req *requestModels.EditProfileReq) error
 }

@@ -15,13 +15,14 @@ type User struct {
 }
 
 type UserDetails struct {
-	ID        uint   `gorm:"primaryKey"`
-	FirstName string `gorm:"column:firstName;notNull"`
-	LastName  string `gorm:"column:lastName"`
-	Email     string `gorm:"column:email;unique;notNull"`
-	Phone     string `gorm:"column:phone;notNull"`
-	Status    string `gorm:"default:Pending"`
+    ID        uint   `json:"id" gorm:"primaryKey"`
+    FirstName string `json:"first_name" gorm:"column:firstName;notNull"`
+    LastName  string `json:"last_name" gorm:"column:lastName"`
+    Email     string `json:"email" gorm:"column:email;unique;notNull"`
+    Phone     string `json:"phone" gorm:"column:phone;notNull"`
+    Status    string `json:"status" gorm:"default:Pending"`
 }
+
 
 type UserAddress struct {
 	ID          uint   `gorm:"primaryKey"`

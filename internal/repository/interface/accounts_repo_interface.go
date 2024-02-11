@@ -11,7 +11,7 @@ type IAdminRepo interface {
 	GetPasswordAndAdminDetailsByEmail(email string) (string, entities.AdminDetails, error)
 	GetUsersList() (*[]entities.UserDetails, error)
 	UpdateUserStatus(email string, newStatus string) error
-	GetSellersList() (*[]entities.SellerDetails, error)
+	GetSellersList() (*[]entities.PwMaskedSeller, error)
 	IsEmailRegisteredAsUser(email string) (bool, error)
 	IsEmailRegisteredAsSeller(email string) (bool, error)
 	UpdateSellerStatus(email string, newStatus string) error
@@ -22,8 +22,8 @@ type ISellerRepo interface {
 	CreateSeller(*entities.Seller) error
 	IsEmailRegistered(string) (bool, error)
 
-	//returns hashed password, seller details as entities.SellerDetails struct and error (if any, else nil)
-	GetPasswordAndSellerDetailsByEmail(string) (string, entities.SellerDetails, error)
+	//returns hashed password, seller details as entities.PwMaskedSeller struct and error (if any, else nil)
+	GetSellerWithPwByEmail(string) (*entities.Seller, error)
 }
 
 type IUserRepo interface {
@@ -35,7 +35,7 @@ type IUserRepo interface {
 	ResetPassword(id uint, newPassword *string) error
 
 	//returns hashed password, user details as entities.UserDetails struct and error (if any, else nil)
-	GetPasswordAndUserDetailsByEmail(string) (string, entities.UserDetails, error)
+	GetPasswordAndUserDetailsByEmail(string) (*entities.User, error)
 	UpdateUserStatus(email string, newStatus string) error
 
 	AddUserAddress(newAddress *entities.UserAddress) error

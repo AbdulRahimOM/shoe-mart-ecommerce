@@ -56,12 +56,12 @@ func (repo *AdminRepo) IsEmailRegisteredAsUser(email string) (bool, error) {
 	return true, nil
 }
 
-func (repo *AdminRepo) GetSellersList() (*[]entities.SellerDetails, error) {
-	var sellersList []entities.SellerDetails
+func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, error) {
+	var sellersList []entities.PwMaskedSeller
 	query := repo.DB.Raw(`
 	SELECT *
 	FROM sellers`).
-		Scan(&sellersList)
+		Scan(&sellersList) //update required#2
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
@@ -94,10 +94,17 @@ func (repo *AdminRepo) UpdateSellerStatus(email string, newStatus string) error 
 }
 
 func (repo *AdminRepo) GetUsersList() (*[]entities.UserDetails, error) {
+	
 	var usersList []entities.UserDetails
 	query := repo.DB.Raw(`
-	SELECT * 
-	FROM users`).
+		SELECT 
+			id,
+			"firstName",
+			"lastName",
+			email,
+			phone,
+			status
+		FROM users`).
 		Scan(&usersList)
 
 	if query.Error != nil {

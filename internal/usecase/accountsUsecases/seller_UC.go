@@ -34,20 +34,20 @@ func (uc *SellerUseCase) SignIn(req *requestModels.SellerSignInReq) (*string, er
 	}
 
 	//get sellerpassword from database
-	hashedPassword, sellerInToken, err := uc.sellerRepo.GetPasswordAndSellerDetailsByEmail(req.Email)
+	sellerForToken, err := uc.sellerRepo.GetSellerWithPwByEmail(req.Email)
 	if err != nil {
 		fmt.Println("Error occured while getting password from record")
 		return nil, err
 	}
 
 	//check for password
-	if hashpassword.CompareHashedPassword(hashedPassword, req.Password) != nil {
+	if hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password) != nil {
 		fmt.Println("Password Mismatch")
 		return nil, e.ErrInvalidPassword
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("seller", sellerInToken, time.Hour*24*30)
+	tokenString, err := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*24*30)
 	if err != nil {
 		return nil, err
 	}
@@ -88,13 +88,13 @@ func (uc *SellerUseCase) SignUp(req *requestModels.SellerSignUpReq) (*string, er
 		return nil, err
 	}
 
-	// //send OTP
+	// //send OTP	
 	// err = otphelper.SendOtp(seller.Phone)
 	// if err != nil {
 	// 	uc.sellerRepo.DeleteByPhone(seller.Phone)
 	// 	return nil, err
 	// }
-	var sellerInToken = entities.SellerDetails{
+	var sellerForToken = entities.PwMaskedSeller{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
 		Email:     req.Email,
@@ -103,7 +103,7 @@ func (uc *SellerUseCase) SignUp(req *requestModels.SellerSignUpReq) (*string, er
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("seller", sellerInToken, time.Hour*5)
+	tokenString, err := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*5)
 	if err != nil {
 		return nil, err
 	}
