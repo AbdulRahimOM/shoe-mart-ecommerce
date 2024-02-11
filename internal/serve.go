@@ -33,7 +33,7 @@ func NewServerHTTP(
 	payment *paymentHandlers.PaymentHandler,
 ) *ServerHttp {
 	engine := gin.Default()
-	// engine.LoadHTMLGlob("./web/templates/*.html")
+	// engine.LoadHTMLGlob("./internal/view/*.html")
 	engine.LoadHTMLGlob("./internal/templates/*.html")
 
 	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order,payment)
