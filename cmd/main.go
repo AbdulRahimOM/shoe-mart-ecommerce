@@ -3,16 +3,16 @@ package main
 import (
 	myshoo "MyShoo"
 	_ "MyShoo/docs"
-	"MyShoo/internal/domain/config"
 	"MyShoo/internal/di"
+	"MyShoo/internal/domain/config"
 	infra "MyShoo/internal/infrastructure"
 	"MyShoo/internal/initializers"
 	"fmt"
 )
 
-// @title MyShoo AP0
-// @version 1.0
-// @description This is a sebcgbdgfrver for MyShoo API.
+//	@title MyShoo API
+//	@version 1.0
+//	@description Main entry point
 func main() {
 	fmt.Println("Handler ::: main()")
 

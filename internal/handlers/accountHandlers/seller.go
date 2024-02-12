@@ -51,7 +51,7 @@ func (h *SellerHandler) PostSignUp(c *gin.Context) {
 	if err := c.Bind(&signUpReq); err != nil {
 		fmt.Println("\n", "Error occured while signing up. Error while binding request"+err.Error(), "\n.")
 
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error while binding request",
 			Error:   err.Error(),
@@ -62,11 +62,10 @@ func (h *SellerHandler) PostSignUp(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(signUpReq); err != nil {
 		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	}
@@ -75,14 +74,14 @@ func (h *SellerHandler) PostSignUp(c *gin.Context) {
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		errResponse := "Error occured while signing up. Try again. Error:" + err.Error() ////////////////////////////////
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "",
 			Token:   *token,
@@ -108,11 +107,10 @@ func (h *SellerHandler) PostLogIn(c *gin.Context) {
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
 		fmt.Println("\nerror binding the requewst\n.")
 		errResponse := "error binding the requewst. Try again. Error:" + err.Error()
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	}
@@ -121,11 +119,10 @@ func (h *SellerHandler) PostLogIn(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(signInReq); err != nil {
 		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	}
@@ -134,15 +131,14 @@ func (h *SellerHandler) PostLogIn(c *gin.Context) {
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		errResponse := "error while signing in"
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "",
 			Token:   *token,

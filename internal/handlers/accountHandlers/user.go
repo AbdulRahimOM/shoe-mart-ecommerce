@@ -25,28 +25,22 @@ func NewUserHandler(useCase usecaseInterface.IUserUC) *UserHandler {
 	return &UserHandler{UserUseCase: useCase}
 }
 
-// definefunctions those which you  have called in user routes
-func (h *UserHandler) GetLogin(c *gin.Context) {
-	fmt.Println("Handler ::: GET login handler")
 
-	c.JSON(http.StatusOK, "token")
+func (h *UserHandler) GetLogin(c *gin.Context) {
+	c.JSON(http.StatusOK, "")
 }
+
 func (h *UserHandler) GetHome(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hai":   "dfdf",
-		"hello": "hello",
-	})
+	c.JSON(http.StatusOK, "")
 }
 
 func (h *UserHandler) PostSignUp(c *gin.Context) {
-	fmt.Println("=============\nentered POST sign-up handler")
 
 	var signUpReq requestModels.UserSignUpReq
 
 	if err := c.Bind(&signUpReq); err != nil {
-		fmt.Println("\n", "Error occured while signing up. Error while binding request"+err.Error(), "\n.")
 
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error while binding request",
 			Error:   err.Error(),
@@ -57,13 +51,11 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 
 	//validation
 	if err := requestValidation.ValidateRequest(signUpReq); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#", //how to inform that this particular field is wrong, like email is wrong, i have to find a way to do that
 			Error:   errResponse,
-			Token:   "",
 		})
 
 		return
@@ -71,9 +63,8 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 
 	token, err := h.UserUseCase.SignUp(&signUpReq)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		errResponse := "Error occured while signing up. Try again. Error:" + err.Error() ////////////////////////////////
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
@@ -81,7 +72,7 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "",
 			Token:   *token,
@@ -98,11 +89,10 @@ func (h *UserHandler) PostLogIn(c *gin.Context) {
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
 		fmt.Println("\nerror binding the requewst\n.")
 		errResponse := "error binding the requewst. Try again. Error:" + err.Error()
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 
 		return
@@ -112,11 +102,10 @@ func (h *UserHandler) PostLogIn(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(signInReq); err != nil {
 		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 
 		return
@@ -126,16 +115,15 @@ func (h *UserHandler) PostLogIn(c *gin.Context) {
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		errResponse := "error while signing in"
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "",
 			Token:   *token,
@@ -150,11 +138,10 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 	user, ok := c.Get("UserModel")
 	if !ok {
 		fmt.Println("error getting user model from context")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error happened. Please login again",
 			Error:   "Error getting user model from context",
-			Token:   "",
 		})
 		return
 	}
@@ -163,15 +150,14 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 	err := h.UserUseCase.SendOtp(phone)
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "error while sending otp",
 			Error:   err.Error(),
-			Token:   "",
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SM{
 			Status:  "success",
 			Message: "OTP sent successfully. Please verify",
 		})
@@ -186,7 +172,7 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 	}
 	if err := c.Bind(&otpStruct); err != nil {
 		fmt.Println("\nerror binding the requewst\n.")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   "error binding the request. Error:" + err.Error(),
@@ -197,11 +183,10 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(otpStruct); err != nil {
 		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	}
@@ -209,7 +194,7 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 	user, ok := c.Get("UserModel")
 	if !ok {
 		fmt.Println("error getting user model from context")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error happened. Please try again",
 			Error:   "Error getting user model from context",
@@ -221,7 +206,7 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 	isVerified, err := h.UserUseCase.VerifyOtp(phone, email, otpStruct.OTP)
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "error occured while verifying otp. Please try again",
 			Error:   err.Error(),
@@ -230,12 +215,12 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 	}
 	if isVerified {
 
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SM{
 			Status:  "success",
 			Message: "OTP verified successfully",
 		})
 	} else {
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SM{
 			Status:  "failed",
 			Message: "OTP verification failed. Please try again",
 		})
@@ -565,7 +550,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 
 	var req requestModels.ApplyForPasswordResetReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error binding request. Try Again",
 			Error:   err.Error(),
@@ -577,7 +562,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(req); err != nil {
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
 		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error validating request. Try Again",
 			Error:   errResponse,
@@ -589,7 +574,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 	var user *entities.User
 	user, err := h.UserUseCase.GetUserByEmail(req.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SMET{
+		c.JSON(http.StatusInternalServerError, response.SME{
 			Status:  "failed",
 			Message: "Error getting reset password. Try Again",
 			Error:   err.Error(),
@@ -600,7 +585,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 	token, err := h.UserUseCase.SendOtpForPWChange(user)
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "error while sending otp",
 			Error:   err.Error(),
@@ -608,7 +593,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 		return
 	} else {
 
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "OTP sent successfully. Please verify",
 			Token:   *token,
@@ -661,7 +646,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	}
 	if err := c.Bind(&otpStruct); err != nil {
 		fmt.Println("\nerror binding the requewst\n.")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   "error binding the request. Error:" + err.Error(),
@@ -672,11 +657,10 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(otpStruct); err != nil {
 		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	}
@@ -684,7 +668,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	isVerified, newtoken, err := h.UserUseCase.VerifyOtpForPWChange(id, phone, otpStruct.OTP)
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "error occured while verifying otp. Please try again",
 			Error:   err.Error(),
@@ -693,13 +677,13 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	}
 	if isVerified {
 		fmt.Println("New token: ", *newtoken)
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "OTP verified successfully",
 			Token:   *newtoken,
 		})
 	} else {
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SM{
 			Status:  "failed",
 			Message: "OTP verification failed. Please try again",
 		})
@@ -772,7 +756,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	//change password
 	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
 	if err := h.UserUseCase.ResetPassword(id, &req.NewPassword); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SMET{
+		c.JSON(http.StatusInternalServerError, response.SME{
 			Status:  "failed",
 			Message: "Error resetting password. Try Again",
 			Error:   err.Error(),
@@ -780,7 +764,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SMET{
+	c.JSON(http.StatusOK, response.SM{
 		Status:  "success",
 		Message: "Password reset successfully",
 	})

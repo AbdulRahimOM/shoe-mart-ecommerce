@@ -1,14 +1,17 @@
 package response
 
+type SM struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}
 type SME struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
 	Error   string `json:"error"`
 }
-type SMET struct {
+type SMT struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
-	Error   string `json:"error"`
 	Token   string `json:"token"`
 }
 type SMED struct {

@@ -26,7 +26,6 @@ func NewAdminHandler(useCase usecaseInterface.IAdminUC) *AdminHandler {
 // @Accept json
 // @Produce json
 // @Success 200 {object} string
-// @Failure 400 {object} string
 // @Router /admin/login [get]
 func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
 	fmt.Println("Handler ::: GET login handler")
@@ -50,8 +49,8 @@ func (h *AdminHandler) GetAdminHome(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param adminSignInReq body requestModels.AdminSignInReq true "Admin Sign In Request"
-// @Success 200 {object} response.SMET
-// @Failure 400 {object} response.SMET
+// @Success 200 {object} response.SMT
+// @Failure 400 {object} response.SMT
 // @Router /admin/login [post]
 func (h *AdminHandler) PostLogIn(c *gin.Context) {
 	fmt.Println("=============\nentered \"POST login\" handler")
@@ -61,11 +60,10 @@ func (h *AdminHandler) PostLogIn(c *gin.Context) {
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
 		fmt.Println("\nerror binding the requewst\n.")
 		errResponse := "error binding the requewst. Try again. Error:" + err.Error()
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error occured. Please try again.",
 			Error:   errResponse,
-			Token:   "",
 		})
 
 		return
@@ -75,11 +73,10 @@ func (h *AdminHandler) PostLogIn(c *gin.Context) {
 	if err := requestValidation.ValidateRequest(signInReq); err != nil {
 		fmt.Println("\n\nerror validating the request\n.")
 		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 
 		return
@@ -89,15 +86,14 @@ func (h *AdminHandler) PostLogIn(c *gin.Context) {
 	if err != nil {
 		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		errResponse := "error while signing in"
-		c.JSON(http.StatusBadRequest, response.SMET{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "#",
 			Error:   errResponse,
-			Token:   "",
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMET{
+		c.JSON(http.StatusOK, response.SMT{
 			Status:  "success",
 			Message: "",
 			Token:   *token,
@@ -401,14 +397,14 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 
 }
 
-//VerifySeller
+// VerifySeller
 func (h *AdminHandler) VerifySeller(c *gin.Context) {
 	var req requestModels.VerifySellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request", err))
 		return
 	}
-	
+
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
 		errResponse := fmt.Errorf("error validating the request. try again. error:   %v", err)
@@ -426,9 +422,9 @@ func (h *AdminHandler) VerifySeller(c *gin.Context) {
 	c.JSON(http.StatusOK, response.SuccessSME("Seller verified successfully"))
 }
 
-//ReloadConfig
+// ReloadConfig
 func (h *AdminHandler) RestartConfig(c *gin.Context) {
-	err:=h.AdminUseCase.RestartConfig()
+	err := h.AdminUseCase.RestartConfig()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Failed to reload config", err))
 		return
