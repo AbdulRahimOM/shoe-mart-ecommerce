@@ -174,3 +174,35 @@ func (repo *AdminRepo) CreateAdmin(admin *entities.Admin) error {
 	}
 	return nil
 }
+
+//VerifySeller
+func (repo *AdminRepo) VerifySeller(id uint) error {
+	err := repo.DB.Model(&entities.Seller{}).Where("id = ?", id).Update("status", "verified").Error
+	if err != nil {
+		fmt.Println("-------\nerror happened on verifying seller. Error= ", err, "\n----")
+		return err
+	}
+
+	return nil
+}
+
+//IsSellerVerified
+func (repo *AdminRepo) IsSellerVerified(id uint) (bool, error) {
+	var seller entities.Seller
+	query := repo.DB.Raw(`
+	SELECT status 
+	FROM sellers 
+	WHERE id = ?`,
+		id).Scan(&seller)
+
+	if query.Error != nil {
+		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
+		return false, query.Error
+	}
+
+	if seller.Status == "verified" {
+		return true, nil
+	}
+
+	return false, nil
+}

@@ -21,6 +21,7 @@ type IAdminUC interface {
 	GetSellersList() (*[]entities.PwMaskedSeller, error)
 	BlockSeller(req *requestModels.BlockSellerReq) error
 	UnblockSeller(req *requestModels.UnblockSellerReq) error
+	VerifySeller(req *requestModels.VerifySellerReq) error
 }
 type ISellerUC interface {
 	SignUp(req *requestModels.SellerSignUpReq) (*string, error)

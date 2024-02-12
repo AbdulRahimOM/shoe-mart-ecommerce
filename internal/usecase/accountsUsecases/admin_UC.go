@@ -9,6 +9,7 @@ import (
 	usecaseInterface "MyShoo/internal/usecase/interface"
 	hashpassword "MyShoo/pkg/hash_Password"
 	jwttoken "MyShoo/pkg/jwt_tokens"
+	"errors"
 	"fmt"
 	"time"
 )
@@ -152,5 +153,27 @@ func (uc *AdminUseCase) RestartConfig() error {
 		fmt.Println("Error occured while reloading config")
 		return err
 	}
+	return nil
+}
+
+//VerifySeller
+func (uc *AdminUseCase) VerifySeller(req *requestModels.VerifySellerReq) error {
+	//check if status is not verified
+	isVerified, err := uc.adminRepo.IsSellerVerified(req.SellerID)
+	if err != nil {
+		fmt.Println("Error occured while getting seller status")
+		return err
+	}
+	if isVerified {
+		fmt.Println("\n-- seller is already verified\n.")
+		return errors.New("seller is already verified")
+	}
+
+	err = uc.adminRepo.VerifySeller(req.SellerID)
+	if err != nil {
+		fmt.Println("Error occured while verifying seller")
+		return err
+	}
+
 	return nil
 }

@@ -15,6 +15,8 @@ type IAdminRepo interface {
 	IsEmailRegisteredAsUser(email string) (bool, error)
 	IsEmailRegisteredAsSeller(email string) (bool, error)
 	UpdateSellerStatus(email string, newStatus string) error
+	IsSellerVerified(sellerID uint) (bool, error)
+	VerifySeller(sellerID  uint) error
 }
 
 type ISellerRepo interface {

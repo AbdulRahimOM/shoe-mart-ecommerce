@@ -22,3 +22,8 @@ type BlockSellerReq struct {
 type UnblockSellerReq struct {
 	Email string `json:"email" validate:"required,email"`
 }
+
+//VerifySellerReq
+type VerifySellerReq struct {
+	SellerID  uint   `json:"seller_id" validate:"required,numeric"`
+}

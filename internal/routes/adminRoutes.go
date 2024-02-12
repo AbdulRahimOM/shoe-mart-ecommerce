@@ -53,6 +53,7 @@ func AdminRoutes(engine *gin.RouterGroup,
 		authAdmin.GET("/sellerslist", admin.GetSellersList)
 		authAdmin.POST("/blockseller", admin.BlockSeller)
 		authAdmin.POST("/unblockseller", admin.UnblockSeller)
+		authAdmin.PATCH("/verify-seller", admin.VerifySeller)
 
 		//get all orders
 		authAdmin.GET("/orders", order.GetOrders)

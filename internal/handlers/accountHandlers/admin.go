@@ -401,6 +401,31 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 
 }
 
+//VerifySeller
+func (h *AdminHandler) VerifySeller(c *gin.Context) {
+	var req requestModels.VerifySellerReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request", err))
+		return
+	}
+	
+	//validation
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		errResponse := fmt.Errorf("error validating the request. try again. error:   %v", err)
+		fmt.Println(errResponse)
+		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request", errResponse))
+		return
+	}
+
+	err := h.AdminUseCase.VerifySeller(&req)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME("Failed to verify seller", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SuccessSME("Seller verified successfully"))
+}
+
 //ReloadConfig
 func (h *AdminHandler) RestartConfig(c *gin.Context) {
 	err:=h.AdminUseCase.RestartConfig()
