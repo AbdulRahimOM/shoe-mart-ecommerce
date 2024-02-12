@@ -46,8 +46,6 @@ func UserRoutes(engine *gin.RouterGroup,
 		authUser := engine.Group("/")
 		authUser.Use(middleware.UserAuth, middleware.VerifyUserStatus)
 		{
-			authUser.GET("/", user.GetHome)
-			authUser.GET("/home", user.GetHome)
 
 			//cart related________________________________________________
 			authUser.GET("/cart", cart.GetCart)
