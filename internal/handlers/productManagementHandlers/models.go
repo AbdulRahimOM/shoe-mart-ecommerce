@@ -109,7 +109,7 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Param editModelNameReq body requestModels.EditModelNameReq true "Edit Model Name Request"
+// @Param editModelReq body requestModels.EditModelReq true "Edit Model Name Request"
 // @Success 200 {object} string
 // @Failure 400 {object} string
 // @Router /admin/editmodelname [patch]

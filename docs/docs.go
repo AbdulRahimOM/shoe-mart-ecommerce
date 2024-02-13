@@ -15,6 +15,72 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/addaddress": {
+            "post": {
+                "description": "Add address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Add address",
+                "parameters": [
+                    {
+                        "description": "Add Address Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.AddUserAddress"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/addresses": {
+            "get": {
+                "description": "Get user addresses",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user addresses",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GetUserAddressesResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
         "/admin/addbrand": {
             "post": {
                 "description": "Add brand",
@@ -135,46 +201,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/adddimensionalvariation": {
-            "post": {
-                "description": "Add dimensional variation",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Add dimensional variation",
-                "parameters": [
-                    {
-                        "description": "Add Dimensional Variation Request",
-                        "name": "addDimensionalVariationReq",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/requestModels.AddDimensionalVariationReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/addmodel": {
             "post": {
                 "description": "Add model",
@@ -196,46 +222,6 @@ const docTemplate = `{
                         "required": true,
                         "schema": {
                             "$ref": "#/definitions/requestModels.AddModelReq"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/addmodeltocategory": {
-            "post": {
-                "description": "Add model to category",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Add model to category",
-                "parameters": [
-                    {
-                        "description": "Add Model To Category Request",
-                        "name": "addModelToCategoryReq",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "$ref": "#/definitions/requestModels.AddModelToCategoryReq"
                         }
                     }
                 ],
@@ -283,13 +269,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.BlockSellerResponse"
+                            "$ref": "#/definitions/response.SM"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.BlockSellerResponse"
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -323,13 +309,133 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.BlockUserResponse"
+                            "$ref": "#/definitions/response.SM"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.BlockUserResponse"
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/editbrand": {
+            "post": {
+                "description": "Edit brand",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Edit brand",
+                "parameters": [
+                    {
+                        "description": "Edit Brand Request",
+                        "name": "editBrandReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.EditBrandReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/editcategory": {
+            "post": {
+                "description": "Edit category",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Edit category",
+                "parameters": [
+                    {
+                        "description": "Edit Category Request",
+                        "name": "editCategoryReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.EditCategoryReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/editmodelname": {
+            "patch": {
+                "description": "Edit model",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Edit model",
+                "parameters": [
+                    {
+                        "description": "Edit Model Name Request",
+                        "name": "editModelReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.EditModelReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "type": "string"
                         }
                     }
                 }
@@ -393,64 +499,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/getdimensionalvariations": {
-            "post": {
-                "description": "Get dimensional variations",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Get dimensional variations",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
-        "/admin/getmodels": {
-            "get": {
-                "description": "Get models",
-                "consumes": [
-                    "application/json"
-                ],
-                "produces": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Get models",
-                "responses": {
-                    "200": {
-                        "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/admin/login": {
             "get": {
                 "description": "Get admin login page",
@@ -467,12 +515,6 @@ const docTemplate = `{
                 "responses": {
                     "200": {
                         "description": "OK",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "400": {
-                        "description": "Bad Request",
                         "schema": {
                             "type": "string"
                         }
@@ -506,13 +548,42 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.AdminLoginResponse"
+                            "$ref": "#/definitions/response.SMT"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.AdminLoginResponse"
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/admin/reloadconfig": {
+            "post": {
+                "description": "Reload config",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "summary": "Reload config",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -541,7 +612,7 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.GetSellersListResponse"
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -575,13 +646,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.UnblockSellerResponse"
+                            "$ref": "#/definitions/response.SM"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.UnblockSellerResponse"
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -615,13 +686,13 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/response.UnblockUserResponse"
+                            "$ref": "#/definitions/response.SM"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.UnblockUserResponse"
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -650,15 +721,39 @@ const docTemplate = `{
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "$ref": "#/definitions/response.GetUsersListResponse"
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
             }
         },
-        "/seller/getdimensionalvariations": {
-            "post": {
-                "description": "Get dimensional variations",
+        "/cart": {
+            "get": {
+                "description": "Get cart",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Get cart",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GetCartResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "Add to cart",
                 "consumes": [
                     "application/json"
                 ],
@@ -666,20 +761,394 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "cart"
                 ],
-                "summary": "Get dimensional variations",
+                "summary": "Add to cart",
+                "parameters": [
+                    {
+                        "description": "Add to Cart Request",
+                        "name": "addToCartReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.AddToCartReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "Delete from cart",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "cart"
+                ],
+                "summary": "Delete from cart",
+                "parameters": [
+                    {
+                        "description": "Delete from Cart Request",
+                        "name": "deleteFromCartReq",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.DeleteFromCartReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/deleteaddress": {
+            "delete": {
+                "description": "Delete address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Delete address",
+                "parameters": [
+                    {
+                        "description": "Delete Address Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.DeleteUserAddress"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/editaddress": {
+            "patch": {
+                "description": "Edit address",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Edit address",
+                "parameters": [
+                    {
+                        "description": "Edit Address Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.EditUserAddress"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/editprofile": {
+            "patch": {
+                "description": "Edit profile",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Edit profile",
+                "parameters": [
+                    {
+                        "description": "Edit Profile Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.EditProfileReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/login": {
+            "get": {
+                "description": "Get user login page",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get user login page",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
                             "type": "string"
                         }
+                    }
+                }
+            },
+            "post": {
+                "description": "User Sign In Handler",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "User Sign In Handler",
+                "parameters": [
+                    {
+                        "description": "User Sign In Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.UserSignInReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SMT"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/profile": {
+            "get": {
+                "description": "Get profile",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get profile",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.GetProfileResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/resetpassword": {
+            "get": {
+                "description": "Get reset password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Get reset password",
+                "parameters": [
+                    {
+                        "description": "Apply For Password Reset Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.ApplyForPasswordResetReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "Reset password",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Reset password",
+                "parameters": [
+                    {
+                        "description": "Reset Password Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.ResetPasswordReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/resetpasswordverifyotp": {
+            "post": {
+                "description": "Verify OTP for password change",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Verify OTP for password change",
+                "parameters": [
+                    {
+                        "description": "Verify OTP Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.VerifyOTPReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SMT"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -704,11 +1173,43 @@ const docTemplate = `{
                         "schema": {
                             "type": "string"
                         }
+                    }
+                }
+            },
+            "post": {
+                "description": "Seller Sign In Handler",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "seller"
+                ],
+                "summary": "Seller Sign In Handler",
+                "parameters": [
+                    {
+                        "description": "Seller Sign In Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.SellerSignInReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SMT"
+                        }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -730,7 +1231,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "description": "Seller Sign Up Request",
-                        "name": "signUpReq",
+                        "name": "req",
                         "in": "body",
                         "required": true,
                         "schema": {
@@ -754,9 +1255,9 @@ const docTemplate = `{
                 }
             }
         },
-        "/user/getdimensionalvariations": {
-            "post": {
-                "description": "Get dimensional variations",
+        "/sendotp": {
+            "get": {
+                "description": "Send OTP",
                 "consumes": [
                     "application/json"
                 ],
@@ -764,20 +1265,100 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "user"
                 ],
-                "summary": "Get dimensional variations",
+                "summary": "Send OTP",
                 "responses": {
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.SM"
                         }
                     },
                     "400": {
                         "description": "Bad Request",
                         "schema": {
-                            "type": "string"
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/signup": {
+            "post": {
+                "description": "User Sign Up Handler",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "User Sign Up Handler",
+                "parameters": [
+                    {
+                        "description": "User Sign Up Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.UserSignUpReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SMT"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
+                        }
+                    }
+                }
+            }
+        },
+        "/verifyotp": {
+            "post": {
+                "description": "Verify OTP",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "Verify OTP",
+                "parameters": [
+                    {
+                        "description": "Verify OTP Request",
+                        "name": "req",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/requestModels.VerifyOTPReq"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/response.SM"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.SME"
                         }
                     }
                 }
@@ -800,6 +1381,9 @@ const docTemplate = `{
                 "lastName": {
                     "type": "string"
                 },
+                "password": {
+                    "type": "string"
+                },
                 "phone": {
                     "type": "string"
                 },
@@ -808,9 +1392,15 @@ const docTemplate = `{
                 }
             }
         },
-        "entities.UserDetails": {
+        "entities.UserAddress": {
             "type": "object",
             "properties": {
+                "addressName": {
+                    "type": "string"
+                },
+                "city": {
+                    "type": "string"
+                },
                 "email": {
                     "type": "string"
                 },
@@ -820,7 +1410,43 @@ const docTemplate = `{
                 "id": {
                     "type": "integer"
                 },
+                "landMark": {
+                    "type": "string"
+                },
                 "lastName": {
+                    "type": "string"
+                },
+                "phone": {
+                    "description": "with country code",
+                    "type": "string"
+                },
+                "pincode": {
+                    "type": "integer"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "entities.UserDetails": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "first_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "last_name": {
                     "type": "string"
                 },
                 "phone": {
@@ -834,12 +1460,16 @@ const docTemplate = `{
         "requestModels.AddBrandReq": {
             "type": "object",
             "required": [
-                "name"
+                "name",
+                "sellerId"
             ],
             "properties": {
                 "name": {
                     "type": "string",
                     "minLength": 3
+                },
+                "sellerId": {
+                    "type": "integer"
                 }
             }
         },
@@ -858,32 +1488,24 @@ const docTemplate = `{
         "requestModels.AddColourVariantReq": {
             "type": "object",
             "required": [
+                "colour",
                 "modelId",
                 "mrp",
-                "variationName"
+                "salePrice"
             ],
             "properties": {
+                "colour": {
+                    "type": "string",
+                    "minLength": 3
+                },
                 "modelId": {
                     "type": "integer"
                 },
                 "mrp": {
-                    "type": "integer"
+                    "type": "number"
                 },
-                "variationName": {
-                    "type": "string",
-                    "minLength": 3
-                }
-            }
-        },
-        "requestModels.AddDimensionalVariationReq": {
-            "type": "object",
-            "required": [
-                "name"
-            ],
-            "properties": {
-                "name": {
-                    "type": "string",
-                    "minLength": 3
+                "salePrice": {
+                    "type": "number"
                 }
             }
         },
@@ -891,10 +1513,14 @@ const docTemplate = `{
             "type": "object",
             "required": [
                 "brandId",
+                "categoryId",
                 "name"
             ],
             "properties": {
                 "brandId": {
+                    "type": "integer"
+                },
+                "categoryId": {
                     "type": "integer"
                 },
                 "name": {
@@ -903,17 +1529,74 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddModelToCategoryReq": {
+        "requestModels.AddToCartReq": {
             "type": "object",
             "required": [
-                "categoryId",
-                "modelId"
+                "productID",
+                "userID"
             ],
             "properties": {
-                "categoryId": {
+                "productID": {
                     "type": "integer"
                 },
-                "modelId": {
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requestModels.AddUserAddress": {
+            "type": "object",
+            "required": [
+                "addressName",
+                "city",
+                "email",
+                "firstName",
+                "lastName",
+                "phone",
+                "pincode",
+                "state",
+                "street",
+                "userId"
+            ],
+            "properties": {
+                "addressName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "city": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "landmark": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "lastName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "pincode": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "street": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "userId": {
                     "type": "integer"
                 }
             }
@@ -931,6 +1614,17 @@ const docTemplate = `{
                 "Login_password": {
                     "type": "string",
                     "minLength": 3
+                }
+            }
+        },
+        "requestModels.ApplyForPasswordResetReq": {
+            "type": "object",
+            "required": [
+                "email"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
                 }
             }
         },
@@ -953,6 +1647,198 @@ const docTemplate = `{
             "properties": {
                 "email": {
                     "type": "string"
+                }
+            }
+        },
+        "requestModels.DeleteFromCartReq": {
+            "type": "object",
+            "required": [
+                "productID",
+                "userID"
+            ],
+            "properties": {
+                "productID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requestModels.DeleteUserAddress": {
+            "type": "object",
+            "required": [
+                "id",
+                "userId"
+            ],
+            "properties": {
+                "id": {
+                    "type": "integer"
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requestModels.EditBrandReq": {
+            "type": "object",
+            "required": [
+                "newName",
+                "oldName",
+                "sellerId"
+            ],
+            "properties": {
+                "newName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "oldName": {
+                    "description": "ID uint ` + "`" + `json:\"id\" validate:\"required,number\"` + "`" + `",
+                    "type": "string",
+                    "minLength": 3
+                },
+                "sellerId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requestModels.EditCategoryReq": {
+            "type": "object",
+            "required": [
+                "newName",
+                "oldName"
+            ],
+            "properties": {
+                "newName": {
+                    "description": "ID uint ` + "`" + `json:\"id\" validate:\"required,number\"` + "`" + `",
+                    "type": "string",
+                    "minLength": 3
+                },
+                "oldName": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "requestModels.EditModelReq": {
+            "type": "object",
+            "required": [
+                "brandId",
+                "categoryId",
+                "id",
+                "name"
+            ],
+            "properties": {
+                "brandId": {
+                    "type": "integer"
+                },
+                "categoryId": {
+                    "type": "integer"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "name": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "requestModels.EditProfileReq": {
+            "type": "object",
+            "required": [
+                "email",
+                "firstName",
+                "lastName",
+                "phone"
+            ],
+            "properties": {
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "lastName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "requestModels.EditUserAddress": {
+            "type": "object",
+            "required": [
+                "addressName",
+                "city",
+                "email",
+                "firstName",
+                "id",
+                "lastName",
+                "phone",
+                "pincode",
+                "state",
+                "street",
+                "userId"
+            ],
+            "properties": {
+                "addressName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "city": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "email": {
+                    "type": "string"
+                },
+                "firstName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "landmark": {
+                    "type": "string",
+                    "minLength": 0
+                },
+                "lastName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "pincode": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "street": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "userId": {
+                    "type": "integer"
+                }
+            }
+        },
+        "requestModels.ResetPasswordReq": {
+            "type": "object",
+            "required": [
+                "newPassword"
+            ],
+            "properties": {
+                "newPassword": {
+                    "type": "string",
+                    "minLength": 3
                 }
             }
         },
@@ -1022,9 +1908,70 @@ const docTemplate = `{
                 }
             }
         },
-        "response.AdminLoginResponse": {
+        "requestModels.UserSignInReq": {
+            "type": "object",
+            "required": [
+                "Login_email",
+                "Login_password"
+            ],
+            "properties": {
+                "Login_email": {
+                    "type": "string"
+                },
+                "Login_password": {
+                    "type": "string",
+                    "minLength": 3
+                }
+            }
+        },
+        "requestModels.UserSignUpReq": {
+            "type": "object",
+            "required": [
+                "SignUp_email",
+                "SignUp_firstName",
+                "SignUp_phone"
+            ],
+            "properties": {
+                "SignUp_email": {
+                    "type": "string"
+                },
+                "SignUp_firstName": {
+                    "type": "string",
+                    "minLength": 3
+                },
+                "SignUp_lastName": {
+                    "type": "string"
+                },
+                "SignUp_password": {
+                    "description": "1st password shall only be considered. Its frontend to check both typed passwords are same. No security implicatoions",
+                    "type": "string",
+                    "minLength": 3
+                },
+                "SignUp_phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "requestModels.VerifyOTPReq": {
+            "type": "object",
+            "required": [
+                "otp"
+            ],
+            "properties": {
+                "otp": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.GetCartResponse": {
             "type": "object",
             "properties": {
+                "cart": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/response.ResponseCartItems"
+                    }
+                },
                 "error": {
                     "type": "string"
                 },
@@ -1034,12 +1981,12 @@ const docTemplate = `{
                 "status": {
                     "type": "string"
                 },
-                "token": {
-                    "type": "string"
+                "totalValue": {
+                    "type": "number"
                 }
             }
         },
-        "response.BlockSellerResponse": {
+        "response.GetProfileResponse": {
             "type": "object",
             "properties": {
                 "error": {
@@ -1048,19 +1995,19 @@ const docTemplate = `{
                 "message": {
                     "type": "string"
                 },
-                "status": {
-                    "type": "string"
-                }
-            }
-        },
-        "response.BlockUserResponse": {
-            "type": "object",
-            "properties": {
-                "error": {
-                    "type": "string"
-                },
-                "message": {
-                    "type": "string"
+                "profile": {
+                    "type": "object",
+                    "properties": {
+                        "addresses": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/entities.UserAddress"
+                            }
+                        },
+                        "userDetails": {
+                            "$ref": "#/definitions/entities.UserDetails"
+                        }
+                    }
                 },
                 "status": {
                     "type": "string"
@@ -1070,9 +2017,6 @@ const docTemplate = `{
         "response.GetSellersListResponse": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string"
-                },
                 "message": {
                     "type": "string"
                 },
@@ -1087,12 +2031,29 @@ const docTemplate = `{
                 }
             }
         },
-        "response.GetUsersListResponse": {
+        "response.GetUserAddressesResponse": {
             "type": "object",
             "properties": {
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/entities.UserAddress"
+                    }
+                },
                 "error": {
                     "type": "string"
                 },
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.GetUsersListResponse": {
+            "type": "object",
+            "properties": {
                 "message": {
                     "type": "string"
                 },
@@ -1107,7 +2068,43 @@ const docTemplate = `{
                 }
             }
         },
-        "response.UnblockSellerResponse": {
+        "response.ResponseCartItems": {
+            "type": "object",
+            "properties": {
+                "fkProduct": {
+                    "type": "object",
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "skuCode": {
+                            "type": "string"
+                        },
+                        "stock": {
+                            "type": "integer"
+                        }
+                    }
+                },
+                "productID": {
+                    "type": "integer"
+                },
+                "quantity": {
+                    "type": "integer"
+                }
+            }
+        },
+        "response.SM": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "string"
+                }
+            }
+        },
+        "response.SME": {
             "type": "object",
             "properties": {
                 "error": {
@@ -1121,16 +2118,16 @@ const docTemplate = `{
                 }
             }
         },
-        "response.UnblockUserResponse": {
+        "response.SMT": {
             "type": "object",
             "properties": {
-                "error": {
-                    "type": "string"
-                },
                 "message": {
                     "type": "string"
                 },
                 "status": {
+                    "type": "string"
+                },
+                "token": {
                     "type": "string"
                 }
             }
@@ -1144,8 +2141,8 @@ var SwaggerInfo = &swag.Spec{
 	Host:             "",
 	BasePath:         "",
 	Schemes:          []string{},
-	Title:            "MyShoo AP0",
-	Description:      "This is a sebcgbdgfrver for MyShoo API.",
+	Title:            "MyShoo API",
+	Description:      "Main entry point",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

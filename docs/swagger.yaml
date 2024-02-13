@@ -9,20 +9,50 @@ definitions:
         type: integer
       lastName:
         type: string
+      password:
+        type: string
       phone:
         type: string
       status:
         type: string
     type: object
-  entities.UserDetails:
+  entities.UserAddress:
     properties:
+      addressName:
+        type: string
+      city:
+        type: string
       email:
         type: string
       firstName:
         type: string
       id:
         type: integer
+      landMark:
+        type: string
       lastName:
+        type: string
+      phone:
+        description: with country code
+        type: string
+      pincode:
+        type: integer
+      state:
+        type: string
+      street:
+        type: string
+      userID:
+        type: integer
+    type: object
+  entities.UserDetails:
+    properties:
+      email:
+        type: string
+      first_name:
+        type: string
+      id:
+        type: integer
+      last_name:
         type: string
       phone:
         type: string
@@ -34,8 +64,11 @@ definitions:
       name:
         minLength: 3
         type: string
+      sellerId:
+        type: integer
     required:
     - name
+    - sellerId
     type: object
   requestModels.AddCategoryReq:
     properties:
@@ -47,46 +80,87 @@ definitions:
     type: object
   requestModels.AddColourVariantReq:
     properties:
+      colour:
+        minLength: 3
+        type: string
       modelId:
         type: integer
       mrp:
-        type: integer
-      variationName:
-        minLength: 3
-        type: string
+        type: number
+      salePrice:
+        type: number
     required:
+    - colour
     - modelId
     - mrp
-    - variationName
-    type: object
-  requestModels.AddDimensionalVariationReq:
-    properties:
-      name:
-        minLength: 3
-        type: string
-    required:
-    - name
+    - salePrice
     type: object
   requestModels.AddModelReq:
     properties:
       brandId:
+        type: integer
+      categoryId:
         type: integer
       name:
         minLength: 3
         type: string
     required:
     - brandId
+    - categoryId
     - name
     type: object
-  requestModels.AddModelToCategoryReq:
+  requestModels.AddToCartReq:
     properties:
-      categoryId:
+      productID:
         type: integer
-      modelId:
+      userID:
         type: integer
     required:
-    - categoryId
-    - modelId
+    - productID
+    - userID
+    type: object
+  requestModels.AddUserAddress:
+    properties:
+      addressName:
+        minLength: 3
+        type: string
+      city:
+        minLength: 3
+        type: string
+      email:
+        type: string
+      firstName:
+        minLength: 3
+        type: string
+      landmark:
+        minLength: 3
+        type: string
+      lastName:
+        minLength: 3
+        type: string
+      phone:
+        type: string
+      pincode:
+        type: string
+      state:
+        minLength: 3
+        type: string
+      street:
+        minLength: 3
+        type: string
+      userId:
+        type: integer
+    required:
+    - addressName
+    - city
+    - email
+    - firstName
+    - lastName
+    - phone
+    - pincode
+    - state
+    - street
+    - userId
     type: object
   requestModels.AdminSignInReq:
     properties:
@@ -98,6 +172,13 @@ definitions:
     required:
     - Login_email
     - Login_password
+    type: object
+  requestModels.ApplyForPasswordResetReq:
+    properties:
+      email:
+        type: string
+    required:
+    - email
     type: object
   requestModels.BlockSellerReq:
     properties:
@@ -112,6 +193,144 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  requestModels.DeleteFromCartReq:
+    properties:
+      productID:
+        type: integer
+      userID:
+        type: integer
+    required:
+    - productID
+    - userID
+    type: object
+  requestModels.DeleteUserAddress:
+    properties:
+      id:
+        type: integer
+      userId:
+        type: integer
+    required:
+    - id
+    - userId
+    type: object
+  requestModels.EditBrandReq:
+    properties:
+      newName:
+        minLength: 3
+        type: string
+      oldName:
+        description: ID uint `json:"id" validate:"required,number"`
+        minLength: 3
+        type: string
+      sellerId:
+        type: integer
+    required:
+    - newName
+    - oldName
+    - sellerId
+    type: object
+  requestModels.EditCategoryReq:
+    properties:
+      newName:
+        description: ID uint `json:"id" validate:"required,number"`
+        minLength: 3
+        type: string
+      oldName:
+        minLength: 3
+        type: string
+    required:
+    - newName
+    - oldName
+    type: object
+  requestModels.EditModelReq:
+    properties:
+      brandId:
+        type: integer
+      categoryId:
+        type: integer
+      id:
+        type: integer
+      name:
+        minLength: 3
+        type: string
+    required:
+    - brandId
+    - categoryId
+    - id
+    - name
+    type: object
+  requestModels.EditProfileReq:
+    properties:
+      email:
+        type: string
+      firstName:
+        minLength: 3
+        type: string
+      lastName:
+        minLength: 3
+        type: string
+      phone:
+        type: string
+    required:
+    - email
+    - firstName
+    - lastName
+    - phone
+    type: object
+  requestModels.EditUserAddress:
+    properties:
+      addressName:
+        minLength: 3
+        type: string
+      city:
+        minLength: 3
+        type: string
+      email:
+        type: string
+      firstName:
+        minLength: 3
+        type: string
+      id:
+        type: integer
+      landmark:
+        minLength: 0
+        type: string
+      lastName:
+        minLength: 3
+        type: string
+      phone:
+        type: string
+      pincode:
+        type: string
+      state:
+        minLength: 3
+        type: string
+      street:
+        minLength: 3
+        type: string
+      userId:
+        type: integer
+    required:
+    - addressName
+    - city
+    - email
+    - firstName
+    - id
+    - lastName
+    - phone
+    - pincode
+    - state
+    - street
+    - userId
+    type: object
+  requestModels.ResetPasswordReq:
+    properties:
+      newPassword:
+        minLength: 3
+        type: string
+    required:
+    - newPassword
     type: object
   requestModels.SellerSignInReq:
     properties:
@@ -159,39 +378,80 @@ definitions:
     required:
     - email
     type: object
-  response.AdminLoginResponse:
+  requestModels.UserSignInReq:
     properties:
+      Login_email:
+        type: string
+      Login_password:
+        minLength: 3
+        type: string
+    required:
+    - Login_email
+    - Login_password
+    type: object
+  requestModels.UserSignUpReq:
+    properties:
+      SignUp_email:
+        type: string
+      SignUp_firstName:
+        minLength: 3
+        type: string
+      SignUp_lastName:
+        type: string
+      SignUp_password:
+        description: 1st password shall only be considered. Its frontend to check
+          both typed passwords are same. No security implicatoions
+        minLength: 3
+        type: string
+      SignUp_phone:
+        type: string
+    required:
+    - SignUp_email
+    - SignUp_firstName
+    - SignUp_phone
+    type: object
+  requestModels.VerifyOTPReq:
+    properties:
+      otp:
+        type: string
+    required:
+    - otp
+    type: object
+  response.GetCartResponse:
+    properties:
+      cart:
+        items:
+          $ref: '#/definitions/response.ResponseCartItems'
+        type: array
       error:
         type: string
       message:
         type: string
       status:
         type: string
-      token:
-        type: string
+      totalValue:
+        type: number
     type: object
-  response.BlockSellerResponse:
+  response.GetProfileResponse:
     properties:
       error:
         type: string
       message:
         type: string
-      status:
-        type: string
-    type: object
-  response.BlockUserResponse:
-    properties:
-      error:
-        type: string
-      message:
-        type: string
+      profile:
+        properties:
+          addresses:
+            items:
+              $ref: '#/definitions/entities.UserAddress'
+            type: array
+          userDetails:
+            $ref: '#/definitions/entities.UserDetails'
+        type: object
       status:
         type: string
     type: object
   response.GetSellersListResponse:
     properties:
-      error:
-        type: string
       message:
         type: string
       sellersList:
@@ -201,10 +461,21 @@ definitions:
       status:
         type: string
     type: object
-  response.GetUsersListResponse:
+  response.GetUserAddressesResponse:
     properties:
+      addresses:
+        items:
+          $ref: '#/definitions/entities.UserAddress'
+        type: array
       error:
         type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.GetUsersListResponse:
+    properties:
       message:
         type: string
       status:
@@ -214,7 +485,30 @@ definitions:
           $ref: '#/definitions/entities.UserDetails'
         type: array
     type: object
-  response.UnblockSellerResponse:
+  response.ResponseCartItems:
+    properties:
+      fkProduct:
+        properties:
+          name:
+            type: string
+          skuCode:
+            type: string
+          stock:
+            type: integer
+        type: object
+      productID:
+        type: integer
+      quantity:
+        type: integer
+    type: object
+  response.SM:
+    properties:
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.SME:
     properties:
       error:
         type: string
@@ -223,21 +517,64 @@ definitions:
       status:
         type: string
     type: object
-  response.UnblockUserResponse:
+  response.SMT:
     properties:
-      error:
-        type: string
       message:
         type: string
       status:
+        type: string
+      token:
         type: string
     type: object
 info:
   contact: {}
-  description: This is a sebcgbdgfrver for MyShoo API.
-  title: MyShoo AP0
+  description: Main entry point
+  title: MyShoo API
   version: "1.0"
 paths:
+  /addaddress:
+    post:
+      consumes:
+      - application/json
+      description: Add address
+      parameters:
+      - description: Add Address Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddUserAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Add address
+      tags:
+      - user
+  /addresses:
+    get:
+      description: Get user addresses
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetUserAddressesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Get user addresses
+      tags:
+      - user
   /admin/addbrand:
     post:
       consumes:
@@ -316,32 +653,6 @@ paths:
       summary: Add colour variant
       tags:
       - admin
-  /admin/adddimensionalvariation:
-    post:
-      consumes:
-      - application/json
-      description: Add dimensional variation
-      parameters:
-      - description: Add Dimensional Variation Request
-        in: body
-        name: addDimensionalVariationReq
-        required: true
-        schema:
-          $ref: '#/definitions/requestModels.AddDimensionalVariationReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Add dimensional variation
-      tags:
-      - admin
   /admin/addmodel:
     post:
       consumes:
@@ -368,32 +679,6 @@ paths:
       summary: Add model
       tags:
       - admin
-  /admin/addmodeltocategory:
-    post:
-      consumes:
-      - application/json
-      description: Add model to category
-      parameters:
-      - description: Add Model To Category Request
-        in: body
-        name: addModelToCategoryReq
-        required: true
-        schema:
-          $ref: '#/definitions/requestModels.AddModelToCategoryReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Add model to category
-      tags:
-      - admin
   /admin/blockseller:
     post:
       consumes:
@@ -412,11 +697,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.BlockSellerResponse'
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.BlockSellerResponse'
+            $ref: '#/definitions/response.SME'
       summary: Block seller
       tags:
       - admin
@@ -438,12 +723,90 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.BlockUserResponse'
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.BlockUserResponse'
+            $ref: '#/definitions/response.SME'
       summary: Block user
+      tags:
+      - admin
+  /admin/editbrand:
+    post:
+      consumes:
+      - application/json
+      description: Edit brand
+      parameters:
+      - description: Edit Brand Request
+        in: body
+        name: editBrandReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditBrandReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Edit brand
+      tags:
+      - admin
+  /admin/editcategory:
+    post:
+      consumes:
+      - application/json
+      description: Edit category
+      parameters:
+      - description: Edit Category Request
+        in: body
+        name: editCategoryReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditCategoryReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Edit category
+      tags:
+      - admin
+  /admin/editmodelname:
+    patch:
+      consumes:
+      - application/json
+      description: Edit model
+      parameters:
+      - description: Edit Model Name Request
+        in: body
+        name: editModelReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditModelReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      summary: Edit model
       tags:
       - admin
   /admin/getbrands:
@@ -484,44 +847,6 @@ paths:
       summary: Get categories
       tags:
       - admin
-  /admin/getdimensionalvariations:
-    post:
-      consumes:
-      - application/json
-      description: Get dimensional variations
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Get dimensional variations
-      tags:
-      - admin
-  /admin/getmodels:
-    get:
-      consumes:
-      - application/json
-      description: Get models
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Get models
-      tags:
-      - admin
   /admin/login:
     get:
       consumes:
@@ -532,10 +857,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
           schema:
             type: string
       summary: Get admin login page
@@ -558,12 +879,31 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.AdminLoginResponse'
+            $ref: '#/definitions/response.SMT'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.AdminLoginResponse'
+            $ref: '#/definitions/response.SME'
       summary: Login admin
+      tags:
+      - admin
+  /admin/reloadconfig:
+    post:
+      consumes:
+      - application/json
+      description: Reload config
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Reload config
       tags:
       - admin
   /admin/sellerslist:
@@ -581,7 +921,7 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.GetSellersListResponse'
+            $ref: '#/definitions/response.SME'
       summary: Get sellers list
       tags:
       - admin
@@ -603,11 +943,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.UnblockSellerResponse'
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.UnblockSellerResponse'
+            $ref: '#/definitions/response.SME'
       summary: Unblock seller
       tags:
       - admin
@@ -629,11 +969,11 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/response.UnblockUserResponse'
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.UnblockUserResponse'
+            $ref: '#/definitions/response.SME'
       summary: Unblock user
       tags:
       - admin
@@ -652,15 +992,160 @@ paths:
         "400":
           description: Bad Request
           schema:
-            $ref: '#/definitions/response.GetUsersListResponse'
+            $ref: '#/definitions/response.SME'
       summary: Get users list
       tags:
       - admin
-  /seller/getdimensionalvariations:
-    post:
+  /cart:
+    delete:
       consumes:
       - application/json
-      description: Get dimensional variations
+      description: Delete from cart
+      parameters:
+      - description: Delete from Cart Request
+        in: body
+        name: deleteFromCartReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.DeleteFromCartReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Delete from cart
+      tags:
+      - cart
+    get:
+      description: Get cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetCartResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Get cart
+      tags:
+      - cart
+    put:
+      consumes:
+      - application/json
+      description: Add to cart
+      parameters:
+      - description: Add to Cart Request
+        in: body
+        name: addToCartReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddToCartReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Add to cart
+      tags:
+      - cart
+  /deleteaddress:
+    delete:
+      consumes:
+      - application/json
+      description: Delete address
+      parameters:
+      - description: Delete Address Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.DeleteUserAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Delete address
+      tags:
+      - user
+  /editaddress:
+    patch:
+      consumes:
+      - application/json
+      description: Edit address
+      parameters:
+      - description: Edit Address Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditUserAddress'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Edit address
+      tags:
+      - user
+  /editprofile:
+    patch:
+      consumes:
+      - application/json
+      description: Edit profile
+      parameters:
+      - description: Edit Profile Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditProfileReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Edit profile
+      tags:
+      - user
+  /login:
+    get:
+      consumes:
+      - application/json
+      description: Get user login page
       produces:
       - application/json
       responses:
@@ -668,13 +1153,128 @@ paths:
           description: OK
           schema:
             type: string
+      summary: Get user login page
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: User Sign In Handler
+      parameters:
+      - description: User Sign In Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.UserSignInReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMT'
         "400":
           description: Bad Request
           schema:
-            type: string
-      summary: Get dimensional variations
+            $ref: '#/definitions/response.SME'
+      summary: User Sign In Handler
       tags:
-      - admin
+      - user
+  /profile:
+    get:
+      description: Get profile
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetProfileResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Get profile
+      tags:
+      - user
+  /resetpassword:
+    get:
+      consumes:
+      - application/json
+      description: Get reset password
+      parameters:
+      - description: Apply For Password Reset Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.ApplyForPasswordResetReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Get reset password
+      tags:
+      - user
+    post:
+      consumes:
+      - application/json
+      description: Reset password
+      parameters:
+      - description: Reset Password Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.ResetPasswordReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Reset password
+      tags:
+      - user
+  /resetpasswordverifyotp:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP for password change
+      parameters:
+      - description: Verify OTP Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.VerifyOTPReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Verify OTP for password change
+      tags:
+      - user
   /seller/login:
     get:
       consumes:
@@ -687,11 +1287,32 @@ paths:
           description: OK
           schema:
             type: string
+      summary: Seller Login Page
+      tags:
+      - seller
+    post:
+      consumes:
+      - application/json
+      description: Seller Sign In Handler
+      parameters:
+      - description: Seller Sign In Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.SellerSignInReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMT'
         "400":
           description: Bad Request
           schema:
-            type: string
-      summary: Seller Login Page
+            $ref: '#/definitions/response.SME'
+      summary: Seller Sign In Handler
       tags:
       - seller
   /seller/signup:
@@ -702,7 +1323,7 @@ paths:
       parameters:
       - description: Seller Sign Up Request
         in: body
-        name: signUpReq
+        name: req
         required: true
         schema:
           $ref: '#/definitions/requestModels.SellerSignUpReq'
@@ -720,23 +1341,75 @@ paths:
       summary: Seller Sign Up Handler
       tags:
       - seller
-  /user/getdimensionalvariations:
-    post:
+  /sendotp:
+    get:
       consumes:
       - application/json
-      description: Get dimensional variations
+      description: Send OTP
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            type: string
-      summary: Get dimensional variations
+            $ref: '#/definitions/response.SME'
+      summary: Send OTP
       tags:
-      - admin
+      - user
+  /signup:
+    post:
+      consumes:
+      - application/json
+      description: User Sign Up Handler
+      parameters:
+      - description: User Sign Up Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.UserSignUpReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: User Sign Up Handler
+      tags:
+      - user
+  /verifyotp:
+    post:
+      consumes:
+      - application/json
+      description: Verify OTP
+      parameters:
+      - description: Verify OTP Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.VerifyOTPReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      summary: Verify OTP
+      tags:
+      - user
 swagger: "2.0"

@@ -587,7 +587,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param otp body {string} true "OTP"
+// @Param req body requestModels.VerifyOTPReq{} true "Verify OTP Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
 // @Router /resetpasswordverifyotp [post]
@@ -626,9 +626,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	phone := claims.Model.(map[string]interface{})["Phone"].(string)
 	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
 
-	var otpStruct struct {
-		OTP string `json:"otp" validate:"required,number"`
-	}
+	var otpStruct requestModels.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
