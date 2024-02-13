@@ -60,3 +60,7 @@ type ApplyForPasswordResetReq struct {
 type ResetPasswordReq struct {
 	NewPassword string `json:"newPassword" validate:"required,gte=3"`
 }
+
+type VerifyOTPReq struct {
+	OTP string `json:"otp" validate:"required,number"`
+}

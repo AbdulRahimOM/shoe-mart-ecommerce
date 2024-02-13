@@ -151,15 +151,13 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 // @Tags user
 // @Accept json
 // @Produce json
-// @Param otp body {string} true "OTP"
+// @Param req body requestModels.VerifyOTPReq{} true "Verify OTP Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /verifyotp [post]
 func (h *UserHandler) VerifyOtp(c *gin.Context) {
 
-	var otpStruct struct {
-		OTP string `json:"otp" validate:"required,number"`
-	}
+	var otpStruct requestModels.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
