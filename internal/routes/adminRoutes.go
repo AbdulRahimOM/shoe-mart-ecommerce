@@ -55,20 +55,24 @@ func AdminRoutes(engine *gin.RouterGroup,
 		authAdmin.POST("/unblockseller", admin.UnblockSeller)
 		authAdmin.PATCH("/verify-seller", admin.VerifySeller)
 
-		//get all orders
-		authAdmin.GET("/orders", order.GetOrders)
-		//mark order as delivered
-		authAdmin.PATCH("/markdelivery", order.MarkOrderAsDelivered)
-		//mark order as returned
-		authAdmin.PATCH("/markorderasreturned", order.MarkOrderAsReturned)
-		//cancel order
-		authAdmin.PATCH("/cancelorder", order.CancelOrderByAdmin)
+		// category management
+		authAdmin.POST("/addcategory", category.AddCategory) //(add category access only to admin)
+		authAdmin.PATCH("/editcategory", category.EditCategory)
 
-		// dashBoardData
-		authAdmin.GET("/dashboarddata/:range", reports.GetDashBoardData)
+		//product edit (exclusive "edit" access, but no "add" access to admin)
+		authAdmin.PATCH("/editbrand", brand.EditBrand)
+		authAdmin.PATCH("/editmodel", model.EditModel)
+		authAdmin.PATCH("/editcolourvariant", product.EditColourVariant)
 
-		//salesreport
-		authAdmin.GET("/salesreport/:range", reports.ExportSalesReport)
+		//order management
+		authAdmin.GET("/orders", order.GetOrders)                          //get all orders
+		authAdmin.PATCH("/markdelivery", order.MarkOrderAsDelivered)       //mark order as delivered
+		authAdmin.PATCH("/markorderasreturned", order.MarkOrderAsReturned) //mark order as returned
+		authAdmin.PATCH("/cancelorder", order.CancelOrderByAdmin)          //cancel order
+
+		//reports
+		authAdmin.GET("/dashboarddata/:range", reports.GetDashBoardData) // dashBoardData
+		authAdmin.GET("/salesreport/:range", reports.ExportSalesReport)  //salesreport
 
 		//coupon
 		authAdmin.GET("/coupons", order.GetCoupons)

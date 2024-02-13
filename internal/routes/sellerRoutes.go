@@ -19,6 +19,15 @@ func SellerRoutes(engine *gin.RouterGroup,
 	wishList *ordermanagementHandlers.WishListHandler,
 ) {
 	engine.Use(middleware.ClearCache)
+	
+	{
+		// viewing whole content from public perspective
+		engine.GET("/categories", category.GetCategories)
+		engine.GET("/brands", brand.GetBrands)
+		engine.GET("/models", model.GetModelsByBrandsAndCategories)
+		engine.GET("/products", product.GetProducts)
+	}
+
 	loggedOutGroup := engine.Group("/")
 	loggedOutGroup.Use(middleware.NotLoggedOutCheck)
 	{
@@ -28,36 +37,17 @@ func SellerRoutes(engine *gin.RouterGroup,
 	}
 
 	authSeller := engine.Group("/")
-	authSeller.Use(middleware.SellerAuth,middleware.VerifySellerStatus)
-	//product management//////////////=============================================================//////
-	//categories
+	authSeller.Use(middleware.SellerAuth, middleware.VerifySellerStatus)
 	{
-		authSeller.GET("/categories", category.GetCategories)
-		authSeller.POST("/addcategory", category.AddCategory)
-		authSeller.PATCH("/editcategory", category.EditCategory)
-
-		//brands
-		authSeller.GET("/brands", brand.GetBrands)
+		//product management (Role: Adding)(Edit access is only for admin)
 		authSeller.POST("/addbrand", brand.AddBrand)
-		authSeller.PATCH("/editbrand", brand.EditBrand)
-
-		//models
-		authSeller.GET("/models", model.GetModelsByBrandsAndCategories)
 		authSeller.POST("/addmodel", model.AddModel)
-		authSeller.PATCH("/editmodel", model.EditModel)
-
-		//Products
-		//colour variants
 		authSeller.POST("/addcolourvariant", product.AddColourVariant)
-		authSeller.PATCH("/editcolourvariant", product.EditColourVariant)
-
-		//dimensional variants
 		authSeller.POST("/adddimensionalvariant", product.AddDimensionalVariant)
 
 		//stock management
-		//get stocks => get products is enough
-		authSeller.GET("/products", product.GetProducts)
 		authSeller.POST("/addstock", product.AddStock)    //add to stock (need not know existing stock)
 		authSeller.PATCH("/editstock", product.EditStock) //need update: Add handler
+		//for get stocks => get products is enough
 	}
 }
