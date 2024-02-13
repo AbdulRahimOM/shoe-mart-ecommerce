@@ -1,10 +1,10 @@
-package handlers
+package accounthandler
 
 import (
 	e "MyShoo/internal/domain/customErrors"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
@@ -13,10 +13,10 @@ import (
 )
 
 type AdminHandler struct {
-	AdminUseCase usecaseInterface.IAdminUC
+	AdminUseCase usecase.IAdminUC
 }
 
-func NewAdminHandler(useCase usecaseInterface.IAdminUC) *AdminHandler {
+func NewAdminHandler(useCase usecase.IAdminUC) *AdminHandler {
 	return &AdminHandler{AdminUseCase: useCase}
 }
 
@@ -42,13 +42,13 @@ func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param adminSignInReq body requestModels.AdminSignInReq{} true "Admin Sign In Request"
+// @Param adminSignInReq body req.AdminSignInReq{} true "Admin Sign In Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/login [post]
 func (h *AdminHandler) PostLogIn(c *gin.Context) {
 
-	var signInReq requestModels.AdminSignInReq
+	var signInReq request.AdminSignInReq
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -139,14 +139,14 @@ func (h *AdminHandler) GetSellersList(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param unblockUserRequest body requestModels.BlockUserReq{} true "user"
+// @Param unblockUserRequest body req.BlockUserReq{} true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/blockuser [post]
 func (h *AdminHandler) BlockUser(c *gin.Context) {
 
 	//get user info from request
-	var req requestModels.BlockUserReq
+	var req request.BlockUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -182,14 +182,14 @@ func (h *AdminHandler) BlockUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param unblockUserRequest body requestModels.UnblockUserReq true "user"
+// @Param unblockUserRequest body req.UnblockUserReq true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/unblockuser [post]
 func (h *AdminHandler) UnblockUser(c *gin.Context) {
 
 	//get user info from request
-	var req requestModels.UnblockUserReq
+	var req request.UnblockUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -228,14 +228,14 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param blockSellerRequest body requestModels.BlockSellerReq true "user"
+// @Param blockSellerRequest body req.BlockSellerReq true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/blockseller [post]
 func (h *AdminHandler) BlockSeller(c *gin.Context) {
 
 	//get seller info from request
-	var req requestModels.BlockSellerReq
+	var req request.BlockSellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -271,14 +271,14 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param unblockSellerRequest body requestModels.UnblockSellerReq true "user"
+// @Param unblockSellerRequest body req.UnblockSellerReq true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/unblockseller [post]
 func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 
 	//get seller info from request
-	var req requestModels.UnblockSellerReq
+	var req request.UnblockSellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -303,7 +303,7 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 
 // VerifySeller
 func (h *AdminHandler) VerifySeller(c *gin.Context) {
-	var req requestModels.VerifySellerReq
+	var req request.VerifySellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return

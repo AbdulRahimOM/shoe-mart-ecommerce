@@ -1,8 +1,8 @@
-package prodManageUsecase
+package productusecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	myMath "MyShoo/pkg/math"
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"github.com/jinzhu/copier"
 )
 
-func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColourVariantReq, file *os.File) error {
+func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVariantReq, file *os.File) error {
 	var colourVariant entities.ColourVariant
 	if err := copier.Copy(&colourVariant, &req); err != nil {
 		return err
@@ -40,7 +40,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 	if !doModelBelongsToSeller {
 		return errors.New("model doesn't belong to this seller")
 	}
-	
+
 	//round off MRP and SalePrice to 2 decimal places
 	colourVariant.MRP = myMath.RoundFloat32(colourVariant.MRP, 2)
 	colourVariant.SalePrice = myMath.RoundFloat32(colourVariant.SalePrice, 2)
@@ -55,7 +55,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *requestModels.AddColo
 }
 
 // EditColourVariant
-func (uc *ProductsUC) EditColourVariant(req *requestModels.EditColourVariantReq) error {
+func (uc *ProductsUC) EditColourVariant(req *request.EditColourVariantReq) error {
 
 	//check if the colourVariant really exists
 	doColourVariantExists, err := uc.ProductsRepo.DoColourVariantExistByID(req.ID)

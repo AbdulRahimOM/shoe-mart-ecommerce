@@ -3,20 +3,21 @@ package di
 import (
 	myhttp "MyShoo/internal"
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
-	orderManagementHandlers "MyShoo/internal/handlers/orderManagementHandlers"
+	orderHandlers "MyShoo/internal/handlers/orderHandlers"
 	"MyShoo/internal/handlers/paymentHandlers"
-	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
+	productHandlers "MyShoo/internal/handlers/productHandlers"
 	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	infra "MyShoo/internal/infrastructure"
-	accRepository "MyShoo/internal/repository/accounts_Repo"
-	ordermanagementrepo "MyShoo/internal/repository/orderManagement_Repo"
+	accountrepo "MyShoo/internal/repository/accounts"
+	orderrepo "MyShoo/internal/repository/order"
+
 	// paymentrepo "MyShoo/internal/repository/payment_repo"
-	productRepository "MyShoo/internal/repository/productManagement_Repo"
-	reportsrepo "MyShoo/internal/repository/reports_Repo"
-	accountsUsecase "MyShoo/internal/usecase/accountsUsecases"
-	orderManageUseCase "MyShoo/internal/usecase/orderManageUseCase"
+	productRepository "MyShoo/internal/repository/productManagement"
+	reportsrepo "MyShoo/internal/repository/reports"
+	accountsusecase "MyShoo/internal/usecase/accountsusecases"
+	orderusecase "MyShoo/internal/usecase/orderUseCase"
 	paymentusecase "MyShoo/internal/usecase/paymentUsecase"
-	prodManageUsecase "MyShoo/internal/usecase/productManagementUsecases"
+	productusecase "MyShoo/internal/usecase/productManagementUsecases"
 	reportsusecases "MyShoo/internal/usecase/reportsUsecases"
 	"fmt"
 )
@@ -24,49 +25,49 @@ import (
 func InitializeAndStartAPI() {
 	fmt.Println("Handler ::: InitializeAndStartAPI in di package")
 
-	userRepository := accRepository.NewUserRepository(infra.DB)
-	userUseCase := accountsUsecase.NewUserUseCase(userRepository)
+	userRepository := accountrepo.NewUserRepository(infra.DB)
+	userUseCase := accountsusecase.NewUserUseCase(userRepository)
 	userHandler := accHandlers.NewUserHandler(userUseCase)
 
-	adminRepository := accRepository.NewAdminRepository(infra.DB)
-	adminUseCase := accountsUsecase.NewAdminUseCase(adminRepository)
+	adminRepository := accountrepo.NewAdminRepository(infra.DB)
+	adminUseCase := accountsusecase.NewAdminUseCase(adminRepository)
 	adminHandler := accHandlers.NewAdminHandler(adminUseCase)
 
-	sellerRepository := accRepository.NewSellerRepository(infra.DB)
-	sellerUseCase := accountsUsecase.NewSellerUseCase(sellerRepository)
+	sellerRepository := accountrepo.NewSellerRepository(infra.DB)
+	sellerUseCase := accountsusecase.NewSellerUseCase(sellerRepository)
 	sellerHandler := accHandlers.NewSellerHandler(sellerUseCase)
 
 	categoryRepository := productRepository.NewCategoryRepository(infra.DB)
-	categoryUseCase := prodManageUsecase.NewCategoryUseCase(categoryRepository)
+	categoryUseCase := productusecase.NewCategoryUseCase(categoryRepository)
 	categoryHandler := productHandlers.NewCategoryHandler(categoryUseCase)
 
 	brandRepository := productRepository.NewBrandRepository(infra.DB)
-	brandUseCase := prodManageUsecase.NewBrandUseCase(brandRepository)
+	brandUseCase := productusecase.NewBrandUseCase(brandRepository)
 	brandHandler := productHandlers.NewBrandHandler(brandUseCase)
 
 	modelRepository := productRepository.NewModelRepository(infra.DB)
-	modelUseCase := prodManageUsecase.NewModelUseCase(modelRepository)
+	modelUseCase := productusecase.NewModelUseCase(modelRepository)
 	modelHandler := productHandlers.NewModelHandler(modelUseCase)
 
 	productRepository := productRepository.NewProductRepository(infra.DB, infra.CloudinaryClient)
-	productUseCase := prodManageUsecase.NewProductUseCase(productRepository, modelRepository)
+	productUseCase := productusecase.NewProductUseCase(productRepository, modelRepository)
 	productHandler := productHandlers.NewProductHandler(productUseCase)
 
 	//order management related_____________________________________
 	//cart
-	cartRepository := ordermanagementrepo.NewCartRepository(infra.DB)
-	cartUseCase := orderManageUseCase.NewCartUseCase(cartRepository)
-	cartHandler := orderManagementHandlers.NewCartHandler(cartUseCase)
+	cartRepository := orderrepo.NewCartRepository(infra.DB)
+	cartUseCase := orderusecase.NewCartUseCase(cartRepository)
+	cartHandler := orderHandlers.NewCartHandler(cartUseCase)
 
 	//wishList
-	wishListRepository := ordermanagementrepo.NewWishListRepository(infra.DB)
-	wishListUseCase := orderManageUseCase.NewWishListUseCase(wishListRepository, productRepository)
-	wishListHandler := orderManagementHandlers.NewWishListHandler(wishListUseCase)
+	wishListRepository := orderrepo.NewWishListRepository(infra.DB)
+	wishListUseCase := orderusecase.NewWishListUseCase(wishListRepository, productRepository)
+	wishListHandler := orderHandlers.NewWishListHandler(wishListUseCase)
 
 	//order
-	orderRepository := ordermanagementrepo.NewOrderRepository(infra.DB, infra.CloudinaryClient)
-	orderUseCase := orderManageUseCase.NewOrderUseCase(userRepository, orderRepository, cartRepository, productRepository)
-	orderHandler := orderManagementHandlers.NewOrderHandler(orderUseCase)
+	orderRepository := orderrepo.NewOrderRepository(infra.DB, infra.CloudinaryClient)
+	orderUseCase := orderusecase.NewOrderUseCase(userRepository, orderRepository, cartRepository, productRepository)
+	orderHandler := orderHandlers.NewOrderHandler(orderUseCase)
 
 	//reports
 	reportsRepository := reportsrepo.NewReportRepository(infra.DB, infra.CloudinaryClient)

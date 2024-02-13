@@ -1,28 +1,28 @@
-package handlers
+package accounthandler
 
 import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
 	"os"
 	"strings"
 
-	jwttoken "MyShoo/pkg/jwt_tokens"
+	jwttoken "MyShoo/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )
 
 type UserHandler struct {
-	UserUseCase usecaseInterface.IUserUC
+	UserUseCase usecase.IUserUC
 }
 
-func NewUserHandler(useCase usecaseInterface.IUserUC) *UserHandler {
+func NewUserHandler(useCase usecase.IUserUC) *UserHandler {
 	return &UserHandler{UserUseCase: useCase}
 }
 
@@ -45,13 +45,13 @@ func (h *UserHandler) GetLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.UserSignUpReq{} true "User Sign Up Request"
+// @Param req body req.UserSignUpReq{} true "User Sign Up Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
 // @Router /signup [post]
 func (h *UserHandler) PostSignUp(c *gin.Context) {
 
-	var signUpReq requestModels.UserSignUpReq
+	var signUpReq request.UserSignUpReq
 	if err := c.Bind(&signUpReq); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -81,13 +81,13 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.UserSignInReq{} true "User Sign In Request"
+// @Param req body req.UserSignInReq{} true "User Sign In Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
 // @Router /login [post]
 func (h *UserHandler) PostLogIn(c *gin.Context) {
 
-	var signInReq requestModels.UserSignInReq
+	var signInReq request.UserSignInReq
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -156,13 +156,13 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.VerifyOTPReq{} true "Verify OTP Request"
+// @Param req body req.VerifyOTPReq{} true "Verify OTP Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /verifyotp [post]
 func (h *UserHandler) VerifyOtp(c *gin.Context) {
 
-	var otpStruct requestModels.VerifyOTPReq
+	var otpStruct request.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -217,13 +217,13 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.AddUserAddress{} true "Add Address Request"
+// @Param req body req.AddUserAddress{} true "Add Address Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /addaddress [post]
 func (h *UserHandler) AddUserAddress(c *gin.Context) {
 
-	var req requestModels.AddUserAddress
+	var req request.AddUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -278,13 +278,13 @@ func (h *UserHandler) AddUserAddress(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.EditUserAddress{} true "Edit Address Request"
+// @Param req body req.EditUserAddress{} true "Edit Address Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /editaddress [patch]
 func (h *UserHandler) EditUserAddress(c *gin.Context) {
 
-	var req requestModels.EditUserAddress
+	var req request.EditUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -338,13 +338,13 @@ func (h *UserHandler) EditUserAddress(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.DeleteUserAddress{} true "Delete Address Request"
+// @Param req body req.DeleteUserAddress{} true "Delete Address Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /deleteaddress [delete]
 func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 
-	var req requestModels.DeleteUserAddress
+	var req request.DeleteUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -493,13 +493,13 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.EditProfileReq{} true "Edit Profile Request"
+// @Param req body req.EditProfileReq{} true "Edit Profile Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /editprofile [patch]
 func (h *UserHandler) EditProfile(c *gin.Context) {
 
-	var req requestModels.EditProfileReq
+	var req request.EditProfileReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -544,13 +544,13 @@ func (h *UserHandler) EditProfile(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.ApplyForPasswordResetReq{} true "Apply For Password Reset Request"
+// @Param req body req.ApplyForPasswordResetReq{} true "Apply For Password Reset Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /resetpassword [get]
 func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 
-	var req requestModels.ApplyForPasswordResetReq
+	var req request.ApplyForPasswordResetReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -600,7 +600,7 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.VerifyOTPReq{} true "Verify OTP Request"
+// @Param req body req.VerifyOTPReq{} true "Verify OTP Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
 // @Router /resetpasswordverifyotp [post]
@@ -639,7 +639,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	phone := claims.Model.(map[string]interface{})["Phone"].(string)
 	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
 
-	var otpStruct requestModels.VerifyOTPReq
+	var otpStruct request.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -683,7 +683,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.ResetPasswordReq{} true "Reset Password Request"
+// @Param req body req.ResetPasswordReq{} true "Reset Password Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /resetpassword [post]
@@ -722,7 +722,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	var req requestModels.ResetPasswordReq
+	var req request.ResetPasswordReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return

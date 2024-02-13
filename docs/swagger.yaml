@@ -224,7 +224,7 @@ definitions:
       userID:
         type: integer
     type: object
-  requestModels.AddBrandReq:
+  req.AddBrandReq:
     properties:
       name:
         minLength: 3
@@ -235,7 +235,7 @@ definitions:
     - name
     - sellerId
     type: object
-  requestModels.AddCategoryReq:
+  req.AddCategoryReq:
     properties:
       name:
         minLength: 3
@@ -243,7 +243,7 @@ definitions:
     required:
     - name
     type: object
-  requestModels.AddColourVariantReq:
+  req.AddColourVariantReq:
     properties:
       colour:
         minLength: 3
@@ -260,7 +260,7 @@ definitions:
     - mrp
     - salePrice
     type: object
-  requestModels.AddDimensionalVariantReq:
+  req.AddDimensionalVariantReq:
     properties:
       colourVariantId:
         type: integer
@@ -270,7 +270,7 @@ definitions:
     - colourVariantId
     - dvIndex
     type: object
-  requestModels.AddModelReq:
+  req.AddModelReq:
     properties:
       brandId:
         type: integer
@@ -284,7 +284,7 @@ definitions:
     - categoryId
     - name
     type: object
-  requestModels.AddStockReq:
+  req.AddStockReq:
     properties:
       addingStockCount:
         type: integer
@@ -297,7 +297,7 @@ definitions:
     - productId
     - sellerId
     type: object
-  requestModels.AddToCartReq:
+  req.AddToCartReq:
     properties:
       productID:
         type: integer
@@ -307,7 +307,7 @@ definitions:
     - productID
     - userID
     type: object
-  requestModels.AddToWishListReq:
+  req.AddToWishListReq:
     properties:
       productID:
         type: integer
@@ -317,7 +317,7 @@ definitions:
     - productID
     - wishListID
     type: object
-  requestModels.AddUserAddress:
+  req.AddUserAddress:
     properties:
       addressName:
         minLength: 3
@@ -360,7 +360,7 @@ definitions:
     - street
     - userId
     type: object
-  requestModels.AdminSignInReq:
+  req.AdminSignInReq:
     properties:
       Login_email:
         type: string
@@ -371,49 +371,49 @@ definitions:
     - Login_email
     - Login_password
     type: object
-  requestModels.ApplyForPasswordResetReq:
+  req.ApplyForPasswordResetReq:
     properties:
       email:
         type: string
     required:
     - email
     type: object
-  requestModels.BlockCouponReq:
+  req.BlockCouponReq:
     properties:
       id:
         type: integer
     required:
     - id
     type: object
-  requestModels.BlockSellerReq:
+  req.BlockSellerReq:
     properties:
       email:
         type: string
     required:
     - email
     type: object
-  requestModels.BlockUserReq:
+  req.BlockUserReq:
     properties:
       email:
         type: string
     required:
     - email
     type: object
-  requestModels.CancelOrderReq:
+  req.CancelOrderReq:
     properties:
       orderID:
         type: integer
     required:
     - orderID
     type: object
-  requestModels.CreateWishListReq:
+  req.CreateWishListReq:
     properties:
       name:
         type: string
     required:
     - name
     type: object
-  requestModels.DeleteFromCartReq:
+  req.DeleteFromCartReq:
     properties:
       productID:
         type: integer
@@ -423,7 +423,7 @@ definitions:
     - productID
     - userID
     type: object
-  requestModels.DeleteUserAddress:
+  req.DeleteUserAddress:
     properties:
       id:
         type: integer
@@ -433,7 +433,7 @@ definitions:
     - id
     - userId
     type: object
-  requestModels.EditBrandReq:
+  req.EditBrandReq:
     properties:
       newName:
         minLength: 3
@@ -449,7 +449,7 @@ definitions:
     - oldName
     - sellerId
     type: object
-  requestModels.EditCategoryReq:
+  req.EditCategoryReq:
     properties:
       newName:
         description: ID uint `json:"id" validate:"required,number"`
@@ -462,7 +462,7 @@ definitions:
     - newName
     - oldName
     type: object
-  requestModels.EditColourVariantReq:
+  req.EditColourVariantReq:
     properties:
       colour:
         minLength: 3
@@ -482,7 +482,7 @@ definitions:
     - mrp
     - salePrice
     type: object
-  requestModels.EditModelReq:
+  req.EditModelReq:
     properties:
       brandId:
         type: integer
@@ -499,7 +499,7 @@ definitions:
     - id
     - name
     type: object
-  requestModels.EditProfileReq:
+  req.EditProfileReq:
     properties:
       email:
         type: string
@@ -517,7 +517,7 @@ definitions:
     - lastName
     - phone
     type: object
-  requestModels.EditStockReq:
+  req.EditStockReq:
     properties:
       productId:
         type: integer
@@ -530,7 +530,7 @@ definitions:
     - sellerId
     - updatedStockCount
     type: object
-  requestModels.EditUserAddress:
+  req.EditUserAddress:
     properties:
       addressName:
         minLength: 3
@@ -576,7 +576,7 @@ definitions:
     - street
     - userId
     type: object
-  requestModels.MakeOrderReq:
+  req.MakeOrderReq:
     properties:
       addressID:
         type: integer
@@ -589,7 +589,7 @@ definitions:
     - addressID
     - paymentMethod
     type: object
-  requestModels.NewCouponReq:
+  req.NewCouponReq:
     properties:
       code:
         maxLength: 15
@@ -631,7 +631,7 @@ definitions:
     - type
     - usageLimit
     type: object
-  requestModels.ProceedToPaymentReq:
+  req.ProceedToPaymentReq:
     properties:
       discount:
         type: number
@@ -663,7 +663,7 @@ definitions:
     - total_amount
     - total_payable_amount
     type: object
-  requestModels.RemoveFromWishListReq:
+  req.RemoveFromWishListReq:
     properties:
       productID:
         type: integer
@@ -673,7 +673,7 @@ definitions:
     - productID
     - wishListID
     type: object
-  requestModels.ResetPasswordReq:
+  req.ResetPasswordReq:
     properties:
       newPassword:
         minLength: 3
@@ -681,21 +681,21 @@ definitions:
     required:
     - newPassword
     type: object
-  requestModels.RetryPaymentReq:
+  req.RetryPaymentReq:
     properties:
       order_id:
         type: integer
     required:
     - order_id
     type: object
-  requestModels.ReturnOrderReq:
+  req.ReturnOrderReq:
     properties:
       orderID:
         type: integer
     required:
     - orderID
     type: object
-  requestModels.SellerSignInReq:
+  req.SellerSignInReq:
     properties:
       Login_email:
         type: string
@@ -706,7 +706,7 @@ definitions:
     - Login_email
     - Login_password
     type: object
-  requestModels.SellerSignUpReq:
+  req.SellerSignUpReq:
     properties:
       SignUp_email:
         type: string
@@ -727,14 +727,14 @@ definitions:
     - SignUp_firstName
     - SignUp_phone
     type: object
-  requestModels.SetAddressForCheckOutReq:
+  req.SetAddressForCheckOutReq:
     properties:
       addressID:
         type: integer
     required:
     - addressID
     type: object
-  requestModels.SetCouponForCheckoutReq:
+  req.SetCouponForCheckoutReq:
     properties:
       addressID:
         type: integer
@@ -744,28 +744,28 @@ definitions:
     - addressID
     - couponID
     type: object
-  requestModels.UnblockCouponReq:
+  req.UnblockCouponReq:
     properties:
       id:
         type: integer
     required:
     - id
     type: object
-  requestModels.UnblockSellerReq:
+  req.UnblockSellerReq:
     properties:
       email:
         type: string
     required:
     - email
     type: object
-  requestModels.UnblockUserReq:
+  req.UnblockUserReq:
     properties:
       email:
         type: string
     required:
     - email
     type: object
-  requestModels.UserSignInReq:
+  req.UserSignInReq:
     properties:
       Login_email:
         type: string
@@ -776,7 +776,7 @@ definitions:
     - Login_email
     - Login_password
     type: object
-  requestModels.UserSignUpReq:
+  req.UserSignUpReq:
     properties:
       SignUp_email:
         type: string
@@ -797,7 +797,7 @@ definitions:
     - SignUp_firstName
     - SignUp_phone
     type: object
-  requestModels.VerifyOTPReq:
+  req.VerifyOTPReq:
     properties:
       otp:
         type: string
@@ -1375,7 +1375,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddUserAddress'
+          $ref: '#/definitions/req.AddUserAddress'
       produces:
       - application/json
       responses:
@@ -1422,7 +1422,7 @@ paths:
         name: addToWishListReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddToWishListReq'
+          $ref: '#/definitions/req.AddToWishListReq'
       produces:
       - application/json
       responses:
@@ -1450,7 +1450,7 @@ paths:
         name: addCategoryReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddCategoryReq'
+          $ref: '#/definitions/req.AddCategoryReq'
       produces:
       - application/json
       responses:
@@ -1478,7 +1478,7 @@ paths:
         name: blockCouponReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.BlockCouponReq'
+          $ref: '#/definitions/req.BlockCouponReq'
       produces:
       - application/json
       responses:
@@ -1506,7 +1506,7 @@ paths:
         name: blockSellerRequest
         required: true
         schema:
-          $ref: '#/definitions/requestModels.BlockSellerReq'
+          $ref: '#/definitions/req.BlockSellerReq'
       produces:
       - application/json
       responses:
@@ -1534,7 +1534,7 @@ paths:
         name: unblockUserRequest
         required: true
         schema:
-          $ref: '#/definitions/requestModels.BlockUserReq'
+          $ref: '#/definitions/req.BlockUserReq'
       produces:
       - application/json
       responses:
@@ -1583,7 +1583,7 @@ paths:
         name: cancelOrderReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.CancelOrderReq'
+          $ref: '#/definitions/req.CancelOrderReq'
       produces:
       - application/json
       responses:
@@ -1722,7 +1722,7 @@ paths:
         name: editBrandReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditBrandReq'
+          $ref: '#/definitions/req.EditBrandReq'
       produces:
       - application/json
       responses:
@@ -1750,7 +1750,7 @@ paths:
         name: editCategoryReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditCategoryReq'
+          $ref: '#/definitions/req.EditCategoryReq'
       produces:
       - application/json
       responses:
@@ -1778,7 +1778,7 @@ paths:
         name: editColourVariantReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditColourVariantReq'
+          $ref: '#/definitions/req.EditColourVariantReq'
       produces:
       - application/json
       responses:
@@ -1806,7 +1806,7 @@ paths:
         name: editModelReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditModelReq'
+          $ref: '#/definitions/req.EditModelReq'
       produces:
       - application/json
       responses:
@@ -1850,7 +1850,7 @@ paths:
         name: adminSignInReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AdminSignInReq'
+          $ref: '#/definitions/req.AdminSignInReq'
       produces:
       - application/json
       responses:
@@ -1966,7 +1966,7 @@ paths:
         name: newCouponReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.NewCouponReq'
+          $ref: '#/definitions/req.NewCouponReq'
       produces:
       - application/json
       responses:
@@ -2189,7 +2189,7 @@ paths:
         name: unblockCouponReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.UnblockCouponReq'
+          $ref: '#/definitions/req.UnblockCouponReq'
       produces:
       - application/json
       responses:
@@ -2217,7 +2217,7 @@ paths:
         name: unblockSellerRequest
         required: true
         schema:
-          $ref: '#/definitions/requestModels.UnblockSellerReq'
+          $ref: '#/definitions/req.UnblockSellerReq'
       produces:
       - application/json
       responses:
@@ -2245,7 +2245,7 @@ paths:
         name: unblockUserRequest
         required: true
         schema:
-          $ref: '#/definitions/requestModels.UnblockUserReq'
+          $ref: '#/definitions/req.UnblockUserReq'
       produces:
       - application/json
       responses:
@@ -2315,7 +2315,7 @@ paths:
         name: cancelOrderReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.CancelOrderReq'
+          $ref: '#/definitions/req.CancelOrderReq'
       produces:
       - application/json
       responses:
@@ -2343,7 +2343,7 @@ paths:
         name: deleteFromCartReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.DeleteFromCartReq'
+          $ref: '#/definitions/req.DeleteFromCartReq'
       produces:
       - application/json
       responses:
@@ -2388,7 +2388,7 @@ paths:
         name: addToCartReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddToCartReq'
+          $ref: '#/definitions/req.AddToCartReq'
       produces:
       - application/json
       responses:
@@ -2456,7 +2456,7 @@ paths:
         name: createWishListReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.CreateWishListReq'
+          $ref: '#/definitions/req.CreateWishListReq'
       produces:
       - application/json
       responses:
@@ -2484,7 +2484,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.DeleteUserAddress'
+          $ref: '#/definitions/req.DeleteUserAddress'
       produces:
       - application/json
       responses:
@@ -2512,7 +2512,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditUserAddress'
+          $ref: '#/definitions/req.EditUserAddress'
       produces:
       - application/json
       responses:
@@ -2540,7 +2540,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditProfileReq'
+          $ref: '#/definitions/req.EditProfileReq'
       produces:
       - application/json
       responses:
@@ -2584,7 +2584,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.UserSignInReq'
+          $ref: '#/definitions/req.UserSignInReq'
       produces:
       - application/json
       responses:
@@ -2612,7 +2612,7 @@ paths:
         name: makeOrderReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.MakeOrderReq'
+          $ref: '#/definitions/req.MakeOrderReq'
       produces:
       - application/json
       responses:
@@ -2746,7 +2746,7 @@ paths:
         name: proceedToPaymentReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.ProceedToPaymentReq'
+          $ref: '#/definitions/req.ProceedToPaymentReq'
       produces:
       - application/json
       responses:
@@ -2830,7 +2830,7 @@ paths:
         name: removeFromWishListReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.RemoveFromWishListReq'
+          $ref: '#/definitions/req.RemoveFromWishListReq'
       produces:
       - application/json
       responses:
@@ -2858,7 +2858,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.ApplyForPasswordResetReq'
+          $ref: '#/definitions/req.ApplyForPasswordResetReq'
       produces:
       - application/json
       responses:
@@ -2885,7 +2885,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.ResetPasswordReq'
+          $ref: '#/definitions/req.ResetPasswordReq'
       produces:
       - application/json
       responses:
@@ -2913,7 +2913,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.VerifyOTPReq'
+          $ref: '#/definitions/req.VerifyOTPReq'
       produces:
       - application/json
       responses:
@@ -2941,7 +2941,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.RetryPaymentReq'
+          $ref: '#/definitions/req.RetryPaymentReq'
       produces:
       - application/json
       responses:
@@ -2969,7 +2969,7 @@ paths:
         name: returnOrderReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.ReturnOrderReq'
+          $ref: '#/definitions/req.ReturnOrderReq'
       produces:
       - application/json
       responses:
@@ -3016,7 +3016,7 @@ paths:
         name: addBrandReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddBrandReq'
+          $ref: '#/definitions/req.AddBrandReq'
       produces:
       - application/json
       responses:
@@ -3044,7 +3044,7 @@ paths:
         name: addColourVariantReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddColourVariantReq'
+          $ref: '#/definitions/req.AddColourVariantReq'
       produces:
       - application/json
       responses:
@@ -3072,7 +3072,7 @@ paths:
         name: addModelReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddModelReq'
+          $ref: '#/definitions/req.AddModelReq'
       produces:
       - application/json
       responses:
@@ -3100,7 +3100,7 @@ paths:
         name: addStockReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddStockReq'
+          $ref: '#/definitions/req.AddStockReq'
       produces:
       - application/json
       responses:
@@ -3170,7 +3170,7 @@ paths:
         name: editStockReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.EditStockReq'
+          $ref: '#/definitions/req.EditStockReq'
       produces:
       - application/json
       responses:
@@ -3214,7 +3214,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.SellerSignInReq'
+          $ref: '#/definitions/req.SellerSignInReq'
       produces:
       - application/json
       responses:
@@ -3295,7 +3295,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.SellerSignUpReq'
+          $ref: '#/definitions/req.SellerSignUpReq'
       produces:
       - application/json
       responses:
@@ -3344,7 +3344,7 @@ paths:
         name: setAddGetCouponsReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.SetAddressForCheckOutReq'
+          $ref: '#/definitions/req.SetAddressForCheckOutReq'
       produces:
       - application/json
       responses:
@@ -3372,7 +3372,7 @@ paths:
         name: setCouponGetPaymentMethodsReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.SetCouponForCheckoutReq'
+          $ref: '#/definitions/req.SetCouponForCheckoutReq'
       produces:
       - application/json
       responses:
@@ -3400,7 +3400,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.UserSignUpReq'
+          $ref: '#/definitions/req.UserSignUpReq'
       produces:
       - application/json
       responses:
@@ -3449,7 +3449,7 @@ paths:
         name: req
         required: true
         schema:
-          $ref: '#/definitions/requestModels.VerifyOTPReq'
+          $ref: '#/definitions/req.VerifyOTPReq'
       produces:
       - application/json
       responses:

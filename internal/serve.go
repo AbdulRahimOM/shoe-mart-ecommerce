@@ -2,9 +2,9 @@ package myhttp
 
 import (
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
-	orderHandlers "MyShoo/internal/handlers/orderManagementHandlers"
+	orderHandlers "MyShoo/internal/handlers/orderHandlers"
 	"MyShoo/internal/handlers/paymentHandlers"
-	productHandlers "MyShoo/internal/handlers/productManagementHandlers"
+	productHandlers "MyShoo/internal/handlers/productHandlers"
 	reporthandlers "MyShoo/internal/handlers/reportHandlers"
 	"MyShoo/internal/routes"
 
@@ -36,7 +36,7 @@ func NewServerHTTP(
 	// engine.LoadHTMLGlob("./internal/view/*.html")
 	engine.LoadHTMLGlob("./internal/templates/*.html")
 
-	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order,payment)
+	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order, payment)
 	routes.AdminRoutes(engine.Group("/admin"), admin, category, brand, model, product, cart, wishList, order, reports)
 
 	routes.SellerRoutes(engine.Group("/seller"), seller, category, brand, model, product, cart, wishList)

@@ -1,4 +1,4 @@
-package repository_interface
+package repo
 
 import (
 	"MyShoo/internal/domain/entities"

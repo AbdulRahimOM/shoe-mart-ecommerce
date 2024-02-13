@@ -1,13 +1,13 @@
-package accountsUsecase
+package accountsusecase
 
 import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
-	hashpassword "MyShoo/pkg/hash_Password"
-	jwttoken "MyShoo/pkg/jwt_tokens"
+	usecase "MyShoo/internal/usecase/interface"
+	hashpassword "MyShoo/pkg/hashPassword"
+	jwttoken "MyShoo/pkg/jwt"
 	otpManager "MyShoo/pkg/twilio"
 	"errors"
 	"fmt"
@@ -20,7 +20,7 @@ type UserUseCase struct {
 	userRepo repoInterface.IUserRepo
 }
 
-func NewUserUseCase(repo repoInterface.IUserRepo) usecaseInterface.IUserUC {
+func NewUserUseCase(repo repoInterface.IUserRepo) usecase.IUserUC {
 	return &UserUseCase{userRepo: repo}
 }
 
@@ -51,7 +51,7 @@ func (uc *UserUseCase) VerifyOtp(phone string, email string, otp string) (bool, 
 		return true, nil
 	}
 }
-func (uc *UserUseCase) SignIn(req *requestModels.UserSignInReq) (*string, error) {
+func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, error) {
 	// fmt.Println("req.email=", req.Email)
 	isEmailRegistered, err := uc.userRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -86,7 +86,7 @@ func (uc *UserUseCase) SignIn(req *requestModels.UserSignInReq) (*string, error)
 	return &tokenString, nil
 }
 
-func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error) {
+func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, error) {
 	// fmt.Println("-----\nreq.email:", req.Email, "\n------")
 	emailAlreadyUsed, err := uc.userRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -103,7 +103,7 @@ func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error)
 		fmt.Println("\n error while hashing pw. Error:)", err, "\n.")
 		return nil, err
 	}
-	fmt.Println("\n\n\n\nhashedpw=",hashedPwd)
+	fmt.Println("\n\n\n\nhashedpw=", hashedPwd)
 	var signingUser = entities.User{
 		FirstName: req.FirstName,
 		LastName:  req.LastName,
@@ -136,7 +136,7 @@ func (uc *UserUseCase) SignUp(req *requestModels.UserSignUpReq) (*string, error)
 	return &tokenString, nil
 }
 
-func (uc *UserUseCase) AddUserAddress(req *requestModels.AddUserAddress) error {
+func (uc *UserUseCase) AddUserAddress(req *request.AddUserAddress) error {
 	//check if address name already exists
 	doAddressNameAlreadyExists, err := uc.userRepo.DoAddressNameExists(req.AddressName)
 	if err != nil {
@@ -161,7 +161,7 @@ func (uc *UserUseCase) AddUserAddress(req *requestModels.AddUserAddress) error {
 }
 
 // EditUserAddress
-func (uc *UserUseCase) EditUserAddress(req *requestModels.EditUserAddress) error {
+func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) error {
 	//check if address name exists by ID
 	doAddressExistsByID, err := uc.userRepo.DoAddressExistsByID(req.ID)
 	if err != nil {
@@ -217,7 +217,7 @@ func (uc *UserUseCase) EditUserAddress(req *requestModels.EditUserAddress) error
 }
 
 // DeleteUserAddress
-func (uc *UserUseCase) DeleteUserAddress(req *requestModels.DeleteUserAddress) error {
+func (uc *UserUseCase) DeleteUserAddress(req *request.DeleteUserAddress) error {
 	//check if address exists by ID
 	doAddressExistsByID, err := uc.userRepo.DoAddressExistsByID(req.ID)
 	if err != nil {
@@ -296,7 +296,7 @@ func (uc *UserUseCase) GetProfile(userID uint) (*entities.UserDetails, error) {
 }
 
 // EditProfile
-func (uc *UserUseCase) EditProfile(userID uint, req *requestModels.EditProfileReq) error {
+func (uc *UserUseCase) EditProfile(userID uint, req *request.EditProfileReq) error {
 	//check if user exists //this is required because if user is deleted from records, jwt token may not have expired.
 	doUserExists, err := uc.userRepo.DoUserExistsByID(userID)
 	if err != nil {
@@ -417,4 +417,3 @@ func (uc *UserUseCase) ResetPassword(id uint, newPassword *string) error {
 	}
 	return nil
 }
-

@@ -1,15 +1,15 @@
-package prodManageUsecase
+package productusecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	"errors"
 	"fmt"
 
 	"github.com/jinzhu/copier"
 )
 
-func (uc *ProductsUC) AddDimensionalVariant(req *requestModels.AddDimensionalVariantReq) error {
+func (uc *ProductsUC) AddDimensionalVariant(req *request.AddDimensionalVariantReq) error {
 	var dimensionalVariant entities.DimensionalVariant
 	if err := copier.Copy(&dimensionalVariant, &req); err != nil {
 		return err
@@ -32,4 +32,3 @@ func (uc *ProductsUC) AddDimensionalVariant(req *requestModels.AddDimensionalVar
 
 	return nil
 }
-

@@ -1,11 +1,11 @@
-package usecaseInterface
+package usecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 )
 
 type IPaymentUC interface {
-	VerifyPayment(req *requestModels.VerifyPaymentReq) (bool,*entities.Order, string, error)
-	RetryPayment(req *requestModels.RetryPaymentReq, userID uint) (*requestModels.ProceedToPaymentReq, string, error)
+	VerifyPayment(req *request.VerifyPaymentReq) (bool, *entities.Order, string, error)
+	RetryPayment(req *request.RetryPaymentReq, userID uint) (*request.ProceedToPaymentReq, string, error)
 }

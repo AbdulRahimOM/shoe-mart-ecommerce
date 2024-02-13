@@ -1,37 +1,37 @@
-package usecaseInterface
+package usecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"os"
 )
 
 type ICategoryUC interface {
-	AddCategory(req *requestModels.AddCategoryReq) error
+	AddCategory(req *request.AddCategoryReq) error
 	GetCategories() (*[]entities.Categories, error)
-	EditCategory(req *requestModels.EditCategoryReq) error
+	EditCategory(req *request.EditCategoryReq) error
 }
 type IBrandsUC interface {
-	AddBrand(req *requestModels.AddBrandReq) error
+	AddBrand(req *request.AddBrandReq) error
 	GetBrands() (*[26]entities.BrandsByAlphabet, error)
-	EditBrand(req *requestModels.EditBrandReq) error
+	EditBrand(req *request.EditBrandReq) error
 }
 
 type IModelsUC interface {
-	AddModel(req *requestModels.AddModelReq) error
-	EditModelName(req *requestModels.EditModelReq) error
+	AddModel(req *request.AddModelReq) error
+	EditModelName(req *request.EditModelReq) error
 	GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, error)
 }
 type IProductsUC interface {
-	AddColourVariant(sellerID uint, req *requestModels.AddColourVariantReq, file *os.File) error
-	EditColourVariant(req *requestModels.EditColourVariantReq) error
+	AddColourVariant(sellerID uint, req *request.AddColourVariantReq, file *os.File) error
+	EditColourVariant(req *request.EditColourVariantReq) error
 	GetColourVariantsUnderModel(modelID uint) (*[]response.ResponseColourVarient, error)
 
 	GetProducts() (*[]response.ResponseProduct, error)
 
-	AddDimensionalVariant(req *requestModels.AddDimensionalVariantReq) error
+	AddDimensionalVariant(req *request.AddDimensionalVariantReq) error
 
-	AddStock(req *requestModels.AddStockReq) error
-	EditStock(req *requestModels.EditStockReq) error
+	AddStock(req *request.AddStockReq) error
+	EditStock(req *request.EditStockReq) error
 }

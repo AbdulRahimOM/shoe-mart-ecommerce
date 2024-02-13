@@ -1,10 +1,10 @@
-package prodManageUsecase
+package productusecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	"errors"
 	"fmt"
 
@@ -15,13 +15,13 @@ type CategoryUC struct {
 	CategoryRepo repoInterface.ICategoryRepo
 }
 
-func NewCategoryUseCase(categoryRepo repoInterface.ICategoryRepo) usecaseInterface.ICategoryUC {
+func NewCategoryUseCase(categoryRepo repoInterface.ICategoryRepo) usecase.ICategoryUC {
 	return &CategoryUC{
 		CategoryRepo: categoryRepo,
 	}
 }
 
-func (uc *CategoryUC) AddCategory(req *requestModels.AddCategoryReq) error {
+func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) error {
 
 	var category entities.Categories
 	if err := copier.Copy(&category, &req); err != nil {
@@ -61,7 +61,7 @@ func (uc *CategoryUC) GetCategories() (*[]entities.Categories, error) {
 }
 
 // edit category
-func (uc *CategoryUC) EditCategory(req *requestModels.EditCategoryReq) error {
+func (uc *CategoryUC) EditCategory(req *request.EditCategoryReq) error {
 	// check if the category really exists
 	DoCategoryExistsByName, err := uc.CategoryRepo.DoCategoryExistsByName(req.OldName)
 	if err != nil {

@@ -1,4 +1,4 @@
-package repository_interface
+package repo
 
 type IPaymentRepo interface {
 }

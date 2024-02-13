@@ -1,14 +1,14 @@
-package accountsUsecase
+package accountsusecase
 
 import (
 	"MyShoo/internal/domain/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
-	hashpassword "MyShoo/pkg/hash_Password"
-	jwttoken "MyShoo/pkg/jwt_tokens"
+	usecase "MyShoo/internal/usecase/interface"
+	hashpassword "MyShoo/pkg/hashPassword"
+	jwttoken "MyShoo/pkg/jwt"
 	"errors"
 	"fmt"
 	"time"
@@ -18,7 +18,7 @@ type AdminUseCase struct {
 	adminRepo repoInterface.IAdminRepo
 }
 
-func NewAdminUseCase(repo repoInterface.IAdminRepo) usecaseInterface.IAdminUC {
+func NewAdminUseCase(repo repoInterface.IAdminRepo) usecase.IAdminUC {
 	return &AdminUseCase{adminRepo: repo}
 }
 
@@ -32,7 +32,7 @@ func (uc *AdminUseCase) GetSellersList() (*[]entities.PwMaskedSeller, error) {
 	return sellerlist, nil
 }
 
-func (uc *AdminUseCase) BlockUser(req *requestModels.BlockUserReq) error {
+func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) error {
 	//check if user exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
 	if err != nil {
@@ -49,7 +49,7 @@ func (uc *AdminUseCase) BlockUser(req *requestModels.BlockUserReq) error {
 	}
 	return nil
 }
-func (uc *AdminUseCase) UnblockUser(req *requestModels.UnblockUserReq) error {
+func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) error {
 	//check if user exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
 	if err != nil {
@@ -68,7 +68,7 @@ func (uc *AdminUseCase) UnblockUser(req *requestModels.UnblockUserReq) error {
 	return nil
 }
 
-func (uc *AdminUseCase) BlockSeller(req *requestModels.BlockSellerReq) error {
+func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) error {
 	//check if seller exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsSeller(req.Email)
 	if err != nil {
@@ -88,7 +88,7 @@ func (uc *AdminUseCase) BlockSeller(req *requestModels.BlockSellerReq) error {
 	return nil
 }
 
-func (uc *AdminUseCase) UnblockSeller(req *requestModels.UnblockSellerReq) error {
+func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) error {
 	//check if seller exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsSeller(req.Email)
 	if err != nil {
@@ -115,7 +115,7 @@ func (uc *AdminUseCase) GetUsersList() (*[]entities.UserDetails, error) {
 	}
 	return userlist, nil
 }
-func (uc *AdminUseCase) SignIn(req *requestModels.AdminSignInReq) (*string, error) {
+func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, error) {
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsAdmin(req.Email)
 	if err != nil {
 		fmt.Println("Error occured while searching email, error:", err)
@@ -156,8 +156,8 @@ func (uc *AdminUseCase) RestartConfig() error {
 	return nil
 }
 
-//VerifySeller
-func (uc *AdminUseCase) VerifySeller(req *requestModels.VerifySellerReq) error {
+// VerifySeller
+func (uc *AdminUseCase) VerifySeller(req *request.VerifySellerReq) error {
 	//check if status is not verified
 	isVerified, err := uc.adminRepo.IsSellerVerified(req.SellerID)
 	if err != nil {

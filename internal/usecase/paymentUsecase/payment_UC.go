@@ -4,28 +4,28 @@ import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	msg "MyShoo/internal/domain/messages"
-	"MyShoo/internal/models/requestModels"
-	repository_interface "MyShoo/internal/repository/interface"
+	request "MyShoo/internal/models/requestModels"
+	repo "MyShoo/internal/repository/interface"
 	"MyShoo/internal/services"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	"errors"
 	"os"
 )
 
 type PaymentUC struct {
-	orderRepo   repository_interface.IOrderRepo
+	orderRepo repo.IOrderRepo
 }
 
 func NewPaymentUseCase(
-	orderRepo repository_interface.IOrderRepo,
-) usecaseInterface.IPaymentUC {
+	orderRepo repo.IOrderRepo,
+) usecase.IPaymentUC {
 	return &PaymentUC{
-		orderRepo:   orderRepo,
+		orderRepo: orderRepo,
 	}
 }
 
-// VerifyPayment implements usecaseInterface.IPaymentUC.
-func (uc *PaymentUC) VerifyPayment(req *requestModels.VerifyPaymentReq) (bool, *entities.Order, string, error) {
+// VerifyPayment implements usecase.IPaymentUC.
+func (uc *PaymentUC) VerifyPayment(req *request.VerifyPaymentReq) (bool, *entities.Order, string, error) {
 	//verify payment
 	isPaymentValid := services.VerifyPayment(req.RazorpayOrderID, req.RazorpayPaymentID, req.RazorpaySignature)
 	if !isPaymentValid {
@@ -47,8 +47,8 @@ func (uc *PaymentUC) VerifyPayment(req *requestModels.VerifyPaymentReq) (bool, *
 	return true, order, "Hoorray!!.. Payment recieved. Your order is placed.", nil
 }
 
-// RetryPayment(req *requestModels.RetryPaymentReq) (*requestModels.ProceedToPaymentReq, string, error)
-func (uc *PaymentUC) RetryPayment(req *requestModels.RetryPaymentReq, userID uint) (*requestModels.ProceedToPaymentReq, string, error) {
+// RetryPayment(req *request.RetryPaymentReq) (*req.ProceedToPaymentReq, string, error)
+func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*request.ProceedToPaymentReq, string, error) {
 	//check if order belongs to user
 	userIDOfOrder, err := uc.orderRepo.GetUserIDByOrderID(req.OrderID)
 	if err != nil {
@@ -85,7 +85,7 @@ func (uc *PaymentUC) RetryPayment(req *requestModels.RetryPaymentReq, userID uin
 		}
 	}
 
-	proceedToPaymentReq := requestModels.ProceedToPaymentReq{
+	proceedToPaymentReq := request.ProceedToPaymentReq{
 		PaymentKey:         os.Getenv("RAZORPAY_KEY_ID"),
 		PaymentOrderID:     order.TransactionID, //need update //payment-u
 		OrderRefNo:         order.ReferenceNo,

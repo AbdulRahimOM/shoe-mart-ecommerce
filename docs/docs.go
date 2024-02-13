@@ -40,7 +40,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddUserAddress"
+                            "$ref": "#/definitions/req.AddUserAddress"
                         }
                     }
                 ],
@@ -116,7 +116,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddToWishListReq"
+                            "$ref": "#/definitions/req.AddToWishListReq"
                         }
                     }
                 ],
@@ -161,7 +161,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddCategoryReq"
+                            "$ref": "#/definitions/req.AddCategoryReq"
                         }
                     }
                 ],
@@ -206,7 +206,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.BlockCouponReq"
+                            "$ref": "#/definitions/req.BlockCouponReq"
                         }
                     }
                 ],
@@ -251,7 +251,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.BlockSellerReq"
+                            "$ref": "#/definitions/req.BlockSellerReq"
                         }
                     }
                 ],
@@ -296,7 +296,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.BlockUserReq"
+                            "$ref": "#/definitions/req.BlockUserReq"
                         }
                     }
                 ],
@@ -374,7 +374,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.CancelOrderReq"
+                            "$ref": "#/definitions/req.CancelOrderReq"
                         }
                     }
                 ],
@@ -592,7 +592,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditBrandReq"
+                            "$ref": "#/definitions/req.EditBrandReq"
                         }
                     }
                 ],
@@ -637,7 +637,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditCategoryReq"
+                            "$ref": "#/definitions/req.EditCategoryReq"
                         }
                     }
                 ],
@@ -682,7 +682,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditColourVariantReq"
+                            "$ref": "#/definitions/req.EditColourVariantReq"
                         }
                     }
                 ],
@@ -727,7 +727,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditModelReq"
+                            "$ref": "#/definitions/req.EditModelReq"
                         }
                     }
                 ],
@@ -798,7 +798,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AdminSignInReq"
+                            "$ref": "#/definitions/req.AdminSignInReq"
                         }
                     }
                 ],
@@ -979,7 +979,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.NewCouponReq"
+                            "$ref": "#/definitions/req.NewCouponReq"
                         }
                     }
                 ],
@@ -1338,7 +1338,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.UnblockCouponReq"
+                            "$ref": "#/definitions/req.UnblockCouponReq"
                         }
                     }
                 ],
@@ -1383,7 +1383,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.UnblockSellerReq"
+                            "$ref": "#/definitions/req.UnblockSellerReq"
                         }
                     }
                 ],
@@ -1428,7 +1428,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.UnblockUserReq"
+                            "$ref": "#/definitions/req.UnblockUserReq"
                         }
                     }
                 ],
@@ -1540,7 +1540,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.CancelOrderReq"
+                            "$ref": "#/definitions/req.CancelOrderReq"
                         }
                     }
                 ],
@@ -1614,7 +1614,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddToCartReq"
+                            "$ref": "#/definitions/req.AddToCartReq"
                         }
                     }
                 ],
@@ -1657,7 +1657,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.DeleteFromCartReq"
+                            "$ref": "#/definitions/req.DeleteFromCartReq"
                         }
                     }
                 ],
@@ -1766,7 +1766,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.CreateWishListReq"
+                            "$ref": "#/definitions/req.CreateWishListReq"
                         }
                     }
                 ],
@@ -1811,7 +1811,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.DeleteUserAddress"
+                            "$ref": "#/definitions/req.DeleteUserAddress"
                         }
                     }
                 ],
@@ -1856,7 +1856,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditUserAddress"
+                            "$ref": "#/definitions/req.EditUserAddress"
                         }
                     }
                 ],
@@ -1901,7 +1901,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditProfileReq"
+                            "$ref": "#/definitions/req.EditProfileReq"
                         }
                     }
                 ],
@@ -1972,7 +1972,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.UserSignInReq"
+                            "$ref": "#/definitions/req.UserSignInReq"
                         }
                     }
                 ],
@@ -2017,7 +2017,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.MakeOrderReq"
+                            "$ref": "#/definitions/req.MakeOrderReq"
                         }
                     }
                 ],
@@ -2231,7 +2231,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.ProceedToPaymentReq"
+                            "$ref": "#/definitions/req.ProceedToPaymentReq"
                         }
                     }
                 ],
@@ -2364,7 +2364,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.RemoveFromWishListReq"
+                            "$ref": "#/definitions/req.RemoveFromWishListReq"
                         }
                     }
                 ],
@@ -2409,7 +2409,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.ApplyForPasswordResetReq"
+                            "$ref": "#/definitions/req.ApplyForPasswordResetReq"
                         }
                     }
                 ],
@@ -2452,7 +2452,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.ResetPasswordReq"
+                            "$ref": "#/definitions/req.ResetPasswordReq"
                         }
                     }
                 ],
@@ -2497,7 +2497,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.VerifyOTPReq"
+                            "$ref": "#/definitions/req.VerifyOTPReq"
                         }
                     }
                 ],
@@ -2542,7 +2542,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.RetryPaymentReq"
+                            "$ref": "#/definitions/req.RetryPaymentReq"
                         }
                     }
                 ],
@@ -2587,7 +2587,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.ReturnOrderReq"
+                            "$ref": "#/definitions/req.ReturnOrderReq"
                         }
                     }
                 ],
@@ -2663,7 +2663,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddBrandReq"
+                            "$ref": "#/definitions/req.AddBrandReq"
                         }
                     }
                 ],
@@ -2708,7 +2708,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddColourVariantReq"
+                            "$ref": "#/definitions/req.AddColourVariantReq"
                         }
                     }
                 ],
@@ -2753,7 +2753,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddModelReq"
+                            "$ref": "#/definitions/req.AddModelReq"
                         }
                     }
                 ],
@@ -2798,7 +2798,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.AddStockReq"
+                            "$ref": "#/definitions/req.AddStockReq"
                         }
                     }
                 ],
@@ -2909,7 +2909,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.EditStockReq"
+                            "$ref": "#/definitions/req.EditStockReq"
                         }
                     }
                 ],
@@ -2980,7 +2980,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.SellerSignInReq"
+                            "$ref": "#/definitions/req.SellerSignInReq"
                         }
                     }
                 ],
@@ -3108,7 +3108,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.SellerSignUpReq"
+                            "$ref": "#/definitions/req.SellerSignUpReq"
                         }
                     }
                 ],
@@ -3187,7 +3187,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.SetAddressForCheckOutReq"
+                            "$ref": "#/definitions/req.SetAddressForCheckOutReq"
                         }
                     }
                 ],
@@ -3232,7 +3232,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.SetCouponForCheckoutReq"
+                            "$ref": "#/definitions/req.SetCouponForCheckoutReq"
                         }
                     }
                 ],
@@ -3277,7 +3277,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.UserSignUpReq"
+                            "$ref": "#/definitions/req.UserSignUpReq"
                         }
                     }
                 ],
@@ -3355,7 +3355,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/requestModels.VerifyOTPReq"
+                            "$ref": "#/definitions/req.VerifyOTPReq"
                         }
                     }
                 ],
@@ -3764,7 +3764,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddBrandReq": {
+        "req.AddBrandReq": {
             "type": "object",
             "required": [
                 "name",
@@ -3780,7 +3780,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddCategoryReq": {
+        "req.AddCategoryReq": {
             "type": "object",
             "required": [
                 "name"
@@ -3792,7 +3792,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddColourVariantReq": {
+        "req.AddColourVariantReq": {
             "type": "object",
             "required": [
                 "colour",
@@ -3816,7 +3816,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddDimensionalVariantReq": {
+        "req.AddDimensionalVariantReq": {
             "type": "object",
             "required": [
                 "colourVariantId",
@@ -3831,7 +3831,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddModelReq": {
+        "req.AddModelReq": {
             "type": "object",
             "required": [
                 "brandId",
@@ -3851,7 +3851,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddStockReq": {
+        "req.AddStockReq": {
             "type": "object",
             "required": [
                 "addingStockCount",
@@ -3870,7 +3870,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddToCartReq": {
+        "req.AddToCartReq": {
             "type": "object",
             "required": [
                 "productID",
@@ -3885,7 +3885,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddToWishListReq": {
+        "req.AddToWishListReq": {
             "type": "object",
             "required": [
                 "productID",
@@ -3900,7 +3900,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AddUserAddress": {
+        "req.AddUserAddress": {
             "type": "object",
             "required": [
                 "addressName",
@@ -3957,7 +3957,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.AdminSignInReq": {
+        "req.AdminSignInReq": {
             "type": "object",
             "required": [
                 "Login_email",
@@ -3973,7 +3973,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.ApplyForPasswordResetReq": {
+        "req.ApplyForPasswordResetReq": {
             "type": "object",
             "required": [
                 "email"
@@ -3984,7 +3984,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.BlockCouponReq": {
+        "req.BlockCouponReq": {
             "type": "object",
             "required": [
                 "id"
@@ -3995,7 +3995,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.BlockSellerReq": {
+        "req.BlockSellerReq": {
             "type": "object",
             "required": [
                 "email"
@@ -4006,7 +4006,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.BlockUserReq": {
+        "req.BlockUserReq": {
             "type": "object",
             "required": [
                 "email"
@@ -4017,7 +4017,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.CancelOrderReq": {
+        "req.CancelOrderReq": {
             "type": "object",
             "required": [
                 "orderID"
@@ -4028,7 +4028,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.CreateWishListReq": {
+        "req.CreateWishListReq": {
             "type": "object",
             "required": [
                 "name"
@@ -4039,7 +4039,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.DeleteFromCartReq": {
+        "req.DeleteFromCartReq": {
             "type": "object",
             "required": [
                 "productID",
@@ -4054,7 +4054,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.DeleteUserAddress": {
+        "req.DeleteUserAddress": {
             "type": "object",
             "required": [
                 "id",
@@ -4069,7 +4069,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditBrandReq": {
+        "req.EditBrandReq": {
             "type": "object",
             "required": [
                 "newName",
@@ -4091,7 +4091,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditCategoryReq": {
+        "req.EditCategoryReq": {
             "type": "object",
             "required": [
                 "newName",
@@ -4109,7 +4109,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditColourVariantReq": {
+        "req.EditColourVariantReq": {
             "type": "object",
             "required": [
                 "colour",
@@ -4137,7 +4137,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditModelReq": {
+        "req.EditModelReq": {
             "type": "object",
             "required": [
                 "brandId",
@@ -4161,7 +4161,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditProfileReq": {
+        "req.EditProfileReq": {
             "type": "object",
             "required": [
                 "email",
@@ -4186,7 +4186,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditStockReq": {
+        "req.EditStockReq": {
             "type": "object",
             "required": [
                 "productId",
@@ -4205,7 +4205,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.EditUserAddress": {
+        "req.EditUserAddress": {
             "type": "object",
             "required": [
                 "addressName",
@@ -4266,7 +4266,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.MakeOrderReq": {
+        "req.MakeOrderReq": {
             "type": "object",
             "required": [
                 "addressID",
@@ -4285,7 +4285,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.NewCouponReq": {
+        "req.NewCouponReq": {
             "type": "object",
             "required": [
                 "code",
@@ -4343,7 +4343,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.ProceedToPaymentReq": {
+        "req.ProceedToPaymentReq": {
             "type": "object",
             "required": [
                 "email",
@@ -4388,7 +4388,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.RemoveFromWishListReq": {
+        "req.RemoveFromWishListReq": {
             "type": "object",
             "required": [
                 "productID",
@@ -4403,7 +4403,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.ResetPasswordReq": {
+        "req.ResetPasswordReq": {
             "type": "object",
             "required": [
                 "newPassword"
@@ -4415,7 +4415,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.RetryPaymentReq": {
+        "req.RetryPaymentReq": {
             "type": "object",
             "required": [
                 "order_id"
@@ -4426,7 +4426,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.ReturnOrderReq": {
+        "req.ReturnOrderReq": {
             "type": "object",
             "required": [
                 "orderID"
@@ -4437,7 +4437,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.SellerSignInReq": {
+        "req.SellerSignInReq": {
             "type": "object",
             "required": [
                 "Login_email",
@@ -4453,7 +4453,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.SellerSignUpReq": {
+        "req.SellerSignUpReq": {
             "type": "object",
             "required": [
                 "SignUp_email",
@@ -4481,7 +4481,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.SetAddressForCheckOutReq": {
+        "req.SetAddressForCheckOutReq": {
             "type": "object",
             "required": [
                 "addressID"
@@ -4492,7 +4492,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.SetCouponForCheckoutReq": {
+        "req.SetCouponForCheckoutReq": {
             "type": "object",
             "required": [
                 "addressID",
@@ -4507,7 +4507,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.UnblockCouponReq": {
+        "req.UnblockCouponReq": {
             "type": "object",
             "required": [
                 "id"
@@ -4518,7 +4518,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.UnblockSellerReq": {
+        "req.UnblockSellerReq": {
             "type": "object",
             "required": [
                 "email"
@@ -4529,7 +4529,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.UnblockUserReq": {
+        "req.UnblockUserReq": {
             "type": "object",
             "required": [
                 "email"
@@ -4540,7 +4540,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.UserSignInReq": {
+        "req.UserSignInReq": {
             "type": "object",
             "required": [
                 "Login_email",
@@ -4556,7 +4556,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.UserSignUpReq": {
+        "req.UserSignUpReq": {
             "type": "object",
             "required": [
                 "SignUp_email",
@@ -4584,7 +4584,7 @@ const docTemplate = `{
                 }
             }
         },
-        "requestModels.VerifyOTPReq": {
+        "req.VerifyOTPReq": {
             "type": "object",
             "required": [
                 "otp"

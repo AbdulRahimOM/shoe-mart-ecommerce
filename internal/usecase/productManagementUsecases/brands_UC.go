@@ -1,10 +1,10 @@
-package prodManageUsecase
+package productusecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	"errors"
 	"fmt"
 
@@ -15,11 +15,11 @@ type BrandsUC struct {
 	BrandsRepo repoInterface.IBrandsRepo
 }
 
-func NewBrandUseCase(repo repoInterface.IBrandsRepo) usecaseInterface.IBrandsUC {
+func NewBrandUseCase(repo repoInterface.IBrandsRepo) usecase.IBrandsUC {
 	return &BrandsUC{BrandsRepo: repo}
 }
 
-func (uc *BrandsUC) AddBrand(req *requestModels.AddBrandReq) error {
+func (uc *BrandsUC) AddBrand(req *request.AddBrandReq) error {
 	//check if the brand already exists
 	doBrandExistsByName, err := uc.BrandsRepo.DoBrandExistsByName(req.Name)
 	if err != nil {
@@ -29,7 +29,7 @@ func (uc *BrandsUC) AddBrand(req *requestModels.AddBrandReq) error {
 	if doBrandExistsByName {
 		return errors.New("brand already exists")
 	}
-	
+
 	var brand entities.Brands
 	if err := copier.Copy(&brand, &req); err != nil {
 		return err
@@ -46,7 +46,7 @@ func (uc *BrandsUC) AddBrand(req *requestModels.AddBrandReq) error {
 }
 
 // EditBrand
-func (uc *BrandsUC) EditBrand(req *requestModels.EditBrandReq) error {
+func (uc *BrandsUC) EditBrand(req *request.EditBrandReq) error {
 
 	//check if the brand really exists
 	DoBrandExistsByName, err := uc.BrandsRepo.DoBrandExistsByName(req.OldName)

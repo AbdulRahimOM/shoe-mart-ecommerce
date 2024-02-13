@@ -1,8 +1,8 @@
-package repository_interface
+package repo
 
 import (
 	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 )
 
@@ -16,7 +16,7 @@ type IAdminRepo interface {
 	IsEmailRegisteredAsSeller(email string) (bool, error)
 	UpdateSellerStatus(email string, newStatus string) error
 	IsSellerVerified(sellerID uint) (bool, error)
-	VerifySeller(sellerID  uint) error
+	VerifySeller(sellerID uint) error
 }
 
 type ISellerRepo interface {
@@ -55,7 +55,7 @@ type IUserRepo interface {
 
 	GetProfile(userID uint) (*entities.UserDetails, error)
 	GetEmailByID(userID uint) (string, error)
-	EditProfile(userID uint, req *requestModels.EditProfileReq) error
+	EditProfile(userID uint, req *request.EditProfileReq) error
 
 	GetWalletBalance(userID uint) (float32, error)
 }

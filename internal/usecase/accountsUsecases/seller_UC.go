@@ -1,13 +1,13 @@
-package accountsUsecase
+package accountsusecase
 
 import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
-	hashpassword "MyShoo/pkg/hash_Password"
-	jwttoken "MyShoo/pkg/jwt_tokens"
+	usecase "MyShoo/internal/usecase/interface"
+	hashpassword "MyShoo/pkg/hashPassword"
+	jwttoken "MyShoo/pkg/jwt"
 
 	"fmt"
 	"time"
@@ -17,11 +17,11 @@ type SellerUseCase struct {
 	sellerRepo repoInterface.ISellerRepo
 }
 
-func NewSellerUseCase(repo repoInterface.ISellerRepo) usecaseInterface.ISellerUC {
+func NewSellerUseCase(repo repoInterface.ISellerRepo) usecase.ISellerUC {
 	return &SellerUseCase{sellerRepo: repo}
 }
 
-func (uc *SellerUseCase) SignIn(req *requestModels.SellerSignInReq) (*string, error) {
+func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, error) {
 	// fmt.Println("req.email=", req.Email)
 	isEmailRegistered, err := uc.sellerRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -55,7 +55,7 @@ func (uc *SellerUseCase) SignIn(req *requestModels.SellerSignInReq) (*string, er
 	return &tokenString, nil
 }
 
-func (uc *SellerUseCase) SignUp(req *requestModels.SellerSignUpReq) (*string, error) {
+func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, error) {
 	// fmt.Println("-----\nreq.email:", req.Email, "\n------")
 	emailAlreadyUsed, err := uc.sellerRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -88,7 +88,7 @@ func (uc *SellerUseCase) SignUp(req *requestModels.SellerSignUpReq) (*string, er
 		return nil, err
 	}
 
-	// //send OTP	
+	// //send OTP
 	// err = otphelper.SendOtp(seller.Phone)
 	// if err != nil {
 	// 	uc.sellerRepo.DeleteByPhone(seller.Phone)

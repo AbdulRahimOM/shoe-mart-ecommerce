@@ -1,10 +1,10 @@
-package handlers
+package accounthandler
 
 import (
 	e "MyShoo/internal/domain/customErrors"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
@@ -13,10 +13,10 @@ import (
 )
 
 type SellerHandler struct {
-	SellerUseCase usecaseInterface.ISellerUC
+	SellerUseCase usecase.ISellerUC
 }
 
-func NewSellerHandler(useCase usecaseInterface.ISellerUC) *SellerHandler {
+func NewSellerHandler(useCase usecase.ISellerUC) *SellerHandler {
 	return &SellerHandler{SellerUseCase: useCase}
 }
 
@@ -39,13 +39,13 @@ func (h *SellerHandler) GetLogin(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.SellerSignUpReq{} true "Seller Sign Up Request"
+// @Param req body req.SellerSignUpReq{} true "Seller Sign Up Request"
 // @Success 200 {object} string
 // @Failure 400 {object} string
 // @Router /seller/signup [post]
 func (h *SellerHandler) PostSignUp(c *gin.Context) {
 
-	var req requestModels.SellerSignUpReq
+	var req request.SellerSignUpReq
 	if err := c.Bind(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
@@ -74,13 +74,13 @@ func (h *SellerHandler) PostSignUp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Param req body requestModels.SellerSignInReq{} true "Seller Sign In Request"
+// @Param req body req.SellerSignInReq{} true "Seller Sign In Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
 // @Router /seller/login [post]
 func (h *SellerHandler) PostLogIn(c *gin.Context) {
 
-	var req requestModels.SellerSignInReq
+	var req request.SellerSignInReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return

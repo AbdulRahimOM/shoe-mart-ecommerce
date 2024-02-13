@@ -3,7 +3,7 @@ package reportsusecases
 import (
 	"MyShoo/internal/domain/entities"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -17,7 +17,7 @@ type ReportsUseCase struct {
 	reportsRepo repoInterface.IReportsRepo
 }
 
-func NewReportsUseCase(reportsRepo repoInterface.IReportsRepo, orderRepo repoInterface.IOrderRepo) usecaseInterface.ReportsUC {
+func NewReportsUseCase(reportsRepo repoInterface.IReportsRepo, orderRepo repoInterface.IOrderRepo) usecase.ReportsUC {
 	return &ReportsUseCase{
 		reportsRepo: reportsRepo,
 		orderRepo:   orderRepo,

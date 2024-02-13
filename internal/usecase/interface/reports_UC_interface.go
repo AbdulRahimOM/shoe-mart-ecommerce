@@ -1,4 +1,4 @@
-package usecaseInterface
+package usecase
 
 import (
 	"MyShoo/internal/domain/entities"

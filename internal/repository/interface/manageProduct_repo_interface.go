@@ -1,8 +1,8 @@
-package repository_interface
+package repo
 
 import (
 	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	"os"
 )
 
@@ -10,19 +10,19 @@ type ICategoryRepo interface {
 	AddCategory(req *entities.Categories) error
 	DoCategoryExistsByName(name string) (bool, error)
 	GetCategories() (*[]entities.Categories, error)
-	EditCategory(req *requestModels.EditCategoryReq) error
+	EditCategory(req *request.EditCategoryReq) error
 }
 type IBrandsRepo interface {
 	AddBrand(req *entities.Brands) error
 	DoBrandExistsByName(name string) (bool, error)
 	GetBrands() (*[26]entities.BrandsByAlphabet, error)
-	EditBrand(req *requestModels.EditBrandReq) error
+	EditBrand(req *request.EditBrandReq) error
 }
 
 type IModelsRepo interface {
 	AddModel(req *entities.Models) error
 	DoModelExistsbyName(name string) (bool, error)
-	EditModel(req *requestModels.EditModelReq) error
+	EditModel(req *request.EditModelReq) error
 	DoModelExistsByID(id uint) (bool, error)
 	GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, error)
 	DoModelExistByIDAndBelongsToUser(id uint, sellerID uint) (bool, bool, error)
@@ -43,9 +43,9 @@ type IProductsRepo interface {
 	AddDimensionalVariantAndProductCombinations(dimensionalVariant *entities.DimensionalVariant) error
 
 	GetStockOfProduct(productID uint) (uint, error)
-	AddStock(req *requestModels.AddStockReq) error
-	DoProductExistsByID(id uint) (bool,error)
-	EditStock(req *requestModels.EditStockReq) error
+	AddStock(req *request.AddStockReq) error
+	DoProductExistsByID(id uint) (bool, error)
+	EditStock(req *request.EditStockReq) error
 	DoesProductExistByID(id uint) (bool, error)
 
 	GetPriceOfProduct(productID uint) (float32, error)

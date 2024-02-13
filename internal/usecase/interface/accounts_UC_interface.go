@@ -1,8 +1,8 @@
-package usecaseInterface
+package usecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 )
 
 type IAdminUC interface {
@@ -10,26 +10,26 @@ type IAdminUC interface {
 	RestartConfig() error
 
 	//self
-	SignIn(req *requestModels.AdminSignInReq) (*string, error)
+	SignIn(req *request.AdminSignInReq) (*string, error)
 
 	//user related
 	GetUsersList() (*[]entities.UserDetails, error)
-	BlockUser(req *requestModels.BlockUserReq) error
-	UnblockUser(req *requestModels.UnblockUserReq) error
+	BlockUser(req *request.BlockUserReq) error
+	UnblockUser(req *request.UnblockUserReq) error
 
 	//seller related
 	GetSellersList() (*[]entities.PwMaskedSeller, error)
-	BlockSeller(req *requestModels.BlockSellerReq) error
-	UnblockSeller(req *requestModels.UnblockSellerReq) error
-	VerifySeller(req *requestModels.VerifySellerReq) error
+	BlockSeller(req *request.BlockSellerReq) error
+	UnblockSeller(req *request.UnblockSellerReq) error
+	VerifySeller(req *request.VerifySellerReq) error
 }
 type ISellerUC interface {
-	SignUp(req *requestModels.SellerSignUpReq) (*string, error)
-	SignIn(req *requestModels.SellerSignInReq) (*string, error)
+	SignUp(req *request.SellerSignUpReq) (*string, error)
+	SignIn(req *request.SellerSignInReq) (*string, error)
 }
 type IUserUC interface {
-	SignUp(req *requestModels.UserSignUpReq) (*string, error)
-	SignIn(req *requestModels.UserSignInReq) (*string, error)
+	SignUp(req *request.UserSignUpReq) (*string, error)
+	SignIn(req *request.UserSignInReq) (*string, error)
 	SendOtp(phone string) error
 	VerifyOtp(phone string, email string, otp string) (bool, error)
 
@@ -40,11 +40,11 @@ type IUserUC interface {
 	ResetPassword(id uint, newPassword *string) error
 
 	//address related
-	AddUserAddress(req *requestModels.AddUserAddress) error
-	EditUserAddress(req *requestModels.EditUserAddress) error
-	DeleteUserAddress(req *requestModels.DeleteUserAddress) error
+	AddUserAddress(req *request.AddUserAddress) error
+	EditUserAddress(req *request.EditUserAddress) error
+	DeleteUserAddress(req *request.DeleteUserAddress) error
 	GetUserAddresses(userID uint) (*[]entities.UserAddress, error)
 
 	GetProfile(userID uint) (*entities.UserDetails, error)
-	EditProfile(userID uint, req *requestModels.EditProfileReq) error
+	EditProfile(userID uint, req *request.EditProfileReq) error
 }

@@ -1,10 +1,10 @@
-package prodManageUsecase
+package productusecase
 
 import (
 	"MyShoo/internal/domain/entities"
-	requestModels "MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	"fmt"
 
 	"github.com/jinzhu/copier"
@@ -14,11 +14,11 @@ type ModelsUC struct {
 	ModelsRepo repoInterface.IModelsRepo
 }
 
-func NewModelUseCase(repo repoInterface.IModelsRepo) usecaseInterface.IModelsUC {
+func NewModelUseCase(repo repoInterface.IModelsRepo) usecase.IModelsUC {
 	return &ModelsUC{ModelsRepo: repo}
 }
 
-func (uc *ModelsUC) AddModel(req *requestModels.AddModelReq) error {
+func (uc *ModelsUC) AddModel(req *request.AddModelReq) error {
 	var model entities.Models
 	if err := copier.Copy(&model, &req); err != nil {
 		fmt.Println("Error occured while copying request to model")
@@ -44,12 +44,12 @@ func (uc *ModelsUC) AddModel(req *requestModels.AddModelReq) error {
 	return nil
 }
 
-func (uc *ModelsUC) EditModelName(req *requestModels.EditModelReq) error {
+func (uc *ModelsUC) EditModelName(req *request.EditModelReq) error {
 	//check if the model exists
 	if doModelExists, err := uc.ModelsRepo.DoModelExistsByID(req.ID); err != nil {
 		fmt.Println("Error occured while checking if model exists")
 		return err
-	}else if !doModelExists {
+	} else if !doModelExists {
 		return fmt.Errorf("model doesn't exist")
 	}
 

@@ -1,23 +1,24 @@
-package prodManageUsecase
+package productusecase
 
 import (
-	"MyShoo/internal/models/requestModels"
+	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	usecaseInterface "MyShoo/internal/usecase/interface"
+	usecase "MyShoo/internal/usecase/interface"
 	"fmt"
+
 	"github.com/jinzhu/copier"
 )
 
 type ProductsUC struct {
 	ProductsRepo repoInterface.IProductsRepo
-	ModelsRepo  repoInterface.IModelsRepo
+	ModelsRepo   repoInterface.IModelsRepo
 }
 
-func NewProductUseCase(productRepo repoInterface.IProductsRepo, modelsRepo repoInterface.IModelsRepo) usecaseInterface.IProductsUC {
+func NewProductUseCase(productRepo repoInterface.IProductsRepo, modelsRepo repoInterface.IModelsRepo) usecase.IProductsUC {
 	return &ProductsUC{
-		ProductsRepo: productRepo, 
-		ModelsRepo: modelsRepo,
+		ProductsRepo: productRepo,
+		ModelsRepo:   modelsRepo,
 	}
 }
 
@@ -38,7 +39,7 @@ func (uc *ProductsUC) GetProducts() (*[]response.ResponseProduct, error) {
 	return &responseProducts, nil
 }
 
-func (uc *ProductsUC) AddStock(req *requestModels.AddStockReq) error {
+func (uc *ProductsUC) AddStock(req *request.AddStockReq) error {
 	//check if product exists by id
 	doProductExistsByID, err := uc.ProductsRepo.DoProductExistsByID(req.ProductID)
 	if err != nil {
@@ -59,7 +60,7 @@ func (uc *ProductsUC) AddStock(req *requestModels.AddStockReq) error {
 	return nil
 }
 
-func (uc *ProductsUC) EditStock(req *requestModels.EditStockReq) error {
+func (uc *ProductsUC) EditStock(req *request.EditStockReq) error {
 	//check if product exists by id
 	doProductExistsByID, err := uc.ProductsRepo.DoProductExistsByID(req.ProductID)
 	if err != nil {

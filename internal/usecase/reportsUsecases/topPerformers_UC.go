@@ -2,7 +2,7 @@ package reportsusecases
 
 import response "MyShoo/internal/models/responseModels"
 
-// GetTopModels implements usecaseInterface.ReportsUC.
+// GetTopModels implements usecase.ReportsUC.
 func (uc *ReportsUseCase) GetTopModels(limit int) (*[]response.TopModels, error) {
 	resp, err := uc.reportsRepo.GetTopModels(limit)
 	if err != nil {
@@ -11,7 +11,7 @@ func (uc *ReportsUseCase) GetTopModels(limit int) (*[]response.TopModels, error)
 	return resp, nil
 }
 
-// GetTopProducts implements usecaseInterface.ReportsUC.
+// GetTopProducts implements usecase.ReportsUC.
 func (uc *ReportsUseCase) GetTopProducts(limit int) (*[]response.TopProducts, error) {
 	resp, err := uc.reportsRepo.GetTopProducts(limit)
 	if err != nil {
@@ -20,7 +20,7 @@ func (uc *ReportsUseCase) GetTopProducts(limit int) (*[]response.TopProducts, er
 	return resp, nil
 }
 
-// GetTopBrands implements usecaseInterface.ReportsUC.
+// GetTopBrands implements usecase.ReportsUC.
 func (uc *ReportsUseCase) GetTopBrands(limit int) (*[]response.TopBrands, error) {
 	resp, err := uc.reportsRepo.GetTopBrands(limit)
 	if err != nil {
@@ -29,7 +29,7 @@ func (uc *ReportsUseCase) GetTopBrands(limit int) (*[]response.TopBrands, error)
 	return resp, nil
 }
 
-// GetTopSellers implements usecaseInterface.ReportsUC.
+// GetTopSellers implements usecase.ReportsUC.
 func (uc *ReportsUseCase) GetTopSellers(limit int) (*[]response.TopSellers, error) {
 	resp, err := uc.reportsRepo.GetTopSellers(limit)
 	if err != nil {
