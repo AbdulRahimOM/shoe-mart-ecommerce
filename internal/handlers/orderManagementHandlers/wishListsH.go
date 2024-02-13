@@ -1,6 +1,7 @@
 package ordermanagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
@@ -23,18 +24,27 @@ func NewWishListHandler(wishListUseCase usecaseInterface.IWishListsUC) *WishList
 }
 
 // create new wishlist
+// @Summary Create wishlist
+// @Description Create wishlist
+// @Tags User/WishList
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param createWishListReq body requestModels.CreateWishListReq{} true "Create WishList Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /createwishlist [post]
 func (h *WishListHandler) CreateWishList(c *gin.Context) {
-	var req *requestModels.CreateWishListReq
 
+	var req *requestModels.CreateWishListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -56,19 +66,27 @@ func (h *WishListHandler) CreateWishList(c *gin.Context) {
 }
 
 // add to wishlist
+// @Summary Add to wishlist
+// @Description Add to wishlist
+// @Tags User/WishList
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param addToWishListReq body requestModels.AddToWishListReq{} true "Add to WishList Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /addtowishlist [post]
 func (h *WishListHandler) AddToWishList(c *gin.Context) {
 
 	var req *requestModels.AddToWishListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -90,18 +108,27 @@ func (h *WishListHandler) AddToWishList(c *gin.Context) {
 }
 
 // remove from wishlist
+// @Summary Remove from wishlist
+// @Description Remove from wishlist
+// @Tags User/WishList
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param removeFromWishListReq body requestModels.RemoveFromWishListReq{} true "Remove from WishList Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /removefromwishlist [delete]
 func (h *WishListHandler) RemoveFromWishList(c *gin.Context) {
 
 	var req *requestModels.RemoveFromWishListReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -123,6 +150,15 @@ func (h *WishListHandler) RemoveFromWishList(c *gin.Context) {
 }
 
 // GetAllWishLists
+// @Summary Get all wishlists
+// @Description Get all wishlists
+// @Tags User/WishList
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Success 200 {object} response.GetAllWishListsResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /mywishlists [get]
 func (h *WishListHandler) GetAllWishLists(c *gin.Context) {
 
 	//get userID from token
@@ -150,6 +186,16 @@ func (h *WishListHandler) GetAllWishLists(c *gin.Context) {
 }
 
 // GetWishListByID
+// @Summary Get wishlist by id
+// @Description Get wishlist by id
+// @Tags User/WishList
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param id query string true "WishList ID"
+// @Success 200 {object} response.GetWishListByIDResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /wishlist [get]
 func (h *WishListHandler) GetWishListByID(c *gin.Context) {
 
 	//get query params

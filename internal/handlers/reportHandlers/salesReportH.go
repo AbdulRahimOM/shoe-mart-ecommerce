@@ -18,7 +18,20 @@ func NewReportsHandler(reportsUseCase usecaseInterface.ReportsUC) *ReportsHandle
 	return &ReportsHandler{reportsUC: reportsUseCase}
 }
 
-//export dashBoardData handler
+//export sales report handler
+// @Summary Export sales report
+// @Description Export sales report
+// @Tags Admin/Analytics
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param range path string true "Range type"
+// @Param sd query string false "Start Date"
+// @Param ed query string false "End Date"
+// @Success 200 {file} application/octet-stream
+// @Failure 400 {object} response.SME{} "Error details"
+// @Router /admin/exportsalesreport/{range} [get]
+
 func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	rangeType := c.Param("range")
 

@@ -23,9 +23,10 @@ func NewSellerHandler(useCase usecaseInterface.ISellerUC) *SellerHandler {
 // definefunctions those which you  have called in seller routes
 // @Summary Seller Login Page
 // @Description Seller Login Page
-// @Tags seller
+// @Tags Seller/Session
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} string
 // @Router /seller/login [get]
 func (h *SellerHandler) GetLogin(c *gin.Context) {
@@ -34,9 +35,10 @@ func (h *SellerHandler) GetLogin(c *gin.Context) {
 
 // @Summary Seller Sign Up Handler
 // @Description Seller Sign Up Handler
-// @Tags seller
+// @Tags Seller/Session
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.SellerSignUpReq{} true "Seller Sign Up Request"
 // @Success 200 {object} string
 // @Failure 400 {object} string
@@ -68,9 +70,10 @@ func (h *SellerHandler) PostSignUp(c *gin.Context) {
 
 // @Summary Seller Sign In Handler
 // @Description Seller Sign In Handler
-// @Tags seller
+// @Tags Seller/Session
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.SellerSignInReq{} true "Seller Sign In Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}

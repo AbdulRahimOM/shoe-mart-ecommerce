@@ -29,9 +29,10 @@ func NewUserHandler(useCase usecaseInterface.IUserUC) *UserHandler {
 // to get user login page
 // @Summary Get user login page
 // @Description Get user login page
-// @Tags user
+// @Tags User/Session/Login
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} string
 // @Router /login [get]
 func (h *UserHandler) GetLogin(c *gin.Context) {
@@ -40,9 +41,10 @@ func (h *UserHandler) GetLogin(c *gin.Context) {
 
 // @Summary User Sign Up Handler
 // @Description User Sign Up Handler
-// @Tags user
+// @Tags User/Session/SignUp
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.UserSignUpReq{} true "User Sign Up Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
@@ -75,9 +77,10 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 
 // @Summary User Sign In Handler
 // @Description User Sign In Handler
-// @Tags user
+// @Tags User/Session/Login
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.UserSignInReq{} true "User Sign In Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
@@ -118,9 +121,10 @@ func (h *UserHandler) PostLogIn(c *gin.Context) {
 
 // @Summary Send OTP
 // @Description Send OTP
-// @Tags user
+// @Tags User/Session/SignUp
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /sendotp [get]
@@ -148,9 +152,10 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 
 // @Summary Verify OTP
 // @Description Verify OTP
-// @Tags user
+// @Tags User/Session/SignUp
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.VerifyOTPReq{} true "Verify OTP Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -208,9 +213,10 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 // Add address
 // @Summary Add address
 // @Description Add address
-// @Tags user
+// @Tags User/Address
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.AddUserAddress{} true "Add Address Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -268,9 +274,10 @@ func (h *UserHandler) AddUserAddress(c *gin.Context) {
 // Edit address
 // @Summary Edit address
 // @Description Edit address
-// @Tags user
+// @Tags User/Address
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.EditUserAddress{} true "Edit Address Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -327,9 +334,10 @@ func (h *UserHandler) EditUserAddress(c *gin.Context) {
 // DeleteUserAddress
 // @Summary Delete address
 // @Description Delete address
-// @Tags user
+// @Tags User/Address
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.DeleteUserAddress{} true "Delete Address Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -386,8 +394,9 @@ func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 // Get user addresses
 // @Summary Get user addresses
 // @Description Get user addresses
-// @Tags user
+// @Tags User/Address
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} response.GetUserAddressesResponse{}
 // @Failure 400 {object} response.SME{}
 // @Router /addresses [get]
@@ -424,8 +433,9 @@ func (h *UserHandler) GetUserAddresses(c *gin.Context) {
 // GetProfile
 // @Summary Get profile
 // @Description Get profile
-// @Tags user
+// @Tags User/Profile
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} response.GetProfileResponse{}
 // @Failure 400 {object} response.SME{}
 // @Router /profile [get]
@@ -479,9 +489,10 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 // EditProfile
 // @Summary Edit profile
 // @Description Edit profile
-// @Tags user
+// @Tags User/Profile
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.EditProfileReq{} true "Edit Profile Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -529,9 +540,10 @@ func (h *UserHandler) EditProfile(c *gin.Context) {
 // GetResetPassword
 // @Summary Get reset password
 // @Description Get reset password
-// @Tags user
+// @Tags User/Session/Reset_password
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.ApplyForPasswordResetReq{} true "Apply For Password Reset Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -584,9 +596,10 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 // VerifyOtpForPWChange
 // @Summary Verify OTP for password change
 // @Description Verify OTP for password change
-// @Tags user
+// @Tags User/Session/Reset_password
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.VerifyOTPReq{} true "Verify OTP Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
@@ -665,10 +678,11 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 
 // ResetPassword
 // @Summary Reset password
-// @Description Reset password
-// @Tags user
+// @Description User can provide new password after verifying OTP
+// @Tags User/Session/Reset_password
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param req body requestModels.ResetPasswordReq{} true "Reset Password Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}

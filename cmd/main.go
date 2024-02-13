@@ -10,11 +10,14 @@ import (
 	"fmt"
 )
 
-//	@title MyShoo API
-//	@version 1.0
-//	@description Main entry point
+// @title MyShoo API
+// @version 1.0
+// @description E-commerce application (Product: Shoes)
+// @securityDefinitions.apikey	BearerTokenAuth
+// @in							header
+// @name						Authorization
 func main() {
-	fmt.Println("Handler ::: main()")
+	fmt.Println("Program started..........")
 
 	//for dev purpose
 	myshoo.Test()

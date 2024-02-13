@@ -1,6 +1,7 @@
 package ordermanagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -23,12 +24,22 @@ func NewOrderHandler(orderUseCase usecaseInterface.IOrderUC) *OrderHandler {
 }
 
 // MakeOrder
+// @Summary Make Order
+// @Description Make Order
+// @Tags User/Order
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param makeOrderReq body requestModels.MakeOrderReq{} true "Make Order Request"
+// @Success 201 {object} response.CODOrderResponse
+// @Success 201 {object} response.OnlinePaymentOrderResponse
+// @Failure 400 {object} response.SME{}
+// @Router /makeorder [post]
 func (h *OrderHandler) MakeOrder(c *gin.Context) {
 
 	var req *requestModels.MakeOrderReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
@@ -39,15 +50,13 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 	}
 	req.UserID = userID
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error: %v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
 	//make order
-
 	orderInfo, proceedToPaymentInfo, message, err := h.orderUseCase.MakeOrder(req)
 	if err != nil {
 		switch err.Error() {
@@ -78,6 +87,16 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 }
 
 // Get Orders of the user
+// @Summary Get Orders of the user
+// @Description Get Orders of the user
+// @Tags User/Order
+// @Produce json
+// @Security BearerTokenAuth
+// @Param p query string false "page number"
+// @Param l query string false "limit"
+// @Success 200 {object} response.GetOrdersResponse
+// @Failure 400 {object} response.SME{}
+// @Router /myorders [get]
 func (h *OrderHandler) GetOrdersOfUser(c *gin.Context) {
 
 	//get pagination params
@@ -122,6 +141,16 @@ func (h *OrderHandler) GetOrdersOfUser(c *gin.Context) {
 }
 
 // Get All Orders (for admin)
+// @Summary Get All Orders
+// @Description Get All Orders (for admin)
+// @Tags Admin/Order
+// @Produce json
+// @Security BearerTokenAuth
+// @Param p query string false "page number"
+// @Param l query string false "limit"
+// @Success 200 {object} response.GetOrdersResponse
+// @Failure 400 {object} response.SME{}
+// @Router /admin/orders [get]
 func (h *OrderHandler) GetOrders(c *gin.Context) {
 
 	//get pagination params
@@ -158,20 +187,28 @@ func (h *OrderHandler) GetOrders(c *gin.Context) {
 }
 
 // cancel order of user
+// @Summary Cancel Order
+// @Description User can cancel an order which is not yet delivered
+// @Tags User/Order
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param cancelOrderReq body requestModels.CancelOrderReq true "Cancel Order Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /cancelorder [patch]
 func (h *OrderHandler) CancelMyOrder(c *gin.Context) {
 
 	//get req from body
 	var req *requestModels.CancelOrderReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -197,20 +234,28 @@ func (h *OrderHandler) CancelMyOrder(c *gin.Context) {
 }
 
 // cancel order of any user with userID by admin
+// @Summary Cancel Order
+// @Description Admin can cancel an order which is not yet delivered
+// @Tags Admin/Order
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param cancelOrderReq body requestModels.CancelOrderReq true "Cancel Order Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/cancelorder [patch]
 func (h *OrderHandler) CancelOrderByAdmin(c *gin.Context) {
 
 	//get req from body
 	var req *requestModels.CancelOrderReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -228,25 +273,28 @@ func (h *OrderHandler) CancelOrderByAdmin(c *gin.Context) {
 }
 
 // return order of user
+// @Summary Return Order
+// @Description User can request for returning an order which is already delivered
+// @Tags User/Order
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param returnOrderReq body requestModels.ReturnOrderReq true "Return Order Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /returnorder [patch]
 func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 
 	//get req from body
 	var req *requestModels.ReturnOrderReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -270,19 +318,29 @@ func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 	})
 }
 
+// mark order as returned by admin
+// @Summary Mark Order as Returned
+// @Description Admin can mark an order as returned when it is returned by the user and received by the admin
+// @Tags Admin/Order
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param orderID query string true "Order ID"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/markorderasreturned [patch]
 func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
+
 	//get req from body
 	var req *requestModels.ReturnOrderReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -296,21 +354,29 @@ func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
 	c.JSON(http.StatusOK, response.SuccessSM("Order marked as returned successfully"))
 }
 
-// MarkOrderAsDelivered
+// MarkOrderAsDelivered by admin
+// @Summary Mark Order as Delivered
+// @Description Admin can mark an order as delivered when it is delivered to the user
+// @Tags Admin/Order
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param orderID query string true "Order ID"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/markdelivery [patch]
 func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 
 	//get req from body
 	var req *requestModels.MarkOrderAsDeliveredReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", fmt.Errorf(errResponse)))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -325,6 +391,15 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 }
 
 // get invoice
+// @Summary Get Invoice
+// @Description Get Invoice of an order
+// @Tags User/Order
+// @Produce json
+// @Security BearerTokenAuth
+// @Param orderID query string true "Order ID"
+// @Success 200 {file} application/pdf
+// @Failure 400 {object} response.SME{}
+// @Router /order-invoice [get]
 func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 
 	userID, err := tools.GetUserID(c)
@@ -355,6 +430,14 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 }
 
 // GetAddressForCheckout
+// @Summary Get Address for Checkout
+// @Description Get Address for Checkout
+// @Tags User/Cart
+// @Produce json
+// @Security BearerTokenAuth
+// @Success 200 {object} response.GetAddressesForCheckoutResponse
+// @Failure 400 {object} response.SME{}
+// @Router /selectaddress [get]
 func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
 
 	userID, err := tools.GetUserID(c)
@@ -380,19 +463,28 @@ func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
 }
 
 // SetAddressGetCoupons
+// @Summary Set Address and Get Coupons
+// @Description Set Address and Get Coupons
+// @Tags User/Cart
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param setAddGetCouponsReq body requestModels.SetAddressForCheckOutReq true "Set Address and Get Coupons Request"
+// @Success 200 {object} response.SetAddrGetCouponsResponse
+// @Failure 400 {object} response.SME{}
+// @Router /setaddr-selectcoupon [post]
 func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
 
 	//get req from body
 	var req *requestModels.SetAddressForCheckOutReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -414,19 +506,28 @@ func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
 }
 
 // SetCouponGetPaymentMethods
+// @Summary Set Coupon and Get Payment Methods
+// @Description Set Coupon and Get Payment Methods
+// @Tags User/Cart
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param setCouponGetPaymentMethodsReq body requestModels.SetCouponForCheckoutReq true "Set Coupon and Get Payment Methods Request"
+// @Success 200 {object} response.GetPaymentMethodsForCheckoutResponse
+// @Failure 400 {object} response.SME{}
+// @Router /setcoupon-getpaymentmethods [post]
 func (h *OrderHandler) SetCouponGetPaymentMethods(c *gin.Context) {
 
 	//get req from body
 	var req *requestModels.SetCouponForCheckoutReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 

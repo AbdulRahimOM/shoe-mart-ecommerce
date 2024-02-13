@@ -8,6 +8,17 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// TopProductsHandler
+// @Summary Get top products
+// @Description Get top products
+// @Tags Admin/Analytics/Top_Performers
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param l query int false "Limit"
+// @Success 200 {object} response.TopProductsResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/top-products [get]
 func (h *ReportsHandler) TopProductsHandler(c *gin.Context) {
 
 	//get query param "l"
@@ -31,6 +42,17 @@ func (h *ReportsHandler) TopProductsHandler(c *gin.Context) {
 	}
 }
 
+// TopSellersHandler
+// @Summary Get top sellers
+// @Description Get top sellers
+// @Tags Admin/Analytics/Top_Performers
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param l query int false "Limit"
+// @Success 200 {object} response.TopSellersResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/top-sellers [get]
 func (h *ReportsHandler) TopSellersHandler(c *gin.Context) {
 
 	//get query param "l"
@@ -54,6 +76,17 @@ func (h *ReportsHandler) TopSellersHandler(c *gin.Context) {
 	}
 }
 
+// TopBrandsHandler
+// @Summary Get top brands
+// @Description Get top brands
+// @Tags Admin/Analytics/Top_Performers
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param l query int false "Limit"
+// @Success 200 {object} response.TopBrandsResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/top-brands [get]
 func (h *ReportsHandler) TopBrandsHandler(c *gin.Context) {
 
 	//get query param "l"
@@ -77,6 +110,17 @@ func (h *ReportsHandler) TopBrandsHandler(c *gin.Context) {
 	}
 }
 
+// TopModelsHandler
+// @Summary Get top models
+// @Description Get top models
+// @Tags Admin/Analytics/Top_Performers
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param l query int false "Limit"
+// @Success 200 {object} response.TopModelsResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/top-models [get]
 func (h *ReportsHandler) TopModelsHandler(c *gin.Context) {
 
 	//get query param "l"

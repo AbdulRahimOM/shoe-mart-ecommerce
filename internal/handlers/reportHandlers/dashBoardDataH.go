@@ -11,8 +11,20 @@ import (
 )
 
 // GetDashBoardData returns a dashboard data for a given date range
+// @Summary Get dashboard data
+// @Description Get dashboard data (for a given date range)
+// @Tags Admin/Analytics
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param range path string true "Range"
+// @Param sd query string false "Start Date"
+// @Param ed query string false "End Date"
+// @Success 200 {object} response.GetDashBoardDataResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/dashboarddata/{range} [get]
 func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
-	fmt.Println("Handler ::: get dashboard data handler")
+
 	var dashBoardData *entities.DashboardData
 	var salesPerDay *[]entities.SalePerDay
 	var err error

@@ -24,9 +24,10 @@ func NewCartHandler(cartUseCase usecaseInterface.ICartUC) *CartHandler {
 // add to cart
 // @Summary Add to cart
 // @Description Add to cart
-// @Tags cart
+// @Tags User/Cart
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param addToCartReq body requestModels.AddToCartReq{} true "Add to Cart Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -83,8 +84,9 @@ func (h *CartHandler) AddToCart(c *gin.Context) {
 // get cart
 // @Summary Get cart
 // @Description Get cart
-// @Tags cart
+// @Tags User/Cart
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} response.GetCartResponse{}
 // @Failure 400 {object} response.SME{}
 // @Router /cart [get]
@@ -124,9 +126,10 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 // delete from cart
 // @Summary Delete from cart
 // @Description Delete from cart
-// @Tags cart
+// @Tags User/Cart
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param deleteFromCartReq body requestModels.DeleteFromCartReq{} true "Delete from Cart Request"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -162,6 +165,14 @@ func (h *CartHandler) DeleteFromCart(c *gin.Context) {
 }
 
 // clear cart
+// @Summary Clear cart
+// @Description Clear cart
+// @Tags User/Cart
+// @Produce json
+// @Security BearerTokenAuth
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /clearcart [delete]
 func (h *CartHandler) ClearCart(c *gin.Context) {
 
 	userID, err := tools.GetUserID(c)

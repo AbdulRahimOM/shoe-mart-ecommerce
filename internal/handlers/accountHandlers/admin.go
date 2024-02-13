@@ -23,9 +23,10 @@ func NewAdminHandler(useCase usecaseInterface.IAdminUC) *AdminHandler {
 // to get admin login page
 // @Summary Get admin login page
 // @Description Get admin login page
-// @Tags admin
+// @Tags Admin/Session
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} string
 // @Router /admin/login [get]
 func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
@@ -37,9 +38,10 @@ func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
 // to login admin
 // @Summary Login admin
 // @Description Login admin
-// @Tags admin
+// @Tags Admin/Session
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param adminSignInReq body requestModels.AdminSignInReq{} true "Admin Sign In Request"
 // @Success 200 {object} response.SMT{}
 // @Failure 400 {object} response.SME{}
@@ -74,9 +76,10 @@ func (h *AdminHandler) PostLogIn(c *gin.Context) {
 // to get users list
 // @Summary Get users list
 // @Description Get users list
-// @Tags admin
+// @Tags Admin/Account_Management/Users
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} response.GetUsersListResponse{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/userslist [get]
@@ -85,9 +88,9 @@ func (h *AdminHandler) GetUsersList(c *gin.Context) {
 	usersList, err := h.AdminUseCase.GetUsersList()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.SME{
-			Status:    "failed",
-			Message:   "Error occured while getting users list. Please try again.",
-			Error:     err.Error(),
+			Status:  "failed",
+			Message: "Error occured while getting users list. Please try again.",
+			Error:   err.Error(),
 		})
 		return
 	} else {
@@ -102,9 +105,10 @@ func (h *AdminHandler) GetUsersList(c *gin.Context) {
 // to get sellers list
 // @Summary Get sellers list
 // @Description Get sellers list
-// @Tags admin
+// @Tags Admin/Account_Management/Sellers
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Success 200 {object} response.GetSellersListResponse{}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/sellerslist [get]
@@ -114,9 +118,9 @@ func (h *AdminHandler) GetSellersList(c *gin.Context) {
 	if err != nil {
 		errResponse := "error while getting sellers list"
 		c.JSON(http.StatusBadRequest, response.SME{
-			Status:      "failed",
-			Message:     "Error occured while getting sellers list. Please try again.",
-			Error:       errResponse,
+			Status:  "failed",
+			Message: "Error occured while getting sellers list. Please try again.",
+			Error:   errResponse,
 		})
 		return
 	} else {
@@ -131,9 +135,10 @@ func (h *AdminHandler) GetSellersList(c *gin.Context) {
 // to block a user
 // @Summary Block user
 // @Description Block user
-// @Tags admin
+// @Tags Admin/Account_Management/Users
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param unblockUserRequest body requestModels.BlockUserReq{} true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -173,9 +178,10 @@ func (h *AdminHandler) BlockUser(c *gin.Context) {
 // to unblock a user
 // @Summary Unblock user
 // @Description Unblock user
-// @Tags admin
+// @Tags Admin/Account_Management/Users
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param unblockUserRequest body requestModels.UnblockUserReq true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -218,9 +224,10 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 // to block a seller
 // @Summary Block seller
 // @Description Block seller
-// @Tags admin
+// @Tags Admin/Account_Management/Sellers
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param blockSellerRequest body requestModels.BlockSellerReq true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -260,9 +267,10 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 // to unblock a seller
 // @Summary Unblock seller
 // @Description Unblock seller
-// @Tags admin
+// @Tags Admin/Account_Management/Sellers
 // @Accept json
 // @Produce json
+// @Security BearerTokenAuth
 // @Param unblockSellerRequest body requestModels.UnblockSellerReq true "user"
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
@@ -319,12 +327,13 @@ func (h *AdminHandler) VerifySeller(c *gin.Context) {
 // ReloadConfig
 // @Summary Reload config
 // @Description Reload config
-// @Tags admin
+// @Tags Admin/System_Related/Config
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.SM{}
+// @Security BearerTokenAuth
+// @Success 200 {object} response.SM{} @Example {"status": "success", "message": "Config reloaded successfully"}
 // @Failure 400 {object} response.SME{}
-// @Router /admin/reloadconfig [post]
+// @Router /admin/system/restart-Configuration [get]
 func (h *AdminHandler) RestartConfig(c *gin.Context) {
 	err := h.AdminUseCase.RestartConfig()
 	if err != nil {

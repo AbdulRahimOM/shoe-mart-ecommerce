@@ -1,6 +1,7 @@
 package productManagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	requestValidation "MyShoo/pkg/validation"
@@ -11,17 +12,26 @@ import (
 )
 
 // add dimensional variant handler
+// @Summary Add dimensional variant
+// @Description Add dimensional variant
+// @Tags Seller/Product_Management/Dimensional_Variant
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param addDimensionalVariantReq body requestModels.AddDimensionalVariantReq{} true "Add Dimensional Variant Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
 func (h *ProductHandler) AddDimensionalVariant(c *gin.Context) {
 
 	var req requestModels.AddDimensionalVariantReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
-	//validate request
+
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 

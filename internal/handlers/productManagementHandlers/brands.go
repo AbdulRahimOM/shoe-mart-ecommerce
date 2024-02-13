@@ -1,6 +1,7 @@
 package productManagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
@@ -23,25 +24,25 @@ func NewBrandHandler(uc usecaseInterface.IBrandsUC) *BrandsHandler {
 // add brands handler
 // @Summary Add brand
 // @Description Add brand
-// @Tags admin
+// @Tags Seller/Product_Management/Brand
 // @Accept json
 // @Produce json
-// @Param addBrandReq body requestModels.AddBrandReq true "Add Brand Request"
-// @Success 200 {object} string
-// @Failure 400 {object} string
-// @Router /admin/addbrand [post]
+// @Security BearerTokenAuth
+// @Param addBrandReq body requestModels.AddBrandReq{} true "Add Brand Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /seller/addbrand [post]
 func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 
 	var req requestModels.AddBrandReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -56,13 +57,17 @@ func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 
 // get brands handler
 // @Summary Get brands
-// @Description Get brands
-// @Tags admin
-// @Accept json
+// @Description Get brands (categorised by first alphabet)
+// @Tags Admin/Product_Management/Brand
+// @Tags Seller/Product_Management/Brand
+// @Tags User/Browse
 // @Produce json
-// @Success 200 {object} string
-// @Failure 400 {object} string
-// @Router /admin/getbrands [get]
+// @Security BearerTokenAuth
+// @Success 200 {object} response.GetBrandsResponse
+// @Failure 400 {object} response.SME{}
+// @Router /admin/brands [get]
+// @Router /seller/brands [get]
+// @Router /brands [get]
 func (bh *BrandsHandler) GetBrands(c *gin.Context) {
 
 	var brands *[26]entities.BrandsByAlphabet
@@ -82,25 +87,25 @@ func (bh *BrandsHandler) GetBrands(c *gin.Context) {
 // edit brand handler
 // @Summary Edit brand
 // @Description Edit brand
-// @Tags admin
+// @Tags Admin/Product_Management/Brand
 // @Accept json
 // @Produce json
-// @Param editBrandReq body requestModels.EditBrandReq true "Edit Brand Request"
-// @Success 200 {object} string
-// @Failure 400 {object} string
-// @Router /admin/editbrand [post]
+// @Security BearerTokenAuth
+// @Param editBrandReq body requestModels.EditBrandReq{} true "Edit Brand Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/editbrand [patch]
 func (bh *BrandsHandler) EditBrand(c *gin.Context) {
 
 	var req requestModels.EditBrandReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 

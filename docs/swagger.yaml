@@ -1,4 +1,153 @@
 definitions:
+  entities.Brands:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      sellerID:
+        type: integer
+    type: object
+  entities.BrandsByAlphabet:
+    properties:
+      alphabet:
+        type: string
+      brands:
+        items:
+          $ref: '#/definitions/entities.Brands'
+        type: array
+    type: object
+  entities.Categories:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+    type: object
+  entities.Coupon:
+    properties:
+      blocked:
+        type: boolean
+      code:
+        type: string
+      description:
+        type: string
+      endDate:
+        type: string
+      id:
+        type: integer
+      maxDiscount:
+        type: number
+      minOrderValue:
+        type: number
+      percentage:
+        type: number
+      startDate:
+        type: string
+      type:
+        $ref: '#/definitions/entities.CouponType'
+      usageLimit:
+        type: integer
+    type: object
+  entities.CouponType:
+    enum:
+    - percentage
+    - fixed
+    type: string
+    x-enum-varnames:
+    - Percentage
+    - Fixed
+  entities.DashboardData:
+    properties:
+      cancelled_order_count:
+        type: integer
+      coupon_discounts:
+        type: number
+      net_original_value:
+        type: number
+      net_sale_value:
+        type: number
+      order_count:
+        type: integer
+      returned_order_count:
+        type: integer
+      sale_value_after_cancellation_and_returns:
+        type: number
+      users_registered:
+        type: integer
+    type: object
+  entities.Models:
+    properties:
+      brandID:
+        type: integer
+      categoryID:
+        type: integer
+      fkBrand:
+        $ref: '#/definitions/entities.Brands'
+      fkCategory:
+        $ref: '#/definitions/entities.Categories'
+      id:
+        type: integer
+      name:
+        type: string
+      rating:
+        type: number
+    type: object
+  entities.Order:
+    properties:
+      addressID:
+        type: integer
+      couponDiscount:
+        type: number
+      couponID:
+        type: integer
+      deliveredDate:
+        type: string
+      finalAmount:
+        type: number
+      fkAddress:
+        allOf:
+        - $ref: '#/definitions/entities.UserAddress'
+        description: FkUser    User    `gorm:"foreignKey:UserID;constraint:OnDelete:CASCADE"`
+      id:
+        type: integer
+      orderDateAndTime:
+        type: string
+      originalAmount:
+        type: number
+      paymentMethod:
+        type: string
+      paymentStatus:
+        description: need update to notNull
+        type: string
+      referenceNo:
+        type: string
+      shippingCharge:
+        type: number
+      status:
+        type: string
+      transactionID:
+        description: need update to notNull
+        type: string
+      userID:
+        type: integer
+    type: object
+  entities.OrderInfo:
+    properties:
+      orderDetails:
+        $ref: '#/definitions/entities.Order'
+      orderItems:
+        items:
+          $ref: '#/definitions/entities.PQ'
+        type: array
+    type: object
+  entities.PQ:
+    properties:
+      productID:
+        type: integer
+      quantity:
+        type: integer
+    type: object
   entities.PwMaskedSeller:
     properties:
       email:
@@ -15,6 +164,13 @@ definitions:
         type: string
       status:
         type: string
+    type: object
+  entities.SalePerDay:
+    properties:
+      date:
+        type: string
+      sale:
+        type: number
     type: object
   entities.UserAddress:
     properties:
@@ -59,6 +215,15 @@ definitions:
       status:
         type: string
     type: object
+  entities.WishList:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      userID:
+        type: integer
+    type: object
   requestModels.AddBrandReq:
     properties:
       name:
@@ -95,6 +260,16 @@ definitions:
     - mrp
     - salePrice
     type: object
+  requestModels.AddDimensionalVariantReq:
+    properties:
+      colourVariantId:
+        type: integer
+      dvIndex:
+        type: integer
+    required:
+    - colourVariantId
+    - dvIndex
+    type: object
   requestModels.AddModelReq:
     properties:
       brandId:
@@ -109,6 +284,19 @@ definitions:
     - categoryId
     - name
     type: object
+  requestModels.AddStockReq:
+    properties:
+      addingStockCount:
+        type: integer
+      productId:
+        type: integer
+      sellerId:
+        type: integer
+    required:
+    - addingStockCount
+    - productId
+    - sellerId
+    type: object
   requestModels.AddToCartReq:
     properties:
       productID:
@@ -118,6 +306,16 @@ definitions:
     required:
     - productID
     - userID
+    type: object
+  requestModels.AddToWishListReq:
+    properties:
+      productID:
+        type: integer
+      wishListID:
+        type: integer
+    required:
+    - productID
+    - wishListID
     type: object
   requestModels.AddUserAddress:
     properties:
@@ -180,6 +378,13 @@ definitions:
     required:
     - email
     type: object
+  requestModels.BlockCouponReq:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
+    type: object
   requestModels.BlockSellerReq:
     properties:
       email:
@@ -193,6 +398,20 @@ definitions:
         type: string
     required:
     - email
+    type: object
+  requestModels.CancelOrderReq:
+    properties:
+      orderID:
+        type: integer
+    required:
+    - orderID
+    type: object
+  requestModels.CreateWishListReq:
+    properties:
+      name:
+        type: string
+    required:
+    - name
     type: object
   requestModels.DeleteFromCartReq:
     properties:
@@ -243,6 +462,26 @@ definitions:
     - newName
     - oldName
     type: object
+  requestModels.EditColourVariantReq:
+    properties:
+      colour:
+        minLength: 3
+        type: string
+      id:
+        type: integer
+      modelId:
+        type: integer
+      mrp:
+        type: number
+      salePrice:
+        type: number
+    required:
+    - colour
+    - id
+    - modelId
+    - mrp
+    - salePrice
+    type: object
   requestModels.EditModelReq:
     properties:
       brandId:
@@ -277,6 +516,19 @@ definitions:
     - firstName
     - lastName
     - phone
+    type: object
+  requestModels.EditStockReq:
+    properties:
+      productId:
+        type: integer
+      sellerId:
+        type: integer
+      updatedStockCount:
+        type: integer
+    required:
+    - productId
+    - sellerId
+    - updatedStockCount
     type: object
   requestModels.EditUserAddress:
     properties:
@@ -324,6 +576,103 @@ definitions:
     - street
     - userId
     type: object
+  requestModels.MakeOrderReq:
+    properties:
+      addressID:
+        type: integer
+      couponID:
+        type: integer
+      paymentMethod:
+        minLength: 2
+        type: string
+    required:
+    - addressID
+    - paymentMethod
+    type: object
+  requestModels.NewCouponReq:
+    properties:
+      code:
+        maxLength: 15
+        minLength: 3
+        type: string
+      description:
+        maxLength: 100
+        minLength: 3
+        type: string
+      endDate:
+        type: string
+      maxDiscount:
+        minimum: 0
+        type: number
+      minOrderValue:
+        minimum: 0
+        type: number
+      percentage:
+        maximum: 100
+        minimum: 0
+        type: number
+      startDate:
+        type: string
+      type:
+        allOf:
+        - $ref: '#/definitions/entities.CouponType'
+        enum:
+        - percentage
+        - fixed
+      usageLimit:
+        minimum: 1
+        type: integer
+    required:
+    - code
+    - endDate
+    - maxDiscount
+    - minOrderValue
+    - startDate
+    - type
+    - usageLimit
+    type: object
+  requestModels.ProceedToPaymentReq:
+    properties:
+      discount:
+        type: number
+      email:
+        type: string
+      first_name:
+        type: string
+      order_ref_no:
+        type: string
+      payment_key:
+        type: string
+      payment_order_id:
+        type: string
+      phone:
+        type: string
+      shipping_charge:
+        type: number
+      total_amount:
+        type: number
+      total_payable_amount:
+        type: number
+    required:
+    - email
+    - first_name
+    - order_ref_no
+    - payment_key
+    - payment_order_id
+    - phone
+    - total_amount
+    - total_payable_amount
+    type: object
+  requestModels.RemoveFromWishListReq:
+    properties:
+      productID:
+        type: integer
+      wishListID:
+        type: integer
+    required:
+    - productID
+    - wishListID
+    type: object
   requestModels.ResetPasswordReq:
     properties:
       newPassword:
@@ -331,6 +680,20 @@ definitions:
         type: string
     required:
     - newPassword
+    type: object
+  requestModels.RetryPaymentReq:
+    properties:
+      order_id:
+        type: integer
+    required:
+    - order_id
+    type: object
+  requestModels.ReturnOrderReq:
+    properties:
+      orderID:
+        type: integer
+    required:
+    - orderID
     type: object
   requestModels.SellerSignInReq:
     properties:
@@ -363,6 +726,30 @@ definitions:
     - SignUp_email
     - SignUp_firstName
     - SignUp_phone
+    type: object
+  requestModels.SetAddressForCheckOutReq:
+    properties:
+      addressID:
+        type: integer
+    required:
+    - addressID
+    type: object
+  requestModels.SetCouponForCheckoutReq:
+    properties:
+      addressID:
+        type: integer
+      couponID:
+        type: integer
+    required:
+    - addressID
+    - couponID
+    type: object
+  requestModels.UnblockCouponReq:
+    properties:
+      id:
+        type: integer
+    required:
+    - id
     type: object
   requestModels.UnblockSellerReq:
     properties:
@@ -417,6 +804,84 @@ definitions:
     required:
     - otp
     type: object
+  response.BillAfterCoupon:
+    properties:
+      coupon:
+        $ref: '#/definitions/response.ResponseCoupon'
+      couponApplied:
+        type: boolean
+      couponDiscount:
+        type: number
+      grandTotal:
+        type: number
+      shippingCharge:
+        type: number
+      totalProductsValue:
+        type: number
+    type: object
+  response.BillBeforeCoupon:
+    properties:
+      grandTotal:
+        type: number
+      shippingCharge:
+        type: number
+      totalProductsValue:
+        type: number
+    type: object
+  response.CODOrderResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      orderInfo:
+        $ref: '#/definitions/entities.OrderInfo'
+      status:
+        type: string
+    type: object
+  response.GetAddressesForCheckoutResponse:
+    properties:
+      addresses:
+        items:
+          $ref: '#/definitions/entities.UserAddress'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+      totalQuantiy:
+        type: integer
+      totalValue:
+        type: number
+    type: object
+  response.GetAllWishListsResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+      totalCount:
+        type: integer
+      wishLists:
+        items:
+          $ref: '#/definitions/entities.WishList'
+        type: array
+    type: object
+  response.GetBrandsResponse:
+    properties:
+      brandsByAlphabet:
+        items:
+          $ref: '#/definitions/entities.BrandsByAlphabet'
+        type: array
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   response.GetCartResponse:
     properties:
       cart:
@@ -430,6 +895,109 @@ definitions:
       status:
         type: string
       totalValue:
+        type: number
+    type: object
+  response.GetCategoriesResponse:
+    properties:
+      categories:
+        items:
+          $ref: '#/definitions/entities.Categories'
+        type: array
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.GetColourVariantsUnderModelResponse:
+    properties:
+      colourVariants:
+        items:
+          $ref: '#/definitions/response.ResponseColourVarient'
+        type: array
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.GetCouponRes:
+    properties:
+      coupons:
+        items:
+          $ref: '#/definitions/entities.Coupon'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+    type: object
+  response.GetDashBoardDataResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      sale_per_day:
+        items:
+          $ref: '#/definitions/entities.SalePerDay'
+        type: array
+      sales_report:
+        allOf:
+        - $ref: '#/definitions/entities.DashboardData'
+        description: need update
+      status:
+        type: string
+    type: object
+  response.GetModelsResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      models:
+        items:
+          $ref: '#/definitions/entities.Models'
+        type: array
+      status:
+        type: string
+    type: object
+  response.GetOrdersResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      ordersInfo:
+        items:
+          $ref: '#/definitions/response.ResponseOrderInfo'
+        type: array
+      status:
+        type: string
+    type: object
+  response.GetPaymentMethodsForCheckoutResponse:
+    properties:
+      address:
+        $ref: '#/definitions/entities.UserAddress'
+      billSummary:
+        $ref: '#/definitions/response.BillAfterCoupon'
+      codAvailability:
+        type: boolean
+      codAvailabilityNote:
+        type: string
+      message:
+        type: string
+      paymentMethods:
+        items:
+          type: string
+        type: array
+      status:
+        type: string
+      totalQuantiy:
+        type: integer
+      walletBalance:
         type: number
     type: object
   response.GetProfileResponse:
@@ -485,6 +1053,77 @@ definitions:
           $ref: '#/definitions/entities.UserDetails'
         type: array
     type: object
+  response.GetWishListByIDResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+      totalCount:
+        type: integer
+      wishItems:
+        items:
+          $ref: '#/definitions/response.ResponseProduct2'
+        type: array
+      wishListName:
+        type: string
+    type: object
+  response.OnlinePaymentOrderResponse:
+    properties:
+      error:
+        type: string
+      message:
+        type: string
+      orderInfo:
+        $ref: '#/definitions/entities.OrderInfo'
+      proceedToPaymentInfo:
+        $ref: '#/definitions/response.ProceedToPaymentInfo'
+      status:
+        type: string
+    type: object
+  response.PQR:
+    properties:
+      productID:
+        type: integer
+      quantity:
+        type: integer
+      salePriceOnOrder:
+        type: number
+    type: object
+  response.PaidOrderResponse:
+    properties:
+      message:
+        type: string
+      order:
+        $ref: '#/definitions/entities.Order'
+      status:
+        type: string
+    type: object
+  response.ProceedToPaymentInfo:
+    properties:
+      discount:
+        type: number
+      email:
+        type: string
+      first_name:
+        type: string
+      order_ref_no:
+        type: string
+      payment_key:
+        type: string
+      payment_order_id:
+        type: string
+      phone:
+        type: string
+      shipping_charge:
+        type: number
+      total_amount:
+        type: number
+      total_payable_amount:
+        type: number
+    type: object
   response.ResponseCartItems:
     properties:
       fkProduct:
@@ -500,6 +1139,62 @@ definitions:
         type: integer
       quantity:
         type: integer
+    type: object
+  response.ResponseColourVarient:
+    properties:
+      colour:
+        type: string
+      id:
+        type: integer
+      modelID:
+        type: integer
+      mrp:
+        type: number
+      salePrice:
+        type: number
+    type: object
+  response.ResponseCoupon:
+    properties:
+      code:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      maxDiscount:
+        type: number
+      minOrderValue:
+        type: number
+      percentage:
+        type: number
+      type:
+        type: string
+    type: object
+  response.ResponseOrderInfo:
+    properties:
+      orderDetails:
+        $ref: '#/definitions/entities.Order'
+      orderItems:
+        items:
+          $ref: '#/definitions/response.PQR'
+        type: array
+    type: object
+  response.ResponseProduct2:
+    properties:
+      id:
+        type: integer
+      mrp:
+        description: |-
+          SizeIndex              uint    `gorm:"column:sizeIndex;notNull"`
+          DimensionalVariationID uint    `gorm:"column:dimensionalVariationID;notNull"`
+          Stock                  uint    `gorm:"column:stock;notNull"`
+        type: number
+      name:
+        type: string
+      salePrice:
+        type: number
+      skucode:
+        type: string
     type: object
   response.SM:
     properties:
@@ -517,6 +1212,16 @@ definitions:
       status:
         type: string
     type: object
+  response.SMED:
+    properties:
+      data: {}
+      error:
+        type: string
+      message:
+        type: string
+      status:
+        type: string
+    type: object
   response.SMT:
     properties:
       message:
@@ -526,9 +1231,136 @@ definitions:
       token:
         type: string
     type: object
+  response.SetAddrGetCouponsResponse:
+    properties:
+      address:
+        $ref: '#/definitions/entities.UserAddress'
+      billSummary:
+        $ref: '#/definitions/response.BillBeforeCoupon'
+      coupons:
+        items:
+          $ref: '#/definitions/response.ResponseCoupon'
+        type: array
+      message:
+        type: string
+      status:
+        type: string
+      totalQuantiy:
+        type: integer
+    type: object
+  response.TopBrands:
+    properties:
+      brand_id:
+        type: integer
+      brand_name:
+        type: string
+      net_mrp_value_sold:
+        type: number
+      net_sale_amount:
+        type: number
+      quantity_sold:
+        type: integer
+      seller_name:
+        type: string
+    type: object
+  response.TopBrandsResponse:
+    properties:
+      limit:
+        type: integer
+      status:
+        type: string
+      topBrands:
+        items:
+          $ref: '#/definitions/response.TopBrands'
+        type: array
+    type: object
+  response.TopModels:
+    properties:
+      brand_name:
+        type: string
+      model_id:
+        type: integer
+      model_name:
+        type: string
+      net_mrp_value_sold:
+        type: number
+      net_sale_amount:
+        type: number
+      quantity_sold:
+        type: integer
+      seller_name:
+        type: string
+    type: object
+  response.TopModelsResponse:
+    properties:
+      limit:
+        type: integer
+      status:
+        type: string
+      topModels:
+        items:
+          $ref: '#/definitions/response.TopModels'
+        type: array
+    type: object
+  response.TopProducts:
+    properties:
+      brand_name:
+        type: string
+      colour_variant_id:
+        type: integer
+      current_mrp:
+        type: number
+      current_sale_price:
+        type: number
+      model_name:
+        type: string
+      net_mrp_value:
+        type: number
+      net_sale_amount:
+        type: number
+      quantity_sold:
+        type: integer
+      seller_name:
+        type: string
+    type: object
+  response.TopProductsResponse:
+    properties:
+      limit:
+        type: integer
+      status:
+        type: string
+      topProducts:
+        items:
+          $ref: '#/definitions/response.TopProducts'
+        type: array
+    type: object
+  response.TopSellers:
+    properties:
+      net_mrp_value_sold:
+        type: number
+      net_sale_amount:
+        type: number
+      quantity_sold:
+        type: integer
+      seller_id:
+        type: integer
+      seller_name:
+        type: string
+    type: object
+  response.TopSellersResponse:
+    properties:
+      limit:
+        type: integer
+      status:
+        type: string
+      topSellers:
+        items:
+          $ref: '#/definitions/response.TopSellers'
+        type: array
+    type: object
 info:
   contact: {}
-  description: Main entry point
+  description: 'E-commerce application (Product: Shoes)'
   title: MyShoo API
   version: "1.0"
 paths:
@@ -555,9 +1387,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Add address
       tags:
-      - user
+      - User/Address
   /addresses:
     get:
       description: Get user addresses
@@ -572,35 +1406,39 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Get user addresses
       tags:
-      - user
-  /admin/addbrand:
+      - User/Address
+  /addtowishlist:
     post:
       consumes:
       - application/json
-      description: Add brand
+      description: Add to wishlist
       parameters:
-      - description: Add Brand Request
+      - description: Add to WishList Request
         in: body
-        name: addBrandReq
+        name: addToWishListReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddBrandReq'
+          $ref: '#/definitions/requestModels.AddToWishListReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            type: string
-      summary: Add brand
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Add to wishlist
       tags:
-      - admin
+      - User/WishList
   /admin/addcategory:
     post:
       consumes:
@@ -619,66 +1457,44 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Add category
       tags:
-      - admin
-  /admin/addcolourvariant:
-    post:
+      - Admin/Product_Management/Category
+  /admin/blockcoupon:
+    patch:
       consumes:
       - application/json
-      description: Add colour variant
+      description: Admin can block(suspend) a coupon
       parameters:
-      - description: Add Colour Variant Request
+      - description: Block Coupon Request
         in: body
-        name: addColourVariantReq
+        name: blockCouponReq
         required: true
         schema:
-          $ref: '#/definitions/requestModels.AddColourVariantReq'
+          $ref: '#/definitions/requestModels.BlockCouponReq'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/response.SMT'
         "400":
           description: Bad Request
           schema:
-            type: string
-      summary: Add colour variant
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Block coupon
       tags:
-      - admin
-  /admin/addmodel:
-    post:
-      consumes:
-      - application/json
-      description: Add model
-      parameters:
-      - description: Add Model Request
-        in: body
-        name: addModelReq
-        required: true
-        schema:
-          $ref: '#/definitions/requestModels.AddModelReq'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Add model
-      tags:
-      - admin
+      - Admin/Coupon
   /admin/blockseller:
     post:
       consumes:
@@ -702,9 +1518,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Block seller
       tags:
-      - admin
+      - Admin/Account_Management/Sellers
   /admin/blockuser:
     post:
       consumes:
@@ -728,11 +1546,173 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Block user
       tags:
-      - admin
+      - Admin/Account_Management/Users
+  /admin/brands:
+    get:
+      description: Get brands (categorised by first alphabet)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetBrandsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get brands
+      tags:
+      - Admin/Product_Management/Brand
+      - Seller/Product_Management/Brand
+      - User/Browse
+  /admin/cancelorder:
+    patch:
+      consumes:
+      - application/json
+      description: Admin can cancel an order which is not yet delivered
+      parameters:
+      - description: Cancel Order Request
+        in: body
+        name: cancelOrderReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.CancelOrderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Cancel Order
+      tags:
+      - Admin/Order
+  /admin/categories:
+    get:
+      description: Get categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetCategoriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get categories
+      tags:
+      - Admin/Product_Management/Category
+      - Seller/Product_Management/Category
+      - User/Browse
+  /admin/colourvariants/{modelID}:
+    get:
+      description: Get colour variants under model
+      parameters:
+      - description: Model ID
+        in: path
+        name: modelID
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetColourVariantsUnderModelResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get colour variants under model
+      tags:
+      - Admin/Product_Management/Colour_Variant
+      - Seller/Product_Management/Colour_Variant
+      - User/Browse
+  /admin/coupons:
+    get:
+      consumes:
+      - application/json
+      description: Admin can get all coupons, active coupons, expired coupons, upcoming
+        coupons
+      parameters:
+      - description: all, active, expired, upcoming
+        in: query
+        name: criteria
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetCouponRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get coupons
+      tags:
+      - Admin/Coupon
+  /admin/dashboarddata/{range}:
+    get:
+      consumes:
+      - application/json
+      description: Get dashboard data (for a given date range)
+      parameters:
+      - description: Range
+        in: path
+        name: range
+        required: true
+        type: string
+      - description: Start Date
+        in: query
+        name: sd
+        type: string
+      - description: End Date
+        in: query
+        name: ed
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetDashBoardDataResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get dashboard data
+      tags:
+      - Admin/Analytics
   /admin/editbrand:
-    post:
+    patch:
       consumes:
       - application/json
       description: Edit brand
@@ -749,16 +1729,18 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Edit brand
       tags:
-      - admin
+      - Admin/Product_Management/Brand
   /admin/editcategory:
-    post:
+    patch:
       consumes:
       - application/json
       description: Edit category
@@ -775,15 +1757,45 @@ paths:
         "200":
           description: OK
           schema:
-            type: string
+            $ref: '#/definitions/response.SM'
         "400":
           description: Bad Request
           schema:
-            type: string
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Edit category
       tags:
-      - admin
-  /admin/editmodelname:
+      - Admin/Product_Management/Category
+  /admin/editcolourvariant:
+    patch:
+      consumes:
+      - application/json
+      description: Edit colour variant
+      parameters:
+      - description: Edit Colour Variant Request
+        in: body
+        name: editColourVariantReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditColourVariantReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Edit colour variant
+      tags:
+      - Admin/Product_Management/Colour_Variant
+  /admin/editmodel:
     patch:
       consumes:
       - application/json
@@ -806,47 +1818,11 @@ paths:
           description: Bad Request
           schema:
             type: string
+      security:
+      - BearerTokenAuth: []
       summary: Edit model
       tags:
-      - admin
-  /admin/getbrands:
-    get:
-      consumes:
-      - application/json
-      description: Get brands
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Get brands
-      tags:
-      - admin
-  /admin/getcategories:
-    get:
-      consumes:
-      - application/json
-      description: Get categories
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            type: string
-        "400":
-          description: Bad Request
-          schema:
-            type: string
-      summary: Get categories
-      tags:
-      - admin
+      - Admin/Product_Management/Model
   /admin/login:
     get:
       consumes:
@@ -859,9 +1835,11 @@ paths:
           description: OK
           schema:
             type: string
+      security:
+      - BearerTokenAuth: []
       summary: Get admin login page
       tags:
-      - admin
+      - Admin/Session
     post:
       consumes:
       - application/json
@@ -884,14 +1862,23 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Login admin
       tags:
-      - admin
-  /admin/reloadconfig:
-    post:
+      - Admin/Session
+  /admin/markdelivery:
+    patch:
       consumes:
       - application/json
-      description: Reload config
+      description: Admin can mark an order as delivered when it is delivered to the
+        user
+      parameters:
+      - description: Order ID
+        in: query
+        name: orderID
+        required: true
+        type: string
       produces:
       - application/json
       responses:
@@ -903,9 +1890,148 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
-      summary: Reload config
+      security:
+      - BearerTokenAuth: []
+      summary: Mark Order as Delivered
       tags:
-      - admin
+      - Admin/Order
+  /admin/markorderasreturned:
+    patch:
+      consumes:
+      - application/json
+      description: Admin can mark an order as returned when it is returned by the
+        user and received by the admin
+      parameters:
+      - description: Order ID
+        in: query
+        name: orderID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Mark Order as Returned
+      tags:
+      - Admin/Order
+  /admin/models:
+    get:
+      consumes:
+      - application/json
+      description: Get models by brands and categories
+      parameters:
+      - description: Brand ID
+        in: query
+        name: brandID
+        type: string
+      - description: Category ID
+        in: query
+        name: categoryID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetModelsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get models by brands and categories
+      tags:
+      - Admin/Product_Management/Model
+      - Seller/Product_Management/Model
+      - User/Browse
+  /admin/newcoupon:
+    post:
+      consumes:
+      - application/json
+      description: Admin can add new coupon
+      parameters:
+      - description: New Coupon Request
+        in: body
+        name: newCouponReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.NewCouponReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Add new coupon
+      tags:
+      - Admin/Coupon
+  /admin/orders:
+    get:
+      description: Get All Orders (for admin)
+      parameters:
+      - description: page number
+        in: query
+        name: p
+        type: string
+      - description: limit
+        in: query
+        name: l
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetOrdersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get All Orders
+      tags:
+      - Admin/Order
+  /admin/products:
+    get:
+      description: Get products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMED'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get products
+      tags:
+      - Admin/Product_Management/Products
+      - Seller/Product_Management/Products
+      - User/Browse
   /admin/sellerslist:
     get:
       consumes:
@@ -922,9 +2048,164 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Get sellers list
       tags:
-      - admin
+      - Admin/Account_Management/Sellers
+  /admin/system/restart-Configuration:
+    get:
+      consumes:
+      - application/json
+      description: Reload config
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Reload config
+      tags:
+      - Admin/System_Related/Config
+  /admin/top-brands:
+    get:
+      consumes:
+      - application/json
+      description: Get top brands
+      parameters:
+      - description: Limit
+        in: query
+        name: l
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TopBrandsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get top brands
+      tags:
+      - Admin/Analytics/Top_Performers
+  /admin/top-models:
+    get:
+      consumes:
+      - application/json
+      description: Get top models
+      parameters:
+      - description: Limit
+        in: query
+        name: l
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TopModelsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get top models
+      tags:
+      - Admin/Analytics/Top_Performers
+  /admin/top-products:
+    get:
+      consumes:
+      - application/json
+      description: Get top products
+      parameters:
+      - description: Limit
+        in: query
+        name: l
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TopProductsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get top products
+      tags:
+      - Admin/Analytics/Top_Performers
+  /admin/top-sellers:
+    get:
+      consumes:
+      - application/json
+      description: Get top sellers
+      parameters:
+      - description: Limit
+        in: query
+        name: l
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.TopSellersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get top sellers
+      tags:
+      - Admin/Analytics/Top_Performers
+  /admin/unblockcoupon:
+    patch:
+      consumes:
+      - application/json
+      description: Admin can unblock(re-activate) a coupon
+      parameters:
+      - description: Unblock Coupon Request
+        in: body
+        name: unblockCouponReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.UnblockCouponReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMT'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Unblock coupon
+      tags:
+      - Admin/Coupon
   /admin/unblockseller:
     post:
       consumes:
@@ -948,9 +2229,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Unblock seller
       tags:
-      - admin
+      - Admin/Account_Management/Sellers
   /admin/unblockuser:
     post:
       consumes:
@@ -974,9 +2257,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Unblock user
       tags:
-      - admin
+      - Admin/Account_Management/Users
   /admin/userslist:
     get:
       consumes:
@@ -993,9 +2278,60 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Get users list
       tags:
-      - admin
+      - Admin/Account_Management/Users
+  /brands:
+    get:
+      description: Get brands (categorised by first alphabet)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetBrandsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get brands
+      tags:
+      - Admin/Product_Management/Brand
+      - Seller/Product_Management/Brand
+      - User/Browse
+  /cancelorder:
+    patch:
+      consumes:
+      - application/json
+      description: User can cancel an order which is not yet delivered
+      parameters:
+      - description: Cancel Order Request
+        in: body
+        name: cancelOrderReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.CancelOrderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Cancel Order
+      tags:
+      - User/Order
   /cart:
     delete:
       consumes:
@@ -1019,9 +2355,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Delete from cart
       tags:
-      - cart
+      - User/Cart
     get:
       description: Get cart
       produces:
@@ -1035,9 +2373,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Get cart
       tags:
-      - cart
+      - User/Cart
     put:
       consumes:
       - application/json
@@ -1060,9 +2400,79 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Add to cart
       tags:
-      - cart
+      - User/Cart
+  /categories:
+    get:
+      description: Get categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetCategoriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get categories
+      tags:
+      - Admin/Product_Management/Category
+      - Seller/Product_Management/Category
+      - User/Browse
+  /clearcart:
+    delete:
+      description: Clear cart
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Clear cart
+      tags:
+      - User/Cart
+  /createwishlist:
+    post:
+      consumes:
+      - application/json
+      description: Create wishlist
+      parameters:
+      - description: Create WishList Request
+        in: body
+        name: createWishListReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.CreateWishListReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Create wishlist
+      tags:
+      - User/WishList
   /deleteaddress:
     delete:
       consumes:
@@ -1086,9 +2496,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Delete address
       tags:
-      - user
+      - User/Address
   /editaddress:
     patch:
       consumes:
@@ -1112,9 +2524,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Edit address
       tags:
-      - user
+      - User/Address
   /editprofile:
     patch:
       consumes:
@@ -1138,9 +2552,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Edit profile
       tags:
-      - user
+      - User/Profile
   /login:
     get:
       consumes:
@@ -1153,9 +2569,11 @@ paths:
           description: OK
           schema:
             type: string
+      security:
+      - BearerTokenAuth: []
       summary: Get user login page
       tags:
-      - user
+      - User/Session/Login
     post:
       consumes:
       - application/json
@@ -1178,9 +2596,210 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: User Sign In Handler
       tags:
-      - user
+      - User/Session/Login
+  /makeorder:
+    post:
+      consumes:
+      - application/json
+      description: Make Order
+      parameters:
+      - description: Make Order Request
+        in: body
+        name: makeOrderReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.MakeOrderReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/response.OnlinePaymentOrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Make Order
+      tags:
+      - User/Order
+  /models:
+    get:
+      consumes:
+      - application/json
+      description: Get models by brands and categories
+      parameters:
+      - description: Brand ID
+        in: query
+        name: brandID
+        type: string
+      - description: Category ID
+        in: query
+        name: categoryID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetModelsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get models by brands and categories
+      tags:
+      - Admin/Product_Management/Model
+      - Seller/Product_Management/Model
+      - User/Browse
+  /myorders:
+    get:
+      description: Get Orders of the user
+      parameters:
+      - description: page number
+        in: query
+        name: p
+        type: string
+      - description: limit
+        in: query
+        name: l
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetOrdersResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get Orders of the user
+      tags:
+      - User/Order
+  /mywishlists:
+    get:
+      consumes:
+      - application/json
+      description: Get all wishlists
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetAllWishListsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get all wishlists
+      tags:
+      - User/WishList
+  /order-invoice:
+    get:
+      description: Get Invoice of an order
+      parameters:
+      - description: Order ID
+        in: query
+        name: orderID
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: file
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get Invoice
+      tags:
+      - User/Order
+  /payment:
+    post:
+      consumes:
+      - application/json
+      description: Proceed to payment
+      parameters:
+      - description: Proceed to Payment Request
+        in: body
+        name: proceedToPaymentReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.ProceedToPaymentReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Proceed to payment
+      tags:
+      - User/Payment
+  /payment/verify:
+    post:
+      consumes:
+      - application/json
+      description: Verify payment
+      parameters:
+      - description: Razorpay Payment ID
+        in: formData
+        name: razorpay_payment_id
+        required: true
+        type: string
+      - description: Razorpay Order ID
+        in: formData
+        name: razorpay_order_id
+        required: true
+        type: string
+      - description: Razorpay Signature
+        in: formData
+        name: razorpay_signature
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.PaidOrderResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Verify payment
+      tags:
+      - User/Payment
   /profile:
     get:
       description: Get profile
@@ -1195,9 +2814,39 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Get profile
       tags:
-      - user
+      - User/Profile
+  /removefromwishlist:
+    delete:
+      consumes:
+      - application/json
+      description: Remove from wishlist
+      parameters:
+      - description: Remove from WishList Request
+        in: body
+        name: removeFromWishListReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.RemoveFromWishListReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Remove from wishlist
+      tags:
+      - User/WishList
   /resetpassword:
     get:
       consumes:
@@ -1221,13 +2870,15 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Get reset password
       tags:
-      - user
+      - User/Session/Reset_password
     post:
       consumes:
       - application/json
-      description: Reset password
+      description: User can provide new password after verifying OTP
       parameters:
       - description: Reset Password Request
         in: body
@@ -1246,9 +2897,11 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Reset password
       tags:
-      - user
+      - User/Session/Reset_password
   /resetpasswordverifyotp:
     post:
       consumes:
@@ -1272,9 +2925,268 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Verify OTP for password change
       tags:
-      - user
+      - User/Session/Reset_password
+  /retrypayment:
+    post:
+      consumes:
+      - application/json
+      description: Retry payment
+      parameters:
+      - description: Retry Payment Request
+        in: body
+        name: req
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.RetryPaymentReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Retry payment
+      tags:
+      - User/Payment
+  /returnorder:
+    patch:
+      consumes:
+      - application/json
+      description: User can request for returning an order which is already delivered
+      parameters:
+      - description: Return Order Request
+        in: body
+        name: returnOrderReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.ReturnOrderReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Return Order
+      tags:
+      - User/Order
+  /selectaddress:
+    get:
+      description: Get Address for Checkout
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetAddressesForCheckoutResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get Address for Checkout
+      tags:
+      - User/Cart
+  /seller/addbrand:
+    post:
+      consumes:
+      - application/json
+      description: Add brand
+      parameters:
+      - description: Add Brand Request
+        in: body
+        name: addBrandReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddBrandReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Add brand
+      tags:
+      - Seller/Product_Management/Brand
+  /seller/addcolourvariant:
+    post:
+      consumes:
+      - application/json
+      description: Add colour variant
+      parameters:
+      - description: Add Colour Variant Request
+        in: body
+        name: addColourVariantReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddColourVariantReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Add colour variant
+      tags:
+      - Seller/Product_Management/Colour_Variant
+  /seller/addmodel:
+    post:
+      consumes:
+      - application/json
+      description: Add model
+      parameters:
+      - description: Add Model Request
+        in: body
+        name: addModelReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddModelReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            type: string
+      security:
+      - BearerTokenAuth: []
+      summary: Add model
+      tags:
+      - Seller/Product_Management/Model
+  /seller/addstock:
+    post:
+      consumes:
+      - application/json
+      description: Add stock
+      parameters:
+      - description: Add Stock Request
+        in: body
+        name: addStockReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.AddStockReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Add stock
+      tags:
+      - Seller/Product_Management/Stock
+  /seller/brands:
+    get:
+      description: Get brands (categorised by first alphabet)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetBrandsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get brands
+      tags:
+      - Admin/Product_Management/Brand
+      - Seller/Product_Management/Brand
+      - User/Browse
+  /seller/categories:
+    get:
+      description: Get categories
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetCategoriesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get categories
+      tags:
+      - Admin/Product_Management/Category
+      - Seller/Product_Management/Category
+      - User/Browse
+  /seller/editstock:
+    patch:
+      consumes:
+      - application/json
+      description: Edit stock
+      parameters:
+      - description: Edit Stock Request
+        in: body
+        name: editStockReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.EditStockReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SM'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Edit stock
+      tags:
+      - Seller/Product_Management/Stock
   /seller/login:
     get:
       consumes:
@@ -1287,9 +3199,11 @@ paths:
           description: OK
           schema:
             type: string
+      security:
+      - BearerTokenAuth: []
       summary: Seller Login Page
       tags:
-      - seller
+      - Seller/Session
     post:
       consumes:
       - application/json
@@ -1312,9 +3226,64 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Seller Sign In Handler
       tags:
-      - seller
+      - Seller/Session
+  /seller/models:
+    get:
+      consumes:
+      - application/json
+      description: Get models by brands and categories
+      parameters:
+      - description: Brand ID
+        in: query
+        name: brandID
+        type: string
+      - description: Category ID
+        in: query
+        name: categoryID
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetModelsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get models by brands and categories
+      tags:
+      - Admin/Product_Management/Model
+      - Seller/Product_Management/Model
+      - User/Browse
+  /seller/products:
+    get:
+      description: Get products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMED'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get products
+      tags:
+      - Admin/Product_Management/Products
+      - Seller/Product_Management/Products
+      - User/Browse
   /seller/signup:
     post:
       consumes:
@@ -1338,9 +3307,11 @@ paths:
           description: Bad Request
           schema:
             type: string
+      security:
+      - BearerTokenAuth: []
       summary: Seller Sign Up Handler
       tags:
-      - seller
+      - Seller/Session
   /sendotp:
     get:
       consumes:
@@ -1357,9 +3328,67 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Send OTP
       tags:
-      - user
+      - User/Session/SignUp
+  /setaddr-selectcoupon:
+    post:
+      consumes:
+      - application/json
+      description: Set Address and Get Coupons
+      parameters:
+      - description: Set Address and Get Coupons Request
+        in: body
+        name: setAddGetCouponsReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.SetAddressForCheckOutReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SetAddrGetCouponsResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Set Address and Get Coupons
+      tags:
+      - User/Cart
+  /setcoupon-getpaymentmethods:
+    post:
+      consumes:
+      - application/json
+      description: Set Coupon and Get Payment Methods
+      parameters:
+      - description: Set Coupon and Get Payment Methods Request
+        in: body
+        name: setCouponGetPaymentMethodsReq
+        required: true
+        schema:
+          $ref: '#/definitions/requestModels.SetCouponForCheckoutReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetPaymentMethodsForCheckoutResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Set Coupon and Get Payment Methods
+      tags:
+      - User/Cart
   /signup:
     post:
       consumes:
@@ -1383,9 +3412,32 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: User Sign Up Handler
       tags:
-      - user
+      - User/Session/SignUp
+  /user/products:
+    get:
+      description: Get products
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.SMED'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get products
+      tags:
+      - Admin/Product_Management/Products
+      - Seller/Product_Management/Products
+      - User/Browse
   /verifyotp:
     post:
       consumes:
@@ -1409,7 +3461,41 @@ paths:
           description: Bad Request
           schema:
             $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
       summary: Verify OTP
       tags:
-      - user
+      - User/Session/SignUp
+  /wishlist:
+    get:
+      consumes:
+      - application/json
+      description: Get wishlist by id
+      parameters:
+      - description: WishList ID
+        in: query
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/response.GetWishListByIDResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.SME'
+      security:
+      - BearerTokenAuth: []
+      summary: Get wishlist by id
+      tags:
+      - User/WishList
+securityDefinitions:
+  BearerTokenAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

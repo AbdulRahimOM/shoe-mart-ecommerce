@@ -1,6 +1,7 @@
 package productManagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -12,31 +13,30 @@ import (
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/gin-gonic/gin/binding"
 )
 
 // add colour variant handler
 // @Summary Add colour variant
 // @Description Add colour variant
-// @Tags admin
+// @Tags Seller/Product_Management/Colour_Variant
 // @Accept json
 // @Produce json
-// @Param addColourVariantReq body requestModels.AddColourVariantReq true "Add Colour Variant Request"
-// @Success 200 {object} string
-// @Failure 400 {object} string
-// @Router /admin/addcolourvariant [post]
+// @Security BearerTokenAuth
+// @Param addColourVariantReq body requestModels.AddColourVariantReq{} true "Add Colour Variant Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /seller/addcolourvariant [post]
 func (cvh *ProductHandler) AddColourVariant(c *gin.Context) {
 
 	var req requestModels.AddColourVariantReq
-	if err := c.ShouldBindWith(&req, binding.FormMultipart); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -80,22 +80,27 @@ func (cvh *ProductHandler) AddColourVariant(c *gin.Context) {
 }
 
 // edit colour variant handler
+// @Summary Edit colour variant
+// @Description Edit colour variant
+// @Tags Admin/Product_Management/Colour_Variant
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param editColourVariantReq body requestModels.EditColourVariantReq{} true "Edit Colour Variant Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/editcolourvariant [patch]
 func (cvh *ProductHandler) EditColourVariant(c *gin.Context) {
 
 	var req requestModels.EditColourVariantReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Try Again", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -109,6 +114,17 @@ func (cvh *ProductHandler) EditColourVariant(c *gin.Context) {
 }
 
 // get colour variants under model handler
+// @Summary Get colour variants under model
+// @Description Get colour variants under model
+// @Tags Admin/Product_Management/Colour_Variant
+// @Tags Seller/Product_Management/Colour_Variant
+// @Tags User/Browse
+// @Produce json
+// @Security BearerTokenAuth
+// @Param modelID path int true "Model ID"
+// @Success 200 {object} response.GetColourVariantsUnderModelResponse
+// @Failure 400 {object} response.SME{}
+// @Router /admin/colourvariants/{modelID} [get]
 func (cvh *ProductHandler) GetColourVariantsUnderModel(c *gin.Context) {
 
 	modelIDParam := c.Param("modelID")

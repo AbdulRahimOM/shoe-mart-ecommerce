@@ -1,6 +1,7 @@
 package productManagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
@@ -23,29 +24,29 @@ func NewCategoryHandler(usecase usecaseInterface.ICategoryUC) *CategoryHandler {
 // add category handler
 // @Summary Add category
 // @Description Add category
-// @Tags admin
+// @Tags Admin/Product_Management/Category
 // @Accept json
 // @Produce json
-// @Param addCategoryReq body requestModels.AddCategoryReq true "Add Category Request"
-// @Success 200 {object} string
-// @Failure 400 {object} string
+// @Security BearerTokenAuth
+// @Param addCategoryReq body requestModels.AddCategoryReq{} true "Add Category Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/addcategory [post]
 func (h *CategoryHandler) AddCategory(c *gin.Context) {
 
-	var addCategoryReq requestModels.AddCategoryReq
-	if err := c.ShouldBindJSON(&addCategoryReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+	var req requestModels.AddCategoryReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
-	if err := requestValidation.ValidateRequest(addCategoryReq); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Provide valid data", errResponse))
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
-	err := h.CategoryUseCase.AddCategory(&addCategoryReq)
+	err := h.CategoryUseCase.AddCategory(&req)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't add category. Try Again", err))
 		return
@@ -58,12 +59,16 @@ func (h *CategoryHandler) AddCategory(c *gin.Context) {
 // get categories handler
 // @Summary Get categories
 // @Description Get categories
-// @Tags admin
-// @Accept json
+// @Tags Admin/Product_Management/Category
+// @Tags Seller/Product_Management/Category
+// @Tags User/Browse
 // @Produce json
-// @Success 200 {object} string
-// @Failure 400 {object} string
-// @Router /admin/getcategories [get]
+// @Security BearerTokenAuth
+// @Success 200 {object} response.GetCategoriesResponse
+// @Failure 400 {object} response.SME{}
+// @Router /admin/categories [get]
+// @Router /seller/categories [get]
+// @Router /categories [get]
 func (h *CategoryHandler) GetCategories(c *gin.Context) {
 
 	var categories *[]entities.Categories
@@ -85,25 +90,25 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 // edit category handler
 // @Summary Edit category
 // @Description Edit category
-// @Tags admin
+// @Tags Admin/Product_Management/Category
 // @Accept json
 // @Produce json
-// @Param editCategoryReq body requestModels.EditCategoryReq true "Edit Category Request"
-// @Success 200 {object} string
-// @Failure 400 {object} string
-// @Router /admin/editcategory [post]
+// @Security BearerTokenAuth
+// @Param editCategoryReq body requestModels.EditCategoryReq{} true "Edit Category Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/editcategory [patch]
 func (h *CategoryHandler) EditCategory(c *gin.Context) {
 
 	var req requestModels.EditCategoryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request. Provide valid data", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 

@@ -1,6 +1,7 @@
 package ordermanagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	msg "MyShoo/internal/domain/messages"
 	"MyShoo/internal/models/requestModels"
@@ -8,29 +9,39 @@ import (
 	requestValidation "MyShoo/pkg/validation"
 	"errors"
 	"fmt"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
 
-
+// Admin can add new coupons
+// @Summary Add new coupon
+// @Description Admin can add new coupon
+// @Tags Admin/Coupon
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param newCouponReq body requestModels.NewCouponReq{} true "New Coupon Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/newcoupon [post]
 func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 
 	//get req from body
-	var newCouponReq requestModels.NewCouponReq
-	if err := c.ShouldBindJSON(&newCouponReq); err != nil {
-		c.JSON(400, response.FailedSME("Error binding request. Try Again", err))
+	var req requestModels.NewCouponReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
-	if err := requestValidation.ValidateRequest(newCouponReq); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(400, response.FailedSME("Error validating request. Try Again", errResponse))
+	//validation
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
 	//call usecase
-	message, err := h.orderUseCase.CreateNewCoupon(&newCouponReq)
+	message, err := h.orderUseCase.CreateNewCoupon(&req)
 	if err != nil {
 		c.JSON(400, response.FailedSME(message, err))
 		return
@@ -40,24 +51,33 @@ func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 }
 
 // BlockCouponHandler
+// @Summary Block coupon
+// @Description Admin can block(suspend) a coupon
+// @Tags Admin/Coupon
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param blockCouponReq body requestModels.BlockCouponReq{} true "Block Coupon Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/blockcoupon [patch]
 func (h *OrderHandler) BlockCouponHandler(c *gin.Context) {
 
 	//get req from body
-	var blockCouponReq requestModels.BlockCouponReq
-	if err := c.ShouldBindJSON(&blockCouponReq); err != nil {
-		c.JSON(400, response.FailedSME("Error binding request. Try Again", err))
+	var req requestModels.BlockCouponReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
-	if err := requestValidation.ValidateRequest(blockCouponReq); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(400, response.FailedSME("Error validating request. Try Again", errResponse))
+	//validation
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
 	//call usecase
-	message, err := h.orderUseCase.BlockCoupon(&blockCouponReq)
+	message, err := h.orderUseCase.BlockCoupon(&req)
 	if err != nil {
 		c.JSON(400, response.FailedSME(message, err))
 		return
@@ -67,24 +87,33 @@ func (h *OrderHandler) BlockCouponHandler(c *gin.Context) {
 }
 
 // UnblockCouponHandler
+// @Summary Unblock coupon
+// @Description Admin can unblock(re-activate) a coupon
+// @Tags Admin/Coupon
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param unblockCouponReq body requestModels.UnblockCouponReq{} true "Unblock Coupon Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/unblockcoupon [patch]
 func (h *OrderHandler) UnblockCouponHandler(c *gin.Context) {
 
 	//get req from body
-	var unblockCouponReq requestModels.UnblockCouponReq
-	if err := c.ShouldBindJSON(&unblockCouponReq); err != nil {
-		c.JSON(400, response.FailedSME("Error binding request. Try Again", err))
+	var req requestModels.UnblockCouponReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
-	if err := requestValidation.ValidateRequest(unblockCouponReq); err != nil {
-		errResponse := fmt.Errorf("error validating the request. Try again. Error:%v", err)
-		c.JSON(400, response.FailedSME("Error validating request. Try Again", errResponse))
+	//validation
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
 	//call usecase
-	message, err := h.orderUseCase.UnblockCoupon(&unblockCouponReq)
+	message, err := h.orderUseCase.UnblockCoupon(&req)
 	if err != nil {
 		c.JSON(400, response.FailedSME(message, err))
 		return
@@ -94,6 +123,16 @@ func (h *OrderHandler) UnblockCouponHandler(c *gin.Context) {
 }
 
 // GetCoupons
+// @Summary Get coupons
+// @Description Admin can get all coupons, active coupons, expired coupons, upcoming coupons
+// @Tags Admin/Coupon
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param criteria query string true "all, active, expired, upcoming"
+// @Success 200 {object} response.GetCouponRes{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/coupons [get]
 func (h *OrderHandler) GetCoupons(c *gin.Context) {
 
 	criteria := c.Query("criteria")
