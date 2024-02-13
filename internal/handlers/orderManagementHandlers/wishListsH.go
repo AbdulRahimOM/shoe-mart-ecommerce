@@ -52,7 +52,7 @@ func (h *WishListHandler) CreateWishList(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Created wishlist successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Created wishlist successfully"))
 }
 
 // add to wishlist
@@ -86,7 +86,7 @@ func (h *WishListHandler) AddToWishList(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Added to wishlist successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Added to wishlist successfully"))
 }
 
 // remove from wishlist
@@ -119,7 +119,7 @@ func (h *WishListHandler) RemoveFromWishList(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Removed from wishlist successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Removed from wishlist successfully"))
 }
 
 // GetAllWishLists

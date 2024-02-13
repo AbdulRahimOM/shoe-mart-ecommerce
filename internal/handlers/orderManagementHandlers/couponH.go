@@ -12,6 +12,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+
 func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 
 	//get req from body
@@ -35,7 +36,7 @@ func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, response.SuccessSME(message))
+	c.JSON(200, response.SuccessSM(message))
 }
 
 // BlockCouponHandler
@@ -62,7 +63,7 @@ func (h *OrderHandler) BlockCouponHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, response.SuccessSME(message))
+	c.JSON(200, response.SuccessSM(message))
 }
 
 // UnblockCouponHandler
@@ -89,7 +90,7 @@ func (h *OrderHandler) UnblockCouponHandler(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, response.SuccessSME(message))
+	c.JSON(200, response.SuccessSM(message))
 }
 
 // GetCoupons

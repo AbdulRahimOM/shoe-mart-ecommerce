@@ -293,7 +293,7 @@ func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Order marked as returned successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Order marked as returned successfully"))
 }
 
 // MarkOrderAsDelivered
@@ -321,7 +321,7 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Order marked as delivered successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Order marked as delivered successfully"))
 }
 
 // get invoice

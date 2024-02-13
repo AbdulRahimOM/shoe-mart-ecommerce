@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecaseInterface "MyShoo/internal/usecase/interface"
@@ -33,64 +34,33 @@ func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, "This is admin login page. Enter credentials to login")
 }
 
-// to get admin home page : But not developed yet
-// NOTE: this is just a sample
-func (h *AdminHandler) GetAdminHome(c *gin.Context) {
-	c.JSON(http.StatusOK, gin.H{
-		"hai":   "dfdf",
-		"hello": "hello admin",
-	})
-}
-
 // to login admin
 // @Summary Login admin
 // @Description Login admin
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Param adminSignInReq body requestModels.AdminSignInReq true "Admin Sign In Request"
-// @Success 200 {object} response.SMT
-// @Failure 400 {object} response.SMT
+// @Param adminSignInReq body requestModels.AdminSignInReq{} true "Admin Sign In Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/login [post]
 func (h *AdminHandler) PostLogIn(c *gin.Context) {
-	fmt.Println("=============\nentered \"POST login\" handler")
 
 	var signInReq requestModels.AdminSignInReq
-	fmt.Println("c.request.body=", c.Request.Body)
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
-		fmt.Println("\nerror binding the requewst\n.")
-		errResponse := "error binding the requewst. Try again. Error:" + err.Error()
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error occured. Please try again.",
-			Error:   errResponse,
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(signInReq); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
 	token, err := h.AdminUseCase.SignIn(&signInReq)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		errResponse := "error while signing in"
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
@@ -107,27 +77,23 @@ func (h *AdminHandler) PostLogIn(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.GetUsersListResponse
-// @Failure 400 {object} response.GetUsersListResponse
+// @Success 200 {object} response.GetUsersListResponse{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/userslist [get]
 func (h *AdminHandler) GetUsersList(c *gin.Context) {
-	fmt.Println("Handler ::: \"GET users list\" handler")
+
 	usersList, err := h.AdminUseCase.GetUsersList()
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		errResponse := "error while getting users list"
-		c.JSON(http.StatusBadRequest, response.GetUsersListResponse{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:    "failed",
 			Message:   "Error occured while getting users list. Please try again.",
-			Error:     errResponse,
-			UsersList: nil,
+			Error:     err.Error(),
 		})
 		return
 	} else {
 		c.JSON(http.StatusOK, response.GetUsersListResponse{
 			Status:    "success",
 			Message:   "The list of users",
-			Error:     "",
 			UsersList: *usersList,
 		})
 	}
@@ -139,27 +105,24 @@ func (h *AdminHandler) GetUsersList(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Success 200 {object} response.GetSellersListResponse
-// @Failure 400 {object} response.GetSellersListResponse
+// @Success 200 {object} response.GetSellersListResponse{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/sellerslist [get]
 func (h *AdminHandler) GetSellersList(c *gin.Context) {
-	fmt.Println("Handler ::: \"GET sellers list\" handler")
+
 	sellersList, err := h.AdminUseCase.GetSellersList()
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		errResponse := "error while getting sellers list"
-		c.JSON(http.StatusBadRequest, response.GetSellersListResponse{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:      "failed",
 			Message:     "Error occured while getting sellers list. Please try again.",
 			Error:       errResponse,
-			SellersList: nil,
 		})
 		return
 	} else {
 		c.JSON(http.StatusOK, response.GetSellersListResponse{
 			Status:      "success",
 			Message:     "The list of sellers",
-			Error:       "",
 			SellersList: *sellersList,
 		})
 	}
@@ -171,54 +134,38 @@ func (h *AdminHandler) GetSellersList(c *gin.Context) {
 // @Tags admin
 // @Accept json
 // @Produce json
-// @Param unblockUserRequest body requestModels.BlockUserReq true "user"
-// @Success 200 {object} response.BlockUserResponse
-// @Failure 400 {object} response.BlockUserResponse
+// @Param unblockUserRequest body requestModels.BlockUserReq{} true "user"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/blockuser [post]
 func (h *AdminHandler) BlockUser(c *gin.Context) {
-	fmt.Println("Handler ::: \"Block user\" handler")
 
 	//get user info from request
 	var req requestModels.BlockUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errResponse := "error binding the request. Try again. Error:" + err.Error()
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.BlockUserResponse{
-			Status:  "failed",
-			Message: "Error occured. Please try again.",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.BlockUserResponse{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
-	fmt.Println("********1")
+
 	//block user
 	err := h.AdminUseCase.BlockUser(&req)
 	if err != nil {
 		errResponse := fmt.Sprint("error while blocking user. Error: ", err)
 		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.BlockUserResponse{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Some error occured while blocking user.",
 			Error:   errResponse,
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.BlockUserResponse{
-			Status:  "success",
-			Message: "User blocked successfully",
-		})
+		c.JSON(http.StatusOK, response.SuccessSM("User blocked successfully"))
 	}
 
 }
@@ -230,34 +177,21 @@ func (h *AdminHandler) BlockUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param unblockUserRequest body requestModels.UnblockUserReq true "user"
-// @Success 200 {object} response.UnblockUserResponse
-// @Failure 400 {object} response.UnblockUserResponse
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/unblockuser [post]
 func (h *AdminHandler) UnblockUser(c *gin.Context) {
-	fmt.Println("Handler ::: \"Unblock user\" handler")
 
 	//get user info from request
 	var req requestModels.UnblockUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errResponse := "error binding the request. Try again. Error:" + err.Error()
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.UnblockUserResponse{
-			Status:  "failed",
-			Message: "Error occured. Please try again.",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.UnblockUserResponse{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -266,14 +200,14 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 	if err != nil {
 		errResponse := fmt.Sprint("error while unblocking user. Error: ", err)
 		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.UnblockUserResponse{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Some error occured while unblocking user.",
 			Error:   errResponse,
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.UnblockUserResponse{
+		c.JSON(http.StatusOK, response.SM{
 			Status:  "success",
 			Message: "User unblocked successfully",
 		})
@@ -288,34 +222,21 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param blockSellerRequest body requestModels.BlockSellerReq true "user"
-// @Success 200 {object} response.BlockSellerResponse
-// @Failure 400 {object} response.BlockSellerResponse
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/blockseller [post]
 func (h *AdminHandler) BlockSeller(c *gin.Context) {
-	fmt.Println("Handler ::: \"Block seller\" handler")
 
 	//get seller info from request
 	var req requestModels.BlockSellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errResponse := "error binding the request. Try again. Error:" + err.Error()
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.BlockSellerResponse{
-			Status:  "failed",
-			Message: "Error occured. Please try again.",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.BlockSellerResponse{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -324,17 +245,14 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 	if err != nil {
 		errResponse := fmt.Sprint("error while blocking seller. Error: ", err)
 		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.BlockSellerResponse{
+		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Some error occured while blocking seller.",
 			Error:   errResponse,
 		})
 		return
 	} else {
-		c.JSON(http.StatusOK, response.BlockSellerResponse{
-			Status:  "success",
-			Message: "Seller blocked successfully",
-		})
+		c.JSON(http.StatusOK, response.SuccessSM("Seller blocked successfully"))
 	}
 
 }
@@ -346,53 +264,31 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param unblockSellerRequest body requestModels.UnblockSellerReq true "user"
-// @Success 200 {object} response.UnblockSellerResponse
-// @Failure 400 {object} response.UnblockSellerResponse
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
 // @Router /admin/unblockseller [post]
 func (h *AdminHandler) UnblockSeller(c *gin.Context) {
-	fmt.Println("Handler ::: \"Unblock seller\" handler")
 
 	//get seller info from request
 	var req requestModels.UnblockSellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		errResponse := "error binding the request. Try again. Error:" + err.Error()
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.UnblockSellerResponse{
-			Status:  "failed",
-			Message: "Error occured. Please try again.",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.UnblockSellerResponse{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
 	//unblock seller
 	err := h.AdminUseCase.UnblockSeller(&req)
 	if err != nil {
-		errResponse := fmt.Sprint("error while unblocking seller. Error: ", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.UnblockSellerResponse{
-			Status:  "failed",
-			Message: "Some error occured while unblocking seller.",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.UnblockSellerResponse{
-			Status:  "success",
-			Message: "Seller unblocked successfully",
-		})
+		c.JSON(http.StatusOK, response.SuccessSM("Seller unblocked successfully"))
 	}
 
 }
@@ -401,15 +297,13 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 func (h *AdminHandler) VerifySeller(c *gin.Context) {
 	var req requestModels.VerifySellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request", err))
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Errorf("error validating the request. try again. error:   %v", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error validating request", errResponse))
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -419,15 +313,23 @@ func (h *AdminHandler) VerifySeller(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Seller verified successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Seller verified successfully"))
 }
 
 // ReloadConfig
+// @Summary Reload config
+// @Description Reload config
+// @Tags admin
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /admin/reloadconfig [post]
 func (h *AdminHandler) RestartConfig(c *gin.Context) {
 	err := h.AdminUseCase.RestartConfig()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Failed to reload config", err))
 		return
 	}
-	c.JSON(http.StatusOK, response.SuccessSME("Config reloaded successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Config reloaded successfully"))
 }

@@ -22,7 +22,7 @@ func NewProductHandler(productUseCase usecaseInterface.IProductsUC) *ProductHand
 
 // get products handler
 func (h *ProductHandler) GetProducts(c *gin.Context) {
-	
+
 	//get products
 	var products *[]response.ResponseProduct
 	products, err := h.productUseCase.GetProducts()
@@ -77,7 +77,7 @@ func (h *ProductHandler) AddStock(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Stock added successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Stock added successfully"))
 }
 
 // add stock handler
@@ -122,5 +122,5 @@ func (h *ProductHandler) EditStock(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Stock edited successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Stock edited successfully"))
 }

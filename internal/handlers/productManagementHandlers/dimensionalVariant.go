@@ -31,5 +31,5 @@ func (h *ProductHandler) AddDimensionalVariant(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Dimensional variant added successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Dimensional variant added successfully"))
 }

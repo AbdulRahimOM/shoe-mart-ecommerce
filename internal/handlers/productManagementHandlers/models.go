@@ -31,7 +31,7 @@ func NewModelHandler(modelsUseCase usecaseInterface.IModelsUC) *ModelHandler {
 // @Failure 400 {object} string
 // @Router /admin/addmodel [post]
 func (h *ModelHandler) AddModel(c *gin.Context) {
-	
+
 	var req requestModels.AddModelReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
@@ -50,7 +50,7 @@ func (h *ModelHandler) AddModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Model added successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Model added successfully"))
 }
 
 func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
@@ -98,7 +98,7 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 	c.JSON(http.StatusOK, response.GetModelsResponse{
 		Status:  "success",
 		Message: "Models fetched successfully",
-		Models: *models,
+		Models:  *models,
 	})
 
 }
@@ -114,7 +114,7 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 // @Failure 400 {object} string
 // @Router /admin/editmodelname [patch]
 func (h *ModelHandler) EditModel(c *gin.Context) {
-	
+
 	var req requestModels.EditModelReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Error binding request. Try Again", err))
@@ -134,5 +134,5 @@ func (h *ModelHandler) EditModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Model name edited successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Model name edited successfully"))
 }

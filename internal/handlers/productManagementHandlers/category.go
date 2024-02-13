@@ -50,7 +50,7 @@ func (h *CategoryHandler) AddCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't add category. Try Again", err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSME("Category added successfully"))
+		c.JSON(http.StatusOK, response.SuccessSM("Category added successfully"))
 		return
 	}
 }
@@ -112,7 +112,7 @@ func (h *CategoryHandler) EditCategory(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't edit category. Try Again", err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSME("Category edited successfully"))
+		c.JSON(http.StatusOK, response.SuccessSM("Category edited successfully"))
 		return
 	}
 }

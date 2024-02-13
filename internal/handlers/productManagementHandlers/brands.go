@@ -51,7 +51,7 @@ func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Brand added successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Brand added successfully"))
 }
 
 // get brands handler
@@ -110,5 +110,5 @@ func (bh *BrandsHandler) EditBrand(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSME("Brand edited successfully"))
+	c.JSON(http.StatusOK, response.SuccessSM("Brand edited successfully"))
 }

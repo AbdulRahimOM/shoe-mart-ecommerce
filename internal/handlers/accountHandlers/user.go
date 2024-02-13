@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
@@ -25,51 +26,43 @@ func NewUserHandler(useCase usecaseInterface.IUserUC) *UserHandler {
 	return &UserHandler{UserUseCase: useCase}
 }
 
-
+// to get user login page
+// @Summary Get user login page
+// @Description Get user login page
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} string
+// @Router /login [get]
 func (h *UserHandler) GetLogin(c *gin.Context) {
 	c.JSON(http.StatusOK, "")
 }
 
-func (h *UserHandler) GetHome(c *gin.Context) {
-	c.JSON(http.StatusOK, "")
-}
-
+// @Summary User Sign Up Handler
+// @Description User Sign Up Handler
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.UserSignUpReq{} true "User Sign Up Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /signup [post]
 func (h *UserHandler) PostSignUp(c *gin.Context) {
 
 	var signUpReq requestModels.UserSignUpReq
-
 	if err := c.Bind(&signUpReq); err != nil {
-
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error while binding request",
-			Error:   err.Error(),
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(signUpReq); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#", //how to inform that this particular field is wrong, like email is wrong, i have to find a way to do that
-			Error:   errResponse,
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
-
 	token, err := h.UserUseCase.SignUp(&signUpReq)
 	if err != nil {
-		errResponse := "Error occured while signing up. Try again. Error:" + err.Error() ////////////////////////////////
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
@@ -80,34 +73,26 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 	}
 }
 
-// -----------------------------------------------------------------------------------------------------------------
+// @Summary User Sign In Handler
+// @Description User Sign In Handler
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.UserSignInReq{} true "User Sign In Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /login [post]
 func (h *UserHandler) PostLogIn(c *gin.Context) {
-	fmt.Println("=============\nentered \"POST login\" handler")
 
 	var signInReq requestModels.UserSignInReq
-
 	if err := c.ShouldBindJSON(&signInReq); err != nil {
-		fmt.Println("\nerror binding the requewst\n.")
-		errResponse := "error binding the requewst. Try again. Error:" + err.Error()
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(signInReq); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
-
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -131,13 +116,18 @@ func (h *UserHandler) PostLogIn(c *gin.Context) {
 	}
 }
 
-// -----------------------------------------------------------------------------------------------------------------
+// @Summary Send OTP
+// @Description Send OTP
+// @Tags user
+// @Accept json
+// @Produce json
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /sendotp [get]
 func (h *UserHandler) SendOtp(c *gin.Context) {
-	fmt.Println("=============entered \"Send OTP \" handler======")
 
 	user, ok := c.Get("UserModel")
 	if !ok {
-		fmt.Println("error getting user model from context")
 		c.JSON(http.StatusBadRequest, response.SME{
 			Status:  "failed",
 			Message: "Error happened. Please login again",
@@ -149,45 +139,35 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 	phone := userMap["phone"].(string)
 	err := h.UserUseCase.SendOtp(phone)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "error while sending otp",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SM{
-			Status:  "success",
-			Message: "OTP sent successfully. Please verify",
-		})
+		c.JSON(http.StatusOK, response.SuccessSM("OTP sent successfully"))
 	}
 }
 
-// -----------------------------------------------------------------------------------------------------------------
+// @Summary Verify OTP
+// @Description Verify OTP
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param otp body {string} true "OTP"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /verifyotp [post]
 func (h *UserHandler) VerifyOtp(c *gin.Context) {
-	fmt.Println("=============entered \"Verify OTP \" handler======")
+
 	var otpStruct struct {
 		OTP string `json:"otp" validate:"required,number"`
 	}
 	if err := c.Bind(&otpStruct); err != nil {
-		fmt.Println("\nerror binding the requewst\n.")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   "error binding the request. Error:" + err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
+
 	//validation
 	if err := requestValidation.ValidateRequest(otpStruct); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -228,28 +208,26 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 }
 
 // Add address
+// @Summary Add address
+// @Description Add address
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.AddUserAddress{} true "Add Address Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /addaddress [post]
 func (h *UserHandler) AddUserAddress(c *gin.Context) {
-	fmt.Println("Handler ::: add address handler")
-	var req requestModels.AddUserAddress
 
+	var req requestModels.AddUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -290,28 +268,26 @@ func (h *UserHandler) AddUserAddress(c *gin.Context) {
 }
 
 // Edit address
+// @Summary Edit address
+// @Description Edit address
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.EditUserAddress{} true "Edit Address Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /editaddress [patch]
 func (h *UserHandler) EditUserAddress(c *gin.Context) {
-	fmt.Println("Handler ::: edit address handler")
-	var req requestModels.EditUserAddress
 
+	var req requestModels.EditUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -351,28 +327,26 @@ func (h *UserHandler) EditUserAddress(c *gin.Context) {
 }
 
 // DeleteUserAddress
+// @Summary Delete address
+// @Description Delete address
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.DeleteUserAddress{} true "Delete Address Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /deleteaddress [delete]
 func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
-	fmt.Println("Handler ::: delete address handler")
-	var req requestModels.DeleteUserAddress
 
+	var req requestModels.DeleteUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -405,15 +379,21 @@ func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
+	c.JSON(http.StatusOK, response.SM{
 		Status:  "success",
 		Message: "Address deleted successfully",
 	})
 }
 
 // Get user addresses
+// @Summary Get user addresses
+// @Description Get user addresses
+// @Tags user
+// @Produce json
+// @Success 200 {object} response.GetUserAddressesResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /addresses [get]
 func (h *UserHandler) GetUserAddresses(c *gin.Context) {
-	fmt.Println("Handler ::: get user addresses handler")
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
@@ -444,8 +424,14 @@ func (h *UserHandler) GetUserAddresses(c *gin.Context) {
 }
 
 // GetProfile
+// @Summary Get profile
+// @Description Get profile
+// @Tags user
+// @Produce json
+// @Success 200 {object} response.GetProfileResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /profile [get]
 func (h *UserHandler) GetProfile(c *gin.Context) {
-	fmt.Println("Handler ::: get profile handler")
 
 	//get userID from token
 	userID, err := tools.GetUserID(c)
@@ -493,28 +479,26 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 }
 
 // EditProfile
+// @Summary Edit profile
+// @Description Edit profile
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.EditProfileReq{} true "Edit Profile Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /editprofile [patch]
 func (h *UserHandler) EditProfile(c *gin.Context) {
-	fmt.Println("Handler ::: edit profile handler")
-	var req requestModels.EditProfileReq
 
+	var req requestModels.EditProfileReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -545,28 +529,26 @@ func (h *UserHandler) EditProfile(c *gin.Context) {
 }
 
 // GetResetPassword
+// @Summary Get reset password
+// @Description Get reset password
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.ApplyForPasswordResetReq{} true "Apply For Password Reset Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /resetpassword [get]
 func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
-	fmt.Println("Handler ::: get reset password handler")
 
 	var req requestModels.ApplyForPasswordResetReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -601,8 +583,17 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 	}
 }
 
+// VerifyOtpForPWChange
+// @Summary Verify OTP for password change
+// @Description Verify OTP for password change
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param otp body {string} true "OTP"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /resetpasswordverifyotp [post]
 func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
-	fmt.Println("=============entered \"Verify OTP for pw change \" handler======")
 
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString) //
@@ -611,7 +602,6 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	if !isTokenValid {
 		fmt.Println("token is invalid")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
 	//getting claims
@@ -619,7 +609,6 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	if !ok {
 		fmt.Println("claims type assertion failed")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
 
@@ -627,14 +616,12 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	if claims.Role != "user" {
 		fmt.Println("role is not user")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
 	status := claims.Model.(map[string]interface{})["Status"].(string)
 	if status != "PW change requested, otp not verified" {
 		fmt.Println("status is not PW change requested, otp not verified")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
 
@@ -645,23 +632,13 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 		OTP string `json:"otp" validate:"required,number"`
 	}
 	if err := c.Bind(&otpStruct); err != nil {
-		fmt.Println("\nerror binding the requewst\n.")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   "error binding the request. Error:" + err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
+
 	//validation
 	if err := requestValidation.ValidateRequest(otpStruct); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -690,10 +667,17 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	}
 }
 
+// ResetPassword
+// @Summary Reset password
+// @Description Reset password
+// @Tags user
+// @Accept json
+// @Produce json
+// @Param req body requestModels.ResetPasswordReq{} true "Reset Password Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /resetpassword [post]
 func (h *UserHandler) ResetPassword(c *gin.Context) {
-	fmt.Println("before entering reset password handler")
-	// myshoo.Test()
-	fmt.Println("Handler ::: reset password handler")
 
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString)
@@ -702,16 +686,14 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	if !isTokenValid {
 		fmt.Println("token is invalid!")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
-	fmt.Println("************2")
+
 	//getting claims
 	claims, ok := tokenClaims.(*jwttoken.CustomClaims)
 	if !ok {
 		fmt.Println("claims type assertion failed")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
 
@@ -719,10 +701,9 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	if claims.Role != "user" {
 		fmt.Println("role is not user")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
 		return
 	}
-	fmt.Println("************3")
+
 	status := claims.Model.(map[string]interface{})["Status"].(string)
 	if status != "PW change requested, otp verified" {
 		fmt.Println("status is not PW change requested, otp not verified")
@@ -733,23 +714,13 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 
 	var req requestModels.ResetPasswordReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 

@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	requestModels "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecaseInterface "MyShoo/internal/usecase/interface"
@@ -26,12 +27,9 @@ func NewSellerHandler(useCase usecaseInterface.ISellerUC) *SellerHandler {
 // @Accept json
 // @Produce json
 // @Success 200 {object} string
-// @Failure 400 {object} string
 // @Router /seller/login [get]
 func (h *SellerHandler) GetLogin(c *gin.Context) {
-	fmt.Println("Handler ::: GET login handler")
-
-	c.JSON(http.StatusOK, "token")
+	c.JSON(http.StatusOK, "")
 }
 
 // @Summary Seller Sign Up Handler
@@ -39,52 +37,31 @@ func (h *SellerHandler) GetLogin(c *gin.Context) {
 // @Tags seller
 // @Accept json
 // @Produce json
-// @Param signUpReq body requestModels.SellerSignUpReq true "Seller Sign Up Request"
+// @Param req body requestModels.SellerSignUpReq{} true "Seller Sign Up Request"
 // @Success 200 {object} string
 // @Failure 400 {object} string
 // @Router /seller/signup [post]
 func (h *SellerHandler) PostSignUp(c *gin.Context) {
-	fmt.Println("=============\nentered POST sign-up handler")
 
-	var signUpReq requestModels.SellerSignUpReq
-
-	if err := c.Bind(&signUpReq); err != nil {
-		fmt.Println("\n", "Error occured while signing up. Error while binding request"+err.Error(), "\n.")
-
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error while binding request",
-			Error:   err.Error(),
-		})
+	var req requestModels.SellerSignUpReq
+	if err := c.Bind(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
+
 	//validation
-	if err := requestValidation.ValidateRequest(signUpReq); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
-	token, err := h.SellerUseCase.SignUp(&signUpReq)
+	token, err := h.SellerUseCase.SignUp(&req)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		errResponse := "Error occured while signing up. Try again. Error:" + err.Error() ////////////////////////////////
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
-		return
+		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "",
-			Token:   *token,
+			Status: "success",
+			Token:  *token,
 		})
 	}
 }
@@ -94,54 +71,32 @@ func (h *SellerHandler) PostSignUp(c *gin.Context) {
 // @Tags seller
 // @Accept json
 // @Produce json
-// @Param loginReq body requestModels.SellerSignInReq true "Seller Sign In Request"
-// @Success 200 {object} string
-// @Failure 400 {object} string
+// @Param req body requestModels.SellerSignInReq{} true "Seller Sign In Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /seller/login [post]
 func (h *SellerHandler) PostLogIn(c *gin.Context) {
-	fmt.Println("=============\nentered \"POST login\" handler")
-	// Print the raw request
-	fmt.Println("c.request=", c.Request, "\n.")
-	fmt.Println("c.request.body=", c.Request.Body)
-	var signInReq requestModels.SellerSignInReq
 
-	if err := c.ShouldBindJSON(&signInReq); err != nil {
-		fmt.Println("\nerror binding the requewst\n.")
-		errResponse := "error binding the requewst. Try again. Error:" + err.Error()
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+	var req requestModels.SellerSignInReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
 	//validation
-	if err := requestValidation.ValidateRequest(signInReq); err != nil {
-		fmt.Println("\n\nerror validating the request\n.")
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
-	token, err := h.SellerUseCase.SignIn(&signInReq)
+	token, err := h.SellerUseCase.SignIn(&req)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		errResponse := "error while signing in"
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "",
-			Token:   *token,
+			Status: "success",
+			Token:  *token,
 		})
 	}
 }

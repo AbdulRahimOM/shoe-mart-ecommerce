@@ -1,6 +1,7 @@
 package ordermanagementHandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -21,28 +22,26 @@ func NewCartHandler(cartUseCase usecaseInterface.ICartUC) *CartHandler {
 }
 
 // add to cart
+// @Summary Add to cart
+// @Description Add to cart
+// @Tags cart
+// @Accept json
+// @Produce json
+// @Param addToCartReq body requestModels.AddToCartReq{} true "Add to Cart Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /cart [put]
 func (h *CartHandler) AddToCart(c *gin.Context) {
-	fmt.Println("Handler ::: add to cart handler")
-	var req *requestModels.AddToCartReq
 
+	var req *requestModels.AddToCartReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -75,15 +74,21 @@ func (h *CartHandler) AddToCart(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
+	c.JSON(http.StatusOK, response.SM{
 		Status:  "success",
 		Message: "Added to (or increased quantity in) cart successfully",
 	})
 }
 
 // get cart
+// @Summary Get cart
+// @Description Get cart
+// @Tags cart
+// @Produce json
+// @Success 200 {object} response.GetCartResponse{}
+// @Failure 400 {object} response.SME{}
+// @Router /cart [get]
 func (h *CartHandler) GetCart(c *gin.Context) {
-	fmt.Println("Handler ::: get cart handler")
 
 	userID, err := tools.GetUserID(c)
 	if err != nil {
@@ -117,29 +122,26 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 }
 
 // delete from cart
+// @Summary Delete from cart
+// @Description Delete from cart
+// @Tags cart
+// @Accept json
+// @Produce json
+// @Param deleteFromCartReq body requestModels.DeleteFromCartReq{} true "Delete from Cart Request"
+// @Success 200 {object} response.SM{}
+// @Failure 400 {object} response.SME{}
+// @Router /cart [delete]
 func (h *CartHandler) DeleteFromCart(c *gin.Context) {
-	fmt.Println("Handler ::: delete from cart handler")
 
 	var req *requestModels.DeleteFromCartReq
-
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error binding request. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
 		return
 	}
 
-	//validate request
+	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		errResponse := fmt.Sprint("error validating the request. Try again. Error:", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error validating request. Try Again",
-			Error:   errResponse,
-		})
+		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
 		return
 	}
 
@@ -153,7 +155,7 @@ func (h *CartHandler) DeleteFromCart(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
+	c.JSON(http.StatusOK, response.SM{
 		Status:  "success",
 		Message: "Deleted from (or decreased quantity in) cart successfully",
 	})
@@ -161,7 +163,6 @@ func (h *CartHandler) DeleteFromCart(c *gin.Context) {
 
 // clear cart
 func (h *CartHandler) ClearCart(c *gin.Context) {
-	fmt.Println("Handler ::: clear cart handler")
 
 	userID, err := tools.GetUserID(c)
 	if err != nil {
@@ -183,7 +184,7 @@ func (h *CartHandler) ClearCart(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
+	c.JSON(http.StatusOK, response.SM{
 		Status:  "success",
 		Message: "Cleared cart successfully",
 	})
