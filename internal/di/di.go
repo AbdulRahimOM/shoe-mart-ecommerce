@@ -14,7 +14,7 @@ import (
 	// paymentrepo "MyShoo/internal/repository/payment_repo"
 	productRepository "MyShoo/internal/repository/productManagement"
 	reportsrepo "MyShoo/internal/repository/reports"
-	accountsusecase "MyShoo/internal/usecase/accountsusecases"
+	accountsusecase "MyShoo/internal/usecase/accountsUsecases"
 	orderusecase "MyShoo/internal/usecase/orderUseCase"
 	paymentusecase "MyShoo/internal/usecase/paymentUsecase"
 	productusecase "MyShoo/internal/usecase/productManagementUsecases"
