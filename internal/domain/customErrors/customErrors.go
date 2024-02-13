@@ -20,5 +20,7 @@ var (
 
 	ErrCODNotAvailable = errors.New("COD not available")
 	ErrEmptyCart       = errors.New("cart is empty")
+	ErrOnBindingReq  = errors.New("error binding request")
+	ErrOnValidation   = errors.New("error validating the request")
 )
 

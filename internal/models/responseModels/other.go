@@ -29,8 +29,8 @@ func FailedSME(message string, err error) SME {
 	}
 }
 
-func SuccessSME(message string) SME {
-	return SME{
+func SuccessSM(message string) SM {
+	return SM{
 		Status:  "success",
 		Message: message,
 	}
