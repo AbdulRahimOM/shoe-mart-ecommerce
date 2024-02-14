@@ -34,7 +34,8 @@ func NewServerHTTP(
 ) *ServerHttp {
 	engine := gin.Default()
 	// engine.LoadHTMLGlob("./internal/view/*.html")
-	engine.LoadHTMLGlob("./internal/templates/*.html")
+	// engine.LoadHTMLGlob("./internal/templates/*.html")	//server showing error with this while running binary executable (don't know exact reason, busy) 
+	engine.LoadHTMLFiles("./internal/templates/payment.html")
 
 	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order, payment)
 	routes.AdminRoutes(engine.Group("/admin"), admin, category, brand, model, product, cart, wishList, order, reports)
