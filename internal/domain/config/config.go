@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 )
 
 var configRead struct {
@@ -28,7 +29,20 @@ var DeliveryConfig struct {
 }
 
 func LoadConfig() error {
-	if err := loadDeliveryConfig(); err != nil {
+	relativePath := "config/shippingCharges.json"
+	executableDir, err := filepath.Abs(filepath.Dir(os.Args[0]))
+	if err != nil {
+		fmt.Println("Error getting current directory:", err)
+		return err
+	}
+	filePath := filepath.Join(executableDir, relativePath)
+
+	if err := loadDeliveryConfig(filePath); err != nil {
+		fmt.Println("Error loading delivery config (via executing from binary mode). err= ", err)
+		fmt.Println("Trying to restart config(in dev mode., i.e. via 'go run cmd/main.go' command))....")
+		if err2 := loadDeliveryConfig(relativePath); err2 != nil {
+			fmt.Println("Error loading config(in dev mode). err= ", err2)
+		}
 		return err
 	}
 	return nil
@@ -38,15 +52,17 @@ func RestartConfig() error {
 	return LoadConfig()
 }
 
-func loadDeliveryConfig() error {
-	preDiagram()
-	filePath := "config/shippingCharges.json"
+func loadDeliveryConfig(filePath string) error {
+
 	var err error
 	defer func() {
 		if err != nil {
 			failedDiagram()
 		}
 	}()
+
+	preDiagram()
+
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		fmt.Println("Error reading file. err= ", err)
