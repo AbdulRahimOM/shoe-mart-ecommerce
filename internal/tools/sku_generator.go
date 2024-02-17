@@ -32,7 +32,7 @@ func GenerateNameAndSKUCode(dimensionalVariant *entities.DimensionalVariant, siz
 		modelName, " ",
 		colour, " ",
 		dimensionalVariantName, " ",
-		"size:", size, "(US)")
+		"size:", *size, "(US)")
 
 	return name, skuCode
 }
