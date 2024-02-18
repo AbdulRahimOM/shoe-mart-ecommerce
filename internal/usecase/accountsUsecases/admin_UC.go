@@ -1,7 +1,7 @@
 package accountsusecase
 
 import (
-	"MyShoo/internal/domain/config"
+	"MyShoo/internal/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
@@ -148,7 +148,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, error) {
 }
 
 func (uc *AdminUseCase) RestartConfig() error {
-	err := config.RestartConfig()
+	err := config.RestartDeliveryConfig()
 	if err != nil {
 		fmt.Println("Error occured while reloading config")
 		return err

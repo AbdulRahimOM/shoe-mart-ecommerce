@@ -1,18 +1,15 @@
 package services
 
 import (
+	"MyShoo/internal/config"
 	"fmt"
-	"os"
 
 	razorpay "github.com/razorpay/razorpay-go"
 	razorpayUtils "github.com/razorpay/razorpay-go/utils"
 )
 
 func CreateRazorpayOrder(amount float32, referenceNo string) (string, error) {
-
-	razorpayID := os.Getenv("RAZORPAY_KEY_ID")
-	razorpaySecret := os.Getenv("RAZORPAY_KEY_SECRET")
-	client := razorpay.NewClient(razorpayID, razorpaySecret)
+	client := razorpay.NewClient(config.RazorpayKeyId, config.RazorpayKeySecret)
 	data := map[string]interface{}{
 		"amount":   uint(amount * 100),
 		"currency": "INR",
@@ -33,14 +30,12 @@ func CreateRazorpayOrder(amount float32, referenceNo string) (string, error) {
 }
 
 func VerifyPayment(razorpay_order_id string, razorpay_payment_id string, signature string) bool {
-	razorpaySecret := os.Getenv("RAZORPAY_KEY_SECRET")
 	params := map[string]interface{}{
 		"razorpay_order_id":   razorpay_order_id,
 		"razorpay_payment_id": razorpay_payment_id,
 	}
 
-	secret := razorpaySecret
-	isValid := razorpayUtils.VerifyPaymentSignature(params, signature, secret)
+	isValid := razorpayUtils.VerifyPaymentSignature(params, signature, config.RazorpayKeySecret)
 	if isValid {
 		fmt.Println("Payment is valid")
 		return true

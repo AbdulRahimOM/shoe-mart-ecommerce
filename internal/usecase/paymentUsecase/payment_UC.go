@@ -1,6 +1,7 @@
 package paymentusecase
 
 import (
+	"MyShoo/internal/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	msg "MyShoo/internal/domain/messages"
@@ -9,7 +10,6 @@ import (
 	"MyShoo/internal/services"
 	usecase "MyShoo/internal/usecase/interface"
 	"errors"
-	"os"
 )
 
 type PaymentUC struct {
@@ -86,7 +86,7 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 	}
 
 	proceedToPaymentReq := request.ProceedToPaymentReq{
-		PaymentKey:         os.Getenv("RAZORPAY_KEY_ID"),
+		PaymentKey:         config.RazorpayKeyId,
 		PaymentOrderID:     order.TransactionID, //need update //payment-u
 		OrderRefNo:         order.ReferenceNo,
 		TotalAmount:        order.FinalAmount,

@@ -1,6 +1,7 @@
 package reportsusecases
 
 import (
+	"MyShoo/internal/config"
 	"MyShoo/internal/domain/entities"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
@@ -154,7 +155,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 		fmt.Println("Error getting sales report:", err)
 		return "", err
 	}
-	filePath := "internal/templates/TemplateExcel.xlsx"
+	filePath := filepath.Join(config.ExecutableDir, "internal/templates/TemplateExcel.xlsx")
 	file, err := excelize.OpenFile(filePath)
 	if err != nil {
 		fmt.Println("Error opening template:", err)
@@ -272,7 +273,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 		return "", err
 	}
 
-	if os.Getenv("UPLOAD_EXCEL") == "true" {
+	if config.ShouldUploadExcel {
 		url, err = uc.reportsRepo.UploadSalesReportExcel(tempFilePath, "myrange")
 		if err != nil {
 			fmt.Println("Error uploading Excel file:", err)
@@ -281,7 +282,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 		return url, nil
 	} else {
 		// Saving the Excel file locally (for dev/testing purposes)
-		localUrl := "testKit/salesReportOutput.xlsx"
+		localUrl := filepath.Join(config.ExecutableDir, "testKit/salesReportOutput.xlsx")
 		if err := file.SaveAs(localUrl); err != nil {
 			fmt.Println("Error saving Excel file:", err)
 			return "", err

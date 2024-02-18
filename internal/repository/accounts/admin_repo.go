@@ -147,8 +147,17 @@ func (repo *AdminRepo) GetPasswordAndAdminDetailsByEmail(email string) (string, 
 }
 
 func (repo *AdminRepo) IsEmailRegisteredAsAdmin(email string) (bool, error) {
-	fmt.Println("at repo: email=", email)
 	var emptyStruct struct{}
+	if repo.DB == nil {
+		fmt.Println("repo.DB is nil")
+	}else{
+		fmt.Println("repo.DB is not nil")
+	}
+	if repo==nil {
+		fmt.Println("repo is nil")
+	}else{
+		fmt.Println("repo is not nil")
+	}
 	query := repo.DB.Raw(`
         SELECT * 
         FROM admins 

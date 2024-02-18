@@ -1,8 +1,8 @@
 package infra
 
 import (
+	"MyShoo/internal/config"
 	"fmt"
-	"os"
 
 	"github.com/cloudinary/cloudinary-go"
 )
@@ -10,11 +10,8 @@ import (
 var CloudinaryClient *cloudinary.Cloudinary
 
 func ConnectToCloud() error {
-	var cloudName = os.Getenv("CLOUDINARY_CLOUD_NAME")
-	var api_key = os.Getenv("CLOUDINARY_API_KEY")
-	var api_secret = os.Getenv("CLOUDINARY_API_SECRET")
 	var err error
-	CloudinaryClient, err = cloudinary.NewFromParams(cloudName, api_key, api_secret)
+	CloudinaryClient, err = cloudinary.NewFromParams(config.CloudinaryCloudName, config.CloudinaryApiKey, config.CloudinaryApiSecret)
 	if err != nil {
 		fmt.Println("Error creating Cloudinary client:", err)
 		return err

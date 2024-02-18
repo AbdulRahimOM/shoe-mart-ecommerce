@@ -1,8 +1,8 @@
 package jwttoken
 
 import (
+	"MyShoo/internal/config"
 	"fmt"
-	"os"
 	"time"
 
 	jwt "github.com/golang-jwt/jwt/v5"
@@ -27,9 +27,8 @@ func GenerateToken(role string, myClaims interface{}, validityDuration time.Dura
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	secretKey := os.Getenv("SECRET_KEY")
 	// Sign and get the complete encoded token as a string using the secret
-	tokenString, err := token.SignedString([]byte(secretKey))
+	tokenString, err := token.SignedString([]byte(config.SecretKey))
 
 	// fmt.Println(tokenString, err)
 	return tokenString, err

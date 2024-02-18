@@ -1,23 +1,23 @@
 package infra
 
 import (
+	"MyShoo/internal/config"
 	"MyShoo/internal/domain/entities"
 	"fmt"
-	"os"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
-var ConnectionError error = nil
 
 func ConnectToDB() error {
-	dsn := os.Getenv("DB_URL")
-	DB, ConnectionError = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if ConnectionError != nil {
+	dsn := config.DbURL
+	var err error
+	DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
 		fmt.Println("Couldn't connect to DB")
-		return ConnectionError
+		return err
 	}
 
 	//account related tables

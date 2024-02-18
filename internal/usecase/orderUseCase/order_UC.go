@@ -1,7 +1,7 @@
 package orderusecase
 
 import (
-	"MyShoo/internal/domain/config"
+	"MyShoo/internal/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	msg "MyShoo/internal/domain/messages"
@@ -192,7 +192,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 	orderInfo.OrderDetails = order
 
 	proceedToPaymentInfo := response.ProceedToPaymentInfo{
-		PaymentKey:         os.Getenv("RAZORPAY_KEY_ID"),
+		PaymentKey:         config.RazorpayKeyId,
 		PaymentOrderID:     order.TransactionID, //need update //payment-u
 		OrderRefNo:         order.ReferenceNo,
 		TotalAmount:        order.FinalAmount,
@@ -724,10 +724,10 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 
 	pdf := makeInvoicePDF(&invoiceInfo)
 
-	if os.Getenv("UploadInvoice") == "false" {
+	if !config.ShouldUploadInvoice {
 		fmt.Println("Uploading invoice to cloud is disabled. Invoice will be saved locally and link will be provided from that.")
 		// Output the PDF to a file
-		outputPath := "testKit/invoiceOutput.pdf"
+		outputPath := filepath.Join(config.ExecutableDir, "testKit/invoiceOutput.pdf")
 		err = pdf.OutputFileAndClose(outputPath)
 		if err != nil {
 			fmt.Println("Error saving PDF:", err)
@@ -736,7 +736,12 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 			return &outputPath, "Invoice generated successfully(Locally, not via cloud. /Dev note)", nil
 		}
 	} else {
-		tempFilePath := filepath.Join(os.TempDir(), "invoice.pdf")
+		tempFileName, err := tools.MakeRandomUUID()
+		if err != nil {
+			fmt.Println("Error occured while generating random UUID")
+			return nil, "Some error occured.", err
+		}
+		tempFilePath := filepath.Join(os.TempDir(), tempFileName+"invoice.pdf")
 		defer os.Remove(tempFilePath)
 		err = pdf.OutputFileAndClose(tempFilePath)
 		if err != nil {
@@ -753,24 +758,6 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, s
 
 		return &url, "Invoice generated successfully", nil
 	}
-
-	// // Output the PDF to a file
-	// outputPath := "testKit/invoiceOutput.pdf"
-	// err = pdf.OutputFileAndClose(outputPath)
-	// if err != nil {
-	// 	fmt.Println("Error saving PDF:", err)
-	// 	return nil, "Some error occured.", err
-	// }
-
-	// outputPath = "testKit/salesReportOutput.xlsx"
-
-	// url, err := uc.orderRepo.UploadInvoice(outputPath,fmt.Sprint("invoice", orderID))
-	// if err != nil {
-	// 	fmt.Println("Error uploading PDF:", err)
-	// 	return nil, "Some error occured.", err
-	// }
-
-	// return &url, "Invoice generated successfully", nil
 
 }
 
@@ -833,7 +820,7 @@ func makeInvoicePDF(data *response.InvoiceInfo) *gofpdf.Fpdf {
 	{ //left top
 		leftWidth := 110.0
 		{ // Logo
-			logoPath := "internal/domain/config/invoiceLogo.png"
+			logoPath := filepath.Join(config.ExecutableDir, "config/invoiceLogo.png")
 			pdf.Image(logoPath, 10, 10, 70, 0, false, "", 0, "")
 		}
 		{ // Billing-to info

@@ -1,11 +1,11 @@
 package middleware
 
 import (
+	"MyShoo/internal/config"
 	response "MyShoo/internal/models/responseModels"
 	jwttoken "MyShoo/pkg/jwt"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -13,10 +13,9 @@ import (
 
 func UserAuth(c *gin.Context) {
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
-	// fmt.Println("tokenString: ", tokenString) //
-	secretKey := os.Getenv("SECRET_KEY")
+	// fmt.Println("tokenString: ", tokenString)
 
-	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, secretKey)
+	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, config.SecretKey)
 	if !isTokenValid {
 		fmt.Println("token is invalid")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)

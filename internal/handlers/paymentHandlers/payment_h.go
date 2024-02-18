@@ -1,6 +1,7 @@
 package paymentHandlers
 
 import (
+	"MyShoo/internal/config"
 	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
@@ -10,6 +11,7 @@ import (
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
+	"path/filepath"
 
 	"github.com/gin-gonic/gin"
 )
@@ -53,12 +55,9 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	c.HTML(http.StatusOK, "payment.html", req)
 	// c.JSON(http.StatusOK, req)
 
-	//Rendering HTML for viewing payment (for testing)
-	err := htmlRender.RenderHTMLFromTemplate("internal/templates/payment.html", req, "testKit/paymentOutput.html")
-	if err != nil {
-		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
-	} else {
-		fmt.Println("Page loaded successfully. testKit/paymentOutput.html file produced as rendered version.")
+	//Rendering HTML for viewing payment (for testing)	(#dev mode)
+	if config.IsLocalHostMode && config.ShouldRenderPaymentPage {
+		renderPaymentPageInTestkit(req)
 	}
 
 }
@@ -149,8 +148,15 @@ func (h *PaymentHandler) RetryPayment(c *gin.Context) {
 
 	c.HTML(http.StatusOK, "payment.html", paymentInfo)
 
-	//Rendering HTML for viewing payment (for testing)
-	err = htmlRender.RenderHTMLFromTemplate("internal/templates/payment.html", paymentInfo, "testKit/paymentOutput.html")
+	//Rendering HTML for viewing payment (for testing)(#dev mode)
+	if config.IsLocalHostMode && config.ShouldRenderPaymentPage {
+		renderPaymentPageInTestkit(req)
+	}
+}
+func renderPaymentPageInTestkit(req interface{}) { //(#dev mode)
+	templatePath := filepath.Join(config.ExecutableDir, "internal/templates/payment.html")
+	renderOutputPath := filepath.Join(config.ExecutableDir, "testKit/paymentOutput.html")
+	err := htmlRender.RenderHTMLFromTemplate(templatePath, req, renderOutputPath)
 	if err != nil {
 		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
 	} else {

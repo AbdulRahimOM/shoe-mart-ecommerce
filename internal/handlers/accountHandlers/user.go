@@ -1,6 +1,7 @@
 package accounthandler
 
 import (
+	"MyShoo/internal/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
@@ -10,7 +11,6 @@ import (
 	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
-	"os"
 	"strings"
 
 	jwttoken "MyShoo/pkg/jwt"
@@ -197,7 +197,6 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 		return
 	}
 	if isVerified {
-
 		c.JSON(http.StatusOK, response.SM{
 			Status:  "success",
 			Message: "OTP verified successfully",
@@ -608,8 +607,8 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString) //
-	secretKey := os.Getenv("SECRET_KEY")
-	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, secretKey)
+
+	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, config.SecretKey)
 	if !isTokenValid {
 		fmt.Println("token is invalid")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
@@ -691,8 +690,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString)
-	secretKey := os.Getenv("SECRET_KEY")
-	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, secretKey)
+	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, config.SecretKey)
 	if !isTokenValid {
 		fmt.Println("token is invalid!")
 		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)

@@ -8,14 +8,11 @@ import (
 	"github.com/joho/godotenv"
 )
 
-var LocalHostMode string
+var IsLocalHostMode bool = false
 var ExecutableDir string
 
-// var err error
-var envPath string
-
 // var DB_URL string
-var DbURL  string
+var DbURL string
 
 // JWT token generation.....................
 var SecretKey string
@@ -34,36 +31,48 @@ var CloudinaryApiSecret string
 var RazorpayKeyId string
 var RazorpayKeySecret string
 
-//Development mode.......................
-var UploadExcel string
-var RenderPaymentPage string
-var UploadInvoice string
-
+// Development mode.......................
+var ShouldUploadExcel bool
+var ShouldRenderPaymentPage bool
+var ShouldUploadInvoice bool
 
 func init() {
-	var err error
-	if LocalHostMode == "true" {
-		ExecutableDir, err = filepath.Abs(filepath.Dir(os.Args[0]))
-		if err != nil {
-			fmt.Println("Error getting current directory:", err)
-			panic("Couldn't get current(executable) directory")
-		}
-	}
+
 }
 
 func LoadEnvVariables() error {
-	envPath = filepath.Join(ExecutableDir, ".env") //env file is presumed to be alongside the executable
-	err := godotenv.Load(envPath)
+	var err error
+
+	ExecutableDir, err = filepath.Abs(filepath.Dir(os.Args[0]))
 	if err != nil {
-		fmt.Println("Couldn't load env variables")
-		return err
+		return fmt.Errorf("error getting current directory path: %v", err)
 	}
 
-	initiateEnvValues()
-	return nil
+	//try to load .env file in 'execution of binary' mode
+	errBinaryExecMode := godotenv.Load(filepath.Join(ExecutableDir, ".env")) //env file is presumed to be alongside the executable
+	if errBinaryExecMode != nil {
+		goto retryWithGoRunMode
+	}else{
+		initiateEnvValues()
+		return nil
+	}
+
+retryWithGoRunMode:
+	//try to load .env file in 'go run' mode
+	if errGoRunMode := godotenv.Load(".env"); errGoRunMode != nil {
+		return fmt.Errorf("error loading .env file by either modes. \nerr from binary mode: %v\n, err from go run mode: %v", errBinaryExecMode, errGoRunMode)
+	} else {
+		ExecutableDir = ""
+		initiateEnvValues()
+		return nil
+	}
 }
 
 func initiateEnvValues() {
+	// Development mode.......................
+	if os.Getenv("LOCAL_HOST_MODE") == "true" {
+		IsLocalHostMode = true
+	}
 
 	// Database URL.....................
 	DbURL = os.Getenv("DB_URL")
@@ -85,7 +94,13 @@ func initiateEnvValues() {
 	RazorpayKeyId = os.Getenv("RAZORPAY_KEY_ID")
 	RazorpayKeySecret = os.Getenv("RAZORPAY_KEY_SECRET")
 
-	UploadExcel = os.Getenv("UPLOAD_EXCEL")
-	RenderPaymentPage = os.Getenv("RENDER_PAYMENT_PAGE")
-	UploadInvoice = os.Getenv("UploadInvoice")
+	if os.Getenv("UPLOAD_EXCEL") == "true" {
+		ShouldUploadExcel = true
+	}
+	if os.Getenv("RENDER_PAYMENT_PAGE") == "true" {
+		ShouldRenderPaymentPage = true
+	}
+	if os.Getenv("UPLOAD_INVOICE") == "true" {
+		ShouldUploadInvoice = true
+	}
 }

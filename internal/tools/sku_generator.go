@@ -26,7 +26,7 @@ func GenerateNameAndSKUCode(dimensionalVariant *entities.DimensionalVariant, siz
 		colourAlphabet,
 		colourvariantid, "_",
 		dVCode, "_",
-		size)
+		*size)
 	name = fmt.Sprint(
 		brandName, " ",
 		modelName, " ",
