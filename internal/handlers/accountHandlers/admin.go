@@ -30,9 +30,7 @@ func NewAdminHandler(useCase usecase.IAdminUC) *AdminHandler {
 // @Success 200 {object} string
 // @Router /admin/login [get]
 func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
-	fmt.Println("Handler ::: GET login handler")
-
-	c.JSON(http.StatusOK, "This is admin login page. Enter credentials to login")
+	c.JSON(http.StatusOK,"")
 }
 
 // to login admin

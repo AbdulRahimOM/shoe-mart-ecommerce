@@ -1,8 +1,8 @@
 package orderrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	msg "MyShoo/internal/domain/messages"
 	request "MyShoo/internal/models/requestModels"
 	repo "MyShoo/internal/repository/interface"
 	"errors"
@@ -19,32 +19,32 @@ func NewCartRepository(db *gorm.DB) repo.ICartRepo {
 	return &CartRepo{DB: db}
 }
 
-func (repo *CartRepo) AddToCart(cart *entities.Cart) error {
+func (repo *CartRepo) AddToCart(cart *entities.Cart) *e.Error {
 	result := repo.DB.Create(&cart)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add to cart. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
-func (repo *CartRepo) DeleteFromCart(req *request.DeleteFromCartReq) error {
+func (repo *CartRepo) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 	//check by productID and userID
 	result := repo.DB.Where("\"productId\" = ? AND user_id = ?", req.ProductID, req.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't delete from cart. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	if result.RowsAffected == 0 {
-		return errors.New("couldn't delete from cart")
+		return &e.Error{Err: errors.New("nothing deleted. no such item in cart"), StatusCode: 400}
 	}
 
 	return nil
 }
 
-func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, error) {
+func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, *e.Error) {
 	var temp entities.Cart
 	query := repo.DB.Raw(`
 		SELECT *
@@ -54,7 +54,7 @@ func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, er
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-product is existing or not. query.Error= ", query.Error, "\n----")
-		return false, 0, query.Error
+		return false, 0, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -65,7 +65,7 @@ func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, er
 }
 
 // returns cart, totalValue of cart products, error
-func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, error) {
+func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, *e.Error) {
 	var cart []entities.Cart
 	// var totalValue float32
 	query := repo.DB.
@@ -74,8 +74,7 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, error) {
 		Where("user_id = ?", userID).Find(&cart)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, 0, query.Error
+		return nil, 0, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 	var totalValue float32 = 0
 	for i := range cart {
@@ -85,18 +84,18 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, error) {
 	return &cart, totalValue, nil
 }
 
-func (repo *CartRepo) UpdateCartItemQuantity(cart *entities.Cart) error {
+func (repo *CartRepo) UpdateCartItemQuantity(cart *entities.Cart) *e.Error {
 	result := repo.DB.Model(&entities.Cart{}).Where("\"productId\" = ? AND user_id = ?", cart.ProductID, cart.UserID).Update("quantity", cart.Quantity)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't update cart. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
 // IsCartEmpty
-func (repo *CartRepo) IsCartEmpty(userID uint) (bool, error) {
+func (repo *CartRepo) IsCartEmpty(userID uint) (bool, *e.Error) {
 	var temp entities.Cart
 	query := repo.DB.Raw(`
 		SELECT *
@@ -106,7 +105,7 @@ func (repo *CartRepo) IsCartEmpty(userID uint) (bool, error) {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-cart is empty or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -116,19 +115,18 @@ func (repo *CartRepo) IsCartEmpty(userID uint) (bool, error) {
 	}
 }
 
-func (repo *CartRepo) ClearCartOfUser(userID uint) error {
+func (repo *CartRepo) ClearCartOfUser(userID uint) *e.Error {
 	//delete all cart items of user where user_id = userID
 	result := repo.DB.Where("user_id = ?", userID).Delete(&entities.Cart{})
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
-func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, string, error) {
-	// fmt.Println("userID= ", userID)
+func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, *e.Error) {
 	type data struct {
 		TotalQuantity uint    `gorm:"column:totalQuantity"`
 		TotalValue    float32 `gorm:"column:totalValue"`
@@ -148,9 +146,9 @@ func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, str
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get quantity and price of cart. query.Error= ", query.Error, "\n----")
-		return 0, 0, msg.RepoError, query.Error
+		return 0, 0, &e.Error{Err: query.Error, StatusCode: 500}
 	} else if queryData.TotalQuantity == 0 {
-		return 0, 0, msg.Forbidden, errors.New("cart is empty")
+		return 0, 0, &e.Error{Err: errors.New("cart is empty"), StatusCode: 400}
 	}
-	return queryData.TotalQuantity, queryData.TotalValue, "", nil
+	return queryData.TotalQuantity, queryData.TotalValue, nil
 }

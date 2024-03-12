@@ -1,16 +1,17 @@
 package repo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	response "MyShoo/internal/models/responseModels"
 	"time"
 )
 
 type IReportsRepo interface {
-	GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, error)
+	GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
 
-	UploadSalesReportExcel(filePath string, rangeLabel string) (string, error)
+	UploadSalesReportExcel(filePath string, rangeLabel string) (string, *e.Error)
 
 	GetSalesReportFullTime() (
 		*[]entities.SalesReportOrderList,
@@ -19,7 +20,7 @@ type IReportsRepo interface {
 		*[]entities.ModelWiseReport,
 		*[]entities.SizeWiseReport,
 		*[]entities.RevenueGraph,
-		error)
+		*e.Error)
 
 	GetSalesReportBetweenDates(startDate time.Time, endDate time.Time) (
 		*[]entities.SalesReportOrderList,
@@ -28,10 +29,10 @@ type IReportsRepo interface {
 		*[]entities.ModelWiseReport,
 		*[]entities.SizeWiseReport,
 		*[]entities.RevenueGraph,
-		error)
+		*e.Error)
 
-	GetTopModels(limit int) (*[]response.TopModels, error)
-	GetTopProducts(limit int) (*[]response.TopProducts, error)
-	GetTopBrands(limit int) (*[]response.TopBrands, error)
-	GetTopSellers(limit int) (*[]response.TopSellers, error)
+	GetTopModels(limit int) (*[]response.TopModels, *e.Error)
+	GetTopProducts(limit int) (*[]response.TopProducts, *e.Error)
+	GetTopBrands(limit int) (*[]response.TopBrands, *e.Error)
+	GetTopSellers(limit int) (*[]response.TopSellers, *e.Error)
 }

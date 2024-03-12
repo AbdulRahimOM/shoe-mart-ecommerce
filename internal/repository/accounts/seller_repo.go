@@ -1,9 +1,9 @@
 package accountrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	repoInterface "MyShoo/internal/repository/interface"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -16,7 +16,7 @@ func NewSellerRepository(db *gorm.DB) repoInterface.ISellerRepo {
 	return &SellerRepo{DB: db}
 }
 
-func (repo *SellerRepo) GetSellerWithPwByEmail(email string) (*entities.Seller, error) {
+func (repo *SellerRepo) GetSellerWithPwByEmail(email string) (*entities.Seller, *e.Error) {
 
 	var seller entities.Seller
 	query := repo.DB.Raw(`
@@ -26,14 +26,13 @@ func (repo *SellerRepo) GetSellerWithPwByEmail(email string) (*entities.Seller, 
 		email).Scan(&seller) //update required#1  also look  above
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &seller, nil
 }
 
-func (repo *SellerRepo) IsEmailRegistered(email string) (bool, error) {
+func (repo *SellerRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 
 	var emptyStruct struct{}
 	query := repo.DB.Raw(`
@@ -43,8 +42,7 @@ func (repo *SellerRepo) IsEmailRegistered(email string) (bool, error) {
 		email).Scan(&emptyStruct)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -56,8 +54,7 @@ func (repo *SellerRepo) IsEmailRegistered(email string) (bool, error) {
 func (repo *SellerRepo) CreateSeller(seller *entities.Seller) error {
 	sellerCreation := repo.DB.Create(&seller)
 	if sellerCreation.Error != nil {
-		fmt.Println("error occured while creating seller in record. ")
-		return sellerCreation.Error
+		return e.Error{Err: sellerCreation.Error, StatusCode: 500}
 	}
 	return nil
 }

@@ -1,12 +1,13 @@
 package reportsrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	response "MyShoo/internal/models/responseModels"
 	"fmt"
 )
 
 // GetTopModels implements repo.IReportsRepo.
-func (repo *DashboardDataRepo) GetTopModels(limit int) (*[]response.TopModels, error) {
+func (repo *DashboardDataRepo) GetTopModels(limit int) (*[]response.TopModels, *e.Error) {
 	var topModels = make([]response.TopModels, limit)
 
 	query := repo.DB.Raw(`
@@ -34,14 +35,14 @@ func (repo *DashboardDataRepo) GetTopModels(limit int) (*[]response.TopModels, e
 	`, limit).Scan(&topModels)
 	if query.Error != nil {
 		fmt.Println("Error occured while getting top models. err= ", query.Error)
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &topModels, nil
 }
 
 // GetTopProducts implements repo.IReportsRepo.
-func (repo *DashboardDataRepo) GetTopProducts(limit int) (*[]response.TopProducts, error) {
+func (repo *DashboardDataRepo) GetTopProducts(limit int) (*[]response.TopProducts, *e.Error) {
 	var topProducts = make([]response.TopProducts, limit)
 
 	query := repo.DB.Raw(`
@@ -71,14 +72,14 @@ func (repo *DashboardDataRepo) GetTopProducts(limit int) (*[]response.TopProduct
 	`, limit).Scan(&topProducts)
 	if query.Error != nil {
 		fmt.Println("Error occured while getting top products. err= ", query.Error)
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &topProducts, nil
 }
 
 // GetTopBrands implements repo.IReportsRepo.
-func (repo *DashboardDataRepo) GetTopBrands(limit int) (*[]response.TopBrands, error) {
+func (repo *DashboardDataRepo) GetTopBrands(limit int) (*[]response.TopBrands, *e.Error) {
 	var topBrands = make([]response.TopBrands, limit)
 
 	query := repo.DB.Raw(`
@@ -105,7 +106,7 @@ func (repo *DashboardDataRepo) GetTopBrands(limit int) (*[]response.TopBrands, e
 	`, limit).Scan(&topBrands)
 	if query.Error != nil {
 		fmt.Println("Error occured while getting top brands. err= ", query.Error)
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &topBrands, nil
@@ -113,7 +114,7 @@ func (repo *DashboardDataRepo) GetTopBrands(limit int) (*[]response.TopBrands, e
 }
 
 // GetTopSellers implements repo.IReportsRepo.
-func (repo *DashboardDataRepo) GetTopSellers(limit int) (*[]response.TopSellers, error) {
+func (repo *DashboardDataRepo) GetTopSellers(limit int) (*[]response.TopSellers, *e.Error) {
 	var topSellers = make([]response.TopSellers, limit)
 
 	query := repo.DB.Raw(`
@@ -139,7 +140,7 @@ func (repo *DashboardDataRepo) GetTopSellers(limit int) (*[]response.TopSellers,
 	`, limit).Scan(&topSellers)
 	if query.Error != nil {
 		fmt.Println("Error occured while getting top sellers. err= ", query.Error)
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &topSellers, nil

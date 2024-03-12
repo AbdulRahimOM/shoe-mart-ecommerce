@@ -1,6 +1,7 @@
 package productrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/tools"
 	"fmt"
@@ -8,7 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func (repo *ProductsRepo) DoDimensionalVariantExistByID(id uint) (bool, error) {
+func (repo *ProductsRepo) DoDimensionalVariantExistByID(id uint) (bool, *e.Error) {
 	var temp entities.DimensionalVariant
 	query := repo.DB.Raw(`
 		SELECT *
@@ -18,7 +19,7 @@ func (repo *ProductsRepo) DoDimensionalVariantExistByID(id uint) (bool, error) {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-dimensionalVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false,&e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -29,7 +30,7 @@ func (repo *ProductsRepo) DoDimensionalVariantExistByID(id uint) (bool, error) {
 
 }
 
-func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.DimensionalVariant) (bool, error) {
+func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.DimensionalVariant) (bool, *e.Error) {
 	var temp entities.DimensionalVariant
 	query := repo.DB.Raw(`
 		SELECT *
@@ -39,7 +40,7 @@ func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.D
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-dimensionalVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false,&e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -51,7 +52,7 @@ func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.D
 }
 
 // AddDimensionalVariantAndProductCombinations(dimensionalVariant *entities.DimensionalVariant) error
-func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensionalVariant *entities.DimensionalVariant) error {
+func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensionalVariant *entities.DimensionalVariant) *e.Error {
 	//start transaction
 	tx := repo.DB.Begin()
 	var result *gorm.DB
@@ -68,14 +69,14 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 	result = tx.Create(&dimensionalVariant)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add dimensionalVariant. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	//preload dimensionalVariant
 	result = tx.Preload("FkColourVariant.FkModel.FkBrand").First(&dimensionalVariant, dimensionalVariant.ID)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't preload dimensionalVariant. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	//add productCombinations
@@ -92,7 +93,7 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 		result := tx.Create(&productCombinations)
 		if result.Error != nil {
 			fmt.Println("-------\nquery error happened. couldn't add productCombination. query.Error= ", result.Error, "\n----")
-			return result.Error
+			return &e.Error{Err: result.Error, StatusCode: 500}
 		}
 	}
 

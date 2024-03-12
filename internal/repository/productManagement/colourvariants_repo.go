@@ -1,6 +1,7 @@
 package productrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"context"
 	"errors"
@@ -11,7 +12,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os.File) error {
+func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os.File) *e.Error {
 
 	//initiate transaction
 	tx := repo.DB.Begin()
@@ -33,11 +34,11 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 
 	result, err := repo.Cld.Upload.Upload(context.Background(), file, uploadParams)
 	if err != nil {
-		return errors.New("error while uploading file to cloudinary. err: " + err.Error())
+		return &e.Error{Err: errors.New("error while uploading file to cloudinary. err: " + err.Error()),StatusCode: 500}
 	}
 
 	if result.Error.Message != "" {
-		return errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message)
+		return &e.Error{Err: errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message),StatusCode: 500}
 	}
 
 	fmt.Println("req.ImageURL: ", req.ImageURL) //url printing,.. may be required for checking purposes
@@ -47,7 +48,7 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 	if resultGorm.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add colourVariant. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return resultGorm.Error
+		return &e.Error{Err: resultGorm.Error,StatusCode: 500}
 	}
 
 	tx.Commit()
@@ -56,7 +57,7 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 	return nil
 }
 
-func (repo *ProductsRepo) DoColourVariantExistByID(id uint) (bool, error) {
+func (repo *ProductsRepo) DoColourVariantExistByID(id uint) (bool, *e.Error){
 	var temp entities.ColourVariant
 	query := repo.DB.Raw(`
 		SELECT *
@@ -66,7 +67,7 @@ func (repo *ProductsRepo) DoColourVariantExistByID(id uint) (bool, error) {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-colourVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -77,7 +78,7 @@ func (repo *ProductsRepo) DoColourVariantExistByID(id uint) (bool, error) {
 
 }
 
-func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) error {
+func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) *e.Error {
 	//check if colourVariant exists
 	var temp entities.ColourVariant
 	query := repo.DB.Raw(`
@@ -88,11 +89,11 @@ func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) error {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-colourVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return query.Error
+		return &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
-		return fmt.Errorf("colourVariant doesn't exist")
+		return &e.Error{Err: fmt.Errorf("colourVariant doesn't exist"),StatusCode: 400}
 	}
 
 	//update colourVariant
@@ -102,13 +103,13 @@ func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) error {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't update colourVariant. query.Error= ", query.Error, "\n----")
-		return query.Error
+		return &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
-func (repo *ProductsRepo) DoColourVariantExists(req *entities.ColourVariant) (bool, error) {
+func (repo *ProductsRepo) DoColourVariantExists(req *entities.ColourVariant) (bool, *e.Error){
 
 	var temp entities.ColourVariant
 	query := repo.DB.Raw(`
@@ -119,7 +120,7 @@ func (repo *ProductsRepo) DoColourVariantExists(req *entities.ColourVariant) (bo
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-colourVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -130,7 +131,7 @@ func (repo *ProductsRepo) DoColourVariantExists(req *entities.ColourVariant) (bo
 	}
 }
 
-func (repo *ProductsRepo) GetColourVariantsUnderModel(modelID uint) (*[]entities.ColourVariant, error) {
+func (repo *ProductsRepo) GetColourVariantsUnderModel(modelID uint) (*[]entities.ColourVariant, *e.Error){
 	var colourVariants []entities.ColourVariant
 	query := repo.DB.
 		Preload("FkModel.FkBrand").
@@ -138,8 +139,7 @@ func (repo *ProductsRepo) GetColourVariantsUnderModel(modelID uint) (*[]entities
 		Where("\"modelId\" = ?", modelID).Find(&colourVariants)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &colourVariants, nil

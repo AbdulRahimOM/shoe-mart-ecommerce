@@ -1,13 +1,13 @@
 package orderrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	msg "MyShoo/internal/domain/messages"
 	"errors"
 	"fmt"
 )
 
-func (repo *OrderRepo) DoCouponExistByCode(code string) (bool, error) {
+func (repo *OrderRepo) DoCouponExistByCode(code string) (bool, *e.Error) {
 	var temp entities.Coupon
 	query := repo.DB.Raw(`
 		SELECT *
@@ -17,7 +17,7 @@ func (repo *OrderRepo) DoCouponExistByCode(code string) (bool, error) {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-coupon is existing or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -27,103 +27,104 @@ func (repo *OrderRepo) DoCouponExistByCode(code string) (bool, error) {
 	}
 }
 
-func (repo *OrderRepo) CreateNewCoupon(coupon *entities.Coupon) error {
+func (repo *OrderRepo) CreateNewCoupon(coupon *entities.Coupon) *e.Error {
 	fmt.Println("coupon.StartDate= ", coupon.StartDate)
 	fmt.Println("coupon.EndDate= ", coupon.EndDate)
 	// starr
 	result := repo.DB.Create(&coupon)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't create new coupon. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
-func (repo *OrderRepo) BlockCoupon(couponID uint) error {
+func (repo *OrderRepo) BlockCoupon(couponID uint) *e.Error {
 
 	result := repo.DB.Model(&entities.Coupon{}).Where("id = ?", couponID).Update("blocked", true)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't block coupon. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 	return nil
 }
 
-func (repo *OrderRepo) UnblockCoupon(couponID uint) error {
+func (repo *OrderRepo) UnblockCoupon(couponID uint) *e.Error {
 
 	result := repo.DB.Model(&entities.Coupon{}).Where("id = ?", couponID).Update("blocked", false)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't unblock coupon. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 	return nil
 }
 
 // GetAllCoupons
-func (repo *OrderRepo) GetAllCoupons() (*[]entities.Coupon, string, error) {
+func (repo *OrderRepo) GetAllCoupons() (*[]entities.Coupon, *e.Error) {
 	var coupons []entities.Coupon
 	result := repo.DB.Find(&coupons)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get all coupons. query.Error= ", result.Error, "\n----")
-		return nil, "Some error occured", result.Error
+		return nil, &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
-	return &coupons, "", nil
+	return &coupons, nil
 }
 
 // GetExpiredCoupons
-func (repo *OrderRepo) GetExpiredCoupons() (*[]entities.Coupon, string, error) {
+func (repo *OrderRepo) GetExpiredCoupons() (*[]entities.Coupon, *e.Error) {
 	var coupons []entities.Coupon
 	result := repo.DB.Where("end_date < now()").Find(&coupons)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get expired coupons. query.Error= ", result.Error, "\n----")
-		return nil, "Some error occured", result.Error
+		return nil, &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
-	return &coupons, "", nil
+	return &coupons, nil
 }
 
 // GetActiveCoupons
-func (repo *OrderRepo) GetActiveCoupons() (*[]entities.Coupon, string, error) {
+func (repo *OrderRepo) GetActiveCoupons() (*[]entities.Coupon, *e.Error) {
 	var coupons []entities.Coupon
 	result := repo.DB.Where("start_date < now() AND end_date > now() AND blocked=?", "false").Find(&coupons)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get active coupons. query.Error= ", result.Error, "\n----")
-		return nil, "Some error occured", result.Error
+		return nil, &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
-	return &coupons, "", nil
+	return &coupons, nil
 }
 
 // GetUpcomingCoupons
-func (repo *OrderRepo) GetUpcomingCoupons() (*[]entities.Coupon, string, error) {
+func (repo *OrderRepo) GetUpcomingCoupons() (*[]entities.Coupon, *e.Error) {
 	var coupons []entities.Coupon
 	result := repo.DB.Where("start_date > now()").Find(&coupons)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get upcoming coupons. query.Error= ", result.Error, "\n----")
-		return nil, "Some error occured", result.Error
+		return nil, &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
-	return &coupons, "", nil
+	return &coupons, nil
 }
 
 // GetCouponByID
-func (repo *OrderRepo) GetCouponByID(couponID uint) (*entities.Coupon, string, error) {
+func (repo *OrderRepo) GetCouponByID(couponID uint) (*entities.Coupon, *e.Error) {
 	var coupon entities.Coupon
 	result := repo.DB.Where("id = ?", couponID).Find(&coupon)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get coupon by id. query.Error= ", result.Error, "\n----")
-		return nil, msg.RepoError, result.Error
-	} else if result.RowsAffected == 0 {
-		return nil, msg.InvalidRequest, errors.New("coupon doesn't exist")
+		return nil, &e.Error{Err: result.Error, StatusCode: 500}
+	}
+	if result.RowsAffected == 0 {
+		return nil, &e.Error{Err: errors.New("coupon doesn't exist"), StatusCode: 400}
 	}
 
-	return &coupon, "", nil
+	return &coupon, nil
 }
 
 // GetCouponUsageCount implements repo.IOrderRepo.
-func (repo *OrderRepo) GetCouponUsageCount(userID uint, couponID uint) (uint, string, error) {
+func (repo *OrderRepo) GetCouponUsageCount(userID uint, couponID uint) (uint, *e.Error) {
 	var count uint
 	result := repo.DB.Raw(`
 		SELECT COUNT(*)
@@ -132,8 +133,8 @@ func (repo *OrderRepo) GetCouponUsageCount(userID uint, couponID uint) (uint, st
 		userID, couponID).Scan(&count)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get coupon usage count. query.Error= ", result.Error, "\n----")
-		return 0, msg.RepoError, result.Error
+		return 0, &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
-	return count, "", nil
+	return count, nil
 }

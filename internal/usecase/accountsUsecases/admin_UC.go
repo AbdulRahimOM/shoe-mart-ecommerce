@@ -22,7 +22,7 @@ func NewAdminUseCase(repo repoInterface.IAdminRepo) usecase.IAdminUC {
 	return &AdminUseCase{adminRepo: repo}
 }
 
-func (uc *AdminUseCase) GetSellersList() (*[]entities.PwMaskedSeller, error) {
+func (uc *AdminUseCase) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) {
 	var sellerlist *[]entities.PwMaskedSeller
 	sellerlist, err := uc.adminRepo.GetSellersList()
 	if err != nil {
@@ -32,7 +32,7 @@ func (uc *AdminUseCase) GetSellersList() (*[]entities.PwMaskedSeller, error) {
 	return sellerlist, nil
 }
 
-func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) error {
+func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) *e.Error {
 	//check if user exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
 	if err != nil {
@@ -49,7 +49,7 @@ func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) error {
 	}
 	return nil
 }
-func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) error {
+func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) *e.Error {
 	//check if user exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
 	if err != nil {
@@ -68,7 +68,7 @@ func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) error {
 	return nil
 }
 
-func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) error {
+func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) *e.Error {
 	//check if seller exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsSeller(req.Email)
 	if err != nil {
@@ -88,7 +88,7 @@ func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) error {
 	return nil
 }
 
-func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) error {
+func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) *e.Error {
 	//check if seller exists
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsSeller(req.Email)
 	if err != nil {
@@ -107,7 +107,7 @@ func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) error {
 	return nil
 }
 
-func (uc *AdminUseCase) GetUsersList() (*[]entities.UserDetails, error) {
+func (uc *AdminUseCase) GetUsersList() (*[]entities.UserDetails, *e.Error) {
 	userlist, err := uc.adminRepo.GetUsersList()
 	if err != nil {
 		fmt.Println("Error occured while getting users list from database")
@@ -115,7 +115,7 @@ func (uc *AdminUseCase) GetUsersList() (*[]entities.UserDetails, error) {
 	}
 	return userlist, nil
 }
-func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, error) {
+func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) {
 	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsAdmin(req.Email)
 	if err != nil {
 		fmt.Println("Error occured while searching email, error:", err)
@@ -123,7 +123,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, error) {
 	}
 	if !(isEmailRegistered) {
 		fmt.Println("\n-- email is not registered\n.")
-		return nil, e.ErrEmailNotRegistered
+		return nil, &e.Error{Err:e.ErrEmailNotRegistered,StatusCode: 200}
 	}
 
 	//get adminpassword from database
@@ -136,28 +136,28 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, error) {
 	//check for password
 	if hashpassword.CompareHashedPassword(hashedPassword, req.Password) != nil {
 		fmt.Println("Password Mismatch")
-		return nil, e.ErrInvalidPassword
+		return nil, &e.Error{Err:e.ErrInvalidPassword,StatusCode: 200}
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("admin", adminInToken, time.Hour*24*30)
-	if err != nil {
-		return nil, err
+	tokenString, err2 := jwttoken.GenerateToken("admin", adminInToken, time.Hour*24*30)
+	if err2 != nil {
+		return nil, &e.Error{Err:err,StatusCode: 500}
 	}
 	return &tokenString, nil
 }
 
-func (uc *AdminUseCase) RestartConfig() error {
+func (uc *AdminUseCase) RestartConfig() error {	//err pro
 	err := config.RestartDeliveryConfig()
 	if err != nil {
 		fmt.Println("Error occured while reloading config")
-		return err
+		return  err
 	}
 	return nil
 }
 
 // VerifySeller
-func (uc *AdminUseCase) VerifySeller(req *request.VerifySellerReq) error {
+func (uc *AdminUseCase) VerifySeller(req *request.VerifySellerReq) *e.Error {
 	//check if status is not verified
 	isVerified, err := uc.adminRepo.IsSellerVerified(req.SellerID)
 	if err != nil {

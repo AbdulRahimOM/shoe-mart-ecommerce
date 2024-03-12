@@ -1,6 +1,7 @@
 package productrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
@@ -18,18 +19,18 @@ func NewModelRepository(db *gorm.DB) repoInterface.IModelsRepo {
 }
 
 // EditModelName
-func (repo *ModelsRepo) EditModel(req *request.EditModelReq) error {
+func (repo *ModelsRepo) EditModel(req *request.EditModelReq) *e.Error {
 	result := repo.DB.Model(&entities.Models{}).Where("id = ?", req.ID).Update("name", req.Name) //need update
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't edit model name. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
 // DoModelExistsByName
-func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, error) {
+func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, *e.Error) {
 	var temp entities.Models
 	query := repo.DB.Raw(`
 		SELECT *
@@ -39,7 +40,7 @@ func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, error) {
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-model is existing (by name) or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false,&e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -50,17 +51,17 @@ func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, error) {
 }
 
 // AddModel
-func (repo *ModelsRepo) AddModel(req *entities.Models) error {
+func (repo *ModelsRepo) AddModel(req *entities.Models) *e.Error {
 	result := repo.DB.Create(&req)
 	if result.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't add model. query.Error= ", result.Error, "\n----")
-		return result.Error
+		return &e.Error{Err: result.Error, StatusCode: 500}
 	}
 
 	return nil
 }
 
-func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, error) { //need update : is this needed?
+func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, *e.Error) { //need update : is this needed?
 
 	var temp entities.Models
 	query := repo.DB.Raw(`
@@ -71,7 +72,7 @@ func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, error) { //need update
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-model is existing (by ID) or not. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false,&e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -81,7 +82,7 @@ func (repo *ModelsRepo) DoModelExistsByID(id uint) (bool, error) { //need update
 	}
 }
 
-func (repo *ModelsRepo) GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, error) {
+func (repo *ModelsRepo) GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, *e.Error) {
 	var modelsList []entities.Models
 	var query *gorm.DB
 	if brandExists && categoryExists {
@@ -103,21 +104,21 @@ func (repo *ModelsRepo) GetModelsByBrandsAndCategories(brandExists bool, brandID
 
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't get models list. query.Error= ", query.Error, "\n----")
-		return nil, query.Error
+		return nil,&e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &modelsList, nil
 }
 
 // DoModelExistByIDAndBelongsToUser
-func (repo *ModelsRepo) DoModelExistByIDAndBelongsToUser(id uint, sellerID uint) (bool, bool, error) {
+func (repo *ModelsRepo) DoModelExistByIDAndBelongsToUser(id uint, sellerID uint) (bool, bool, *e.Error) {
 	var temp entities.Models
 	//preloading brand and category
 	query := repo.DB.Preload("FkBrand").
 		Where("id = ?", id).Find(&temp)
 	if query.Error != nil {
 		fmt.Println("-------\nquery error happened. couldn't check if-model is existing by id or not. query.Error= ", query.Error, "\n----")
-		return false, false, query.Error
+		return false, false,&e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {

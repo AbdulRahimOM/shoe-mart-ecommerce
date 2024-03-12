@@ -1,72 +1,73 @@
 package repo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 )
 
 type ICartRepo interface {
-	//returns true if product exists in cart, quantity of product in cart, error
-	DoProductExistAlready(cart *entities.Cart) (bool, uint, error)
-	AddToCart(cart *entities.Cart) error
-	GetCart(userID uint) (*[]entities.Cart, float32, error)
-	DeleteFromCart(req *request.DeleteFromCartReq) error
-	UpdateCartItemQuantity(cart *entities.Cart) error
-	IsCartEmpty(userID uint) (bool, error)
-	ClearCartOfUser(userID uint) error
-	GetQuantityAndPriceOfCart(userID uint) (uint, float32, string, error)
+	//returns true if product exists in cart, quantity of product in cart, *e.Error
+	DoProductExistAlready(cart *entities.Cart) (bool, uint, *e.Error)
+	AddToCart(cart *entities.Cart) *e.Error
+	GetCart(userID uint) (*[]entities.Cart, float32, *e.Error)
+	DeleteFromCart(req *request.DeleteFromCartReq) *e.Error
+	UpdateCartItemQuantity(cart *entities.Cart) *e.Error
+	IsCartEmpty(userID uint) (bool, *e.Error)
+	ClearCartOfUser(userID uint) *e.Error
+	GetQuantityAndPriceOfCart(userID uint) (uint, float32, *e.Error)
 }
 
 type IWishListsRepo interface {
-	DoesWishListExistWithName(userID uint, name string) (bool, error)
-	CreateWishList(userID uint, wishList *entities.WishList) error
-	DoesThisWishListExistForUser(userID uint, wishListID uint) (bool, error)
-	IsProductInWishList(productID uint, wishListID uint) (bool, error)
-	AddToWishList(productID uint, wishListID uint) error
-	RemoveFromWishList(productID uint, wishListID uint) error
-	GetAllWishLists(userID uint) (*[]entities.WishList, error)
-	GetWishListByID(userID uint, wishListID uint) (*string, *[]entities.Product, error)
+	DoesWishListExistWithName(userID uint, name string) (bool, *e.Error)
+	CreateWishList(userID uint, wishList *entities.WishList) *e.Error
+	DoesThisWishListExistForUser(userID uint, wishListID uint) (bool, *e.Error)
+	IsProductInWishList(productID uint, wishListID uint) (bool, *e.Error)
+	AddToWishList(productID uint, wishListID uint) *e.Error
+	RemoveFromWishList(productID uint, wishListID uint) *e.Error
+	GetAllWishLists(userID uint) (*[]entities.WishList, *e.Error)
+	GetWishListByID(userID uint, wishListID uint) (*string, *[]entities.Product, *e.Error)
 }
 
 type IOrderRepo interface {
 	//order related_____________________________________________________________
-	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error)
-	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (uint, error)
-	UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*entities.Order, error)
-	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
-	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, error)
-	GetAllOrders() (*[]entities.Order, error)
-	// GetOrderItemsByOrderID(orderID uint) (*[]entities.OrderItem, error)
-	GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS, error)
-	DoOrderExistByID(orderID uint) (bool, error)
-	GetUserIDByOrderID(orderID uint) (uint, error)
-	GetOrderStatusByID(orderID uint) (string, error)
-	GetOrderSummaryByID(orderID uint) (*entities.Order, error)
-	CancelOrder(orderID uint) error
-	ReturnOrderRequest(orderID uint) error
-	MarkOrderAsReturned(orderID uint) error
+	MakeOrder_UpdateStock_ClearCart(order *entities.Order, orderItems *[]entities.OrderItem) (uint, *e.Error)
+	MakeOrder(order *entities.Order, orderItems *[]entities.OrderItem) (uint, *e.Error)
+	UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*entities.Order, *e.Error)
+	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, *e.Error)
+	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, *e.Error)
+	GetAllOrders() (*[]entities.Order, *e.Error)
+	// GetOrderItemsByOrderID(orderID uint) (*[]entities.OrderItem, *e.Error)
+	GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS, *e.Error)
+	DoOrderExistByID(orderID uint) (bool, *e.Error)
+	GetUserIDByOrderID(orderID uint) (uint, *e.Error)
+	GetOrderStatusByID(orderID uint) (string, *e.Error)
+	GetOrderSummaryByID(orderID uint) (*entities.Order, *e.Error)
+	CancelOrder(orderID uint) *e.Error
+	ReturnOrderRequest(orderID uint) *e.Error
+	MarkOrderAsReturned(orderID uint) *e.Error
 
 	//mark order as delivered and change payment-status to "paid" in case of COD
-	MarkOrderAsDelivered(orderID uint) error
+	MarkOrderAsDelivered(orderID uint) *e.Error
 
 	//Online transaction related_______________________________________________________
-	GetOrderByTransactionID(transactionID string) (uint, error)
-	UpdateOrderTransactionID(orderID uint, transactionID string) error
-	GetPaymentStatusByID(orderID uint) (string, error)
+	GetOrderByTransactionID(transactionID string) (uint, *e.Error)
+	UpdateOrderTransactionID(orderID uint, transactionID string) *e.Error
+	GetPaymentStatusByID(orderID uint) (string, *e.Error)
 
 	//coupon related_______________________________________________________
-	DoCouponExistByCode(code string) (bool, error)
-	CreateNewCoupon(coupon *entities.Coupon) error
-	BlockCoupon(couponID uint) error
-	UnblockCoupon(couponID uint) error
-	GetAllCoupons() (*[]entities.Coupon, string, error)
-	GetExpiredCoupons() (*[]entities.Coupon, string, error)
-	GetActiveCoupons() (*[]entities.Coupon, string, error)
-	GetUpcomingCoupons() (*[]entities.Coupon, string, error)
-	GetCouponByID(couponID uint) (*entities.Coupon, string, error)
-	GetCouponUsageCount(userID uint, couponID uint) (uint, string, error)
+	DoCouponExistByCode(code string) (bool, *e.Error)
+	CreateNewCoupon(coupon *entities.Coupon) *e.Error
+	BlockCoupon(couponID uint) *e.Error
+	UnblockCoupon(couponID uint) *e.Error
+	GetAllCoupons() (*[]entities.Coupon, *e.Error)
+	GetExpiredCoupons() (*[]entities.Coupon, *e.Error)
+	GetActiveCoupons() (*[]entities.Coupon, *e.Error)
+	GetUpcomingCoupons() (*[]entities.Coupon, *e.Error)
+	GetCouponByID(couponID uint) (*entities.Coupon, *e.Error)
+	GetCouponUsageCount(userID uint, couponID uint) (uint, *e.Error)
 
 	//upload related_______________________________________________________
-	UploadInvoice(file string, fileName string) (string, error)
+	UploadInvoice(file string, fileName string) (string, *e.Error)
 }

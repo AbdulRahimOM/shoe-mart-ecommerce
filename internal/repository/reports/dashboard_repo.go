@@ -1,12 +1,13 @@
 package reportsrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"fmt"
 	"time"
 )
 
-func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, error) {
+func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error){
 	var dashBoardData entities.DashboardData
 	var salePerDay []entities.SalePerDay
 
@@ -24,7 +25,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
 		start, end, start, end).Scan(&dashBoardData).Error
 	if err != nil {
 		fmt.Println("-------\nquery error happened. couldn't get dashboard data. query.Error= ", err, "\n----")
-		return &dashBoardData, &salePerDay, err
+		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
 	err = repo.DB.Raw(`
@@ -35,13 +36,13 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
 		start, end).Scan(&salePerDay).Error
 	if err != nil {
 		fmt.Println("-------\nquery error happened. couldn't get sales per day graph data. query.Error= ", err, "\n----")
-		return &dashBoardData, &salePerDay, err
+		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
 	return &dashBoardData, &salePerDay, nil
 }
 
-func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, error) {
+func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error){
 	var dashBoardData entities.DashboardData
 	var salePerDay []entities.SalePerDay
 
@@ -58,7 +59,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
 	).Scan(&dashBoardData).Error
 	if err != nil {
 		fmt.Println("-------\nquery error happened. couldn't get dashboard data. query.Error= ", err, "\n----")
-		return &dashBoardData, &salePerDay, err
+		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
 	err = repo.DB.Raw(`
@@ -68,7 +69,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
 	).Scan(&salePerDay).Error
 	if err != nil {
 		fmt.Println("-------\nquery error happened. couldn't get sales per day graph data. query.Error= ", err, "\n----")
-		return &dashBoardData, &salePerDay, err
+		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
 	return &dashBoardData, &salePerDay, nil

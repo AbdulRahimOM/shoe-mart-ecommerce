@@ -1,9 +1,9 @@
 package accountrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	repoInterface "MyShoo/internal/repository/interface"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -16,7 +16,7 @@ func NewAdminRepository(db *gorm.DB) repoInterface.IAdminRepo {
 	return &AdminRepo{DB: db}
 }
 
-func (repo *AdminRepo) IsEmailRegisteredAsSeller(email string) (bool, error) {
+func (repo *AdminRepo) IsEmailRegisteredAsSeller(email string) (bool, *e.Error) {
 	var emptyStruct struct{}
 	query := repo.DB.Raw(`
 	SELECT *
@@ -25,8 +25,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsSeller(email string) (bool, error) {
 		email).Scan(&emptyStruct)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -36,7 +35,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsSeller(email string) (bool, error) {
 	return true, nil
 }
 
-func (repo *AdminRepo) IsEmailRegisteredAsUser(email string) (bool, error) {
+func (repo *AdminRepo) IsEmailRegisteredAsUser(email string) (bool, *e.Error) {
 	var emptyStruct struct{}
 	query := repo.DB.Raw(`
 	SELECT *
@@ -45,8 +44,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsUser(email string) (bool, error) {
 		email).Scan(&emptyStruct)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -56,7 +54,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsUser(email string) (bool, error) {
 	return true, nil
 }
 
-func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, error) {
+func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) {
 	var sellersList []entities.PwMaskedSeller
 	query := repo.DB.Raw(`
 	SELECT *
@@ -64,8 +62,7 @@ func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, error) {
 		Scan(&sellersList) //update required#2
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &sellersList, nil
@@ -75,8 +72,7 @@ func (repo *AdminRepo) UpdateUserStatus(email string, newStatus string) error {
 	var user entities.User
 	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
-		fmt.Println("-------\nerror happened on updating status. Error= ", err, "\n----")
-		return err
+		return &e.Error{Err: err, StatusCode: 500}
 	}
 
 	return nil
@@ -86,14 +82,13 @@ func (repo *AdminRepo) UpdateSellerStatus(email string, newStatus string) error 
 	var seller entities.Seller
 	err := repo.DB.Model(&seller).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
-		fmt.Println("-------\nerror happened on updating status. Error= ", err, "\n----")
-		return err
+		return &e.Error{Err: err, StatusCode: 500}
 	}
 
 	return nil
 }
 
-func (repo *AdminRepo) GetUsersList() (*[]entities.UserDetails, error) {
+func (repo *AdminRepo) GetUsersList() (*[]entities.UserDetails, *e.Error) {
 
 	var usersList []entities.UserDetails
 	query := repo.DB.Raw(`
@@ -108,14 +103,14 @@ func (repo *AdminRepo) GetUsersList() (*[]entities.UserDetails, error) {
 		Scan(&usersList)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, query.Error
+		return nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return &usersList, nil
 }
 
-func (repo *AdminRepo) GetPasswordAndAdminDetailsByEmail(email string) (string, entities.AdminDetails, error) {
+// returns hashed password and admin details
+func (repo *AdminRepo) GetPasswordAndAdminDetailsByEmail(email string) (string, entities.AdminDetails, *e.Error) {
 
 	//getting password
 	var hashedPassword string
@@ -126,8 +121,7 @@ func (repo *AdminRepo) GetPasswordAndAdminDetailsByEmail(email string) (string, 
 		email).Scan(&hashedPassword)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return "", entities.AdminDetails{}, query.Error
+		return "", entities.AdminDetails{}, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	//getting other admindetails
@@ -139,25 +133,14 @@ func (repo *AdminRepo) GetPasswordAndAdminDetailsByEmail(email string) (string, 
 		email).Scan(&adminDetails)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return "", entities.AdminDetails{}, query.Error
+		return "", entities.AdminDetails{}, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	return hashedPassword, adminDetails, nil
 }
 
-func (repo *AdminRepo) IsEmailRegisteredAsAdmin(email string) (bool, error) {
+func (repo *AdminRepo) IsEmailRegisteredAsAdmin(email string) (bool, *e.Error) {
 	var emptyStruct struct{}
-	if repo.DB == nil {
-		fmt.Println("repo.DB is nil")
-	}else{
-		fmt.Println("repo.DB is not nil")
-	}
-	if repo==nil {
-		fmt.Println("repo is nil")
-	}else{
-		fmt.Println("repo is not nil")
-	}
 	query := repo.DB.Raw(`
         SELECT * 
         FROM admins 
@@ -165,8 +148,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsAdmin(email string) (bool, error) {
 		email).Scan(&emptyStruct)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if query.RowsAffected == 0 {
@@ -178,8 +160,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsAdmin(email string) (bool, error) {
 func (repo *AdminRepo) CreateAdmin(admin *entities.Admin) error {
 	adminCreation := repo.DB.Create(&admin)
 	if adminCreation.Error != nil {
-		fmt.Println("error occured while creating admin in record. ")
-		return adminCreation.Error
+		return &e.Error{Err: adminCreation.Error, StatusCode: 500}
 	}
 	return nil
 }
@@ -188,15 +169,14 @@ func (repo *AdminRepo) CreateAdmin(admin *entities.Admin) error {
 func (repo *AdminRepo) VerifySeller(id uint) error {
 	err := repo.DB.Model(&entities.Seller{}).Where("id = ?", id).Update("status", "verified").Error
 	if err != nil {
-		fmt.Println("-------\nerror happened on verifying seller. Error= ", err, "\n----")
-		return err
+		return &e.Error{Err: err, StatusCode: 500}
 	}
 
 	return nil
 }
 
 // IsSellerVerified
-func (repo *AdminRepo) IsSellerVerified(id uint) (bool, error) {
+func (repo *AdminRepo) IsSellerVerified(id uint) (bool, *e.Error) {
 	var seller entities.Seller
 	query := repo.DB.Raw(`
 	SELECT status 
@@ -205,8 +185,7 @@ func (repo *AdminRepo) IsSellerVerified(id uint) (bool, error) {
 		id).Scan(&seller)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return false, query.Error
+		return false, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	if seller.Status == "verified" {

@@ -2,6 +2,28 @@ package e
 
 import "errors"
 
+// type AppError struct {
+//     Err        error
+//     StatusCode int
+// }
+
+type Error struct{
+	Err error
+	StatusCode int
+}
+func (e Error) Error() string {
+    if e.Err != nil {
+        return e.Err.Error()
+    }
+    return ""
+}
+// func (e Error) Error() string {
+//     if e.Err != nil {
+//         return e.Err.Error()
+//     }
+//     return ""
+// }
+
 var (
 	ErrEmailAlreadyUsed   = errors.New("conflict: email already registered")
 	ErrEmailNotRegistered = errors.New("this email is not registered")

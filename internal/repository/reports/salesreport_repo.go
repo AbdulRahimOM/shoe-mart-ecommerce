@@ -1,10 +1,10 @@
 package reportsrepo
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	repoInterface "MyShoo/internal/repository/interface"
@@ -26,7 +26,7 @@ func NewReportRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInt
 	}
 }
 
-func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabel string) (string, error) {
+func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabel string) (string, *e.Error) {
 	uploadParams := uploader.UploadParams{
 		Folder:    "MyShoo/adminreports",
 		PublicID:  rangeLabel + "ReportForAdmin",
@@ -34,11 +34,11 @@ func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabe
 	}
 	result, err := repo.Cld.Upload.Upload(context.Background(), filePath, uploadParams)
 	if err != nil {
-		return "", errors.New("error while uploading file to cloudinary. err: " + err.Error())
+		return "", &e.Error{Err: errors.New("error while uploading file to cloudinary. err: " + err.Error()), StatusCode: 500}
 	}
 
 	if result.Error.Message != "" {
-		return "", errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message)
+		return "", &e.Error{Err: errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message), StatusCode: 500}
 	}
 
 	return result.SecureURL, nil
@@ -51,7 +51,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 	*[]entities.ModelWiseReport,
 	*[]entities.SizeWiseReport,
 	*[]entities.RevenueGraph,
-	error) {
+	*e.Error) {
 	var orderList []entities.SalesReportOrderList
 	query := repo.DB.Raw(`
 		SELECT
@@ -76,8 +76,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 	`).Scan(&orderList)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var sellerWiseReport []entities.SellerWiseReport
@@ -106,8 +105,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 		`).Scan(&sellerWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var brandWiseReport []entities.BrandWiseReport
@@ -135,8 +133,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 		`).Scan(&brandWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var modelWiseReport []entities.ModelWiseReport
@@ -164,8 +161,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 		`).Scan(&modelWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var sizeWiseReport []entities.SizeWiseReport
@@ -180,8 +176,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 		`).Scan(&sizeWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	for i := range sizeWiseReport {
@@ -204,8 +199,7 @@ func (repo *DashboardDataRepo) GetSalesReportFullTime() (
 		`).Scan(&revenueGraph)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	for i := range revenueGraph {
@@ -222,7 +216,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 	*[]entities.ModelWiseReport,
 	*[]entities.SizeWiseReport,
 	*[]entities.RevenueGraph,
-	error) {
+	*e.Error) {
 	var orderList []entities.SalesReportOrderList
 	query := repo.DB.Raw(`
 		SELECT
@@ -248,8 +242,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 	`, startDate, endDate).Scan(&orderList)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var sellerWiseReport []entities.SellerWiseReport
@@ -279,8 +272,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 		`, startDate, endDate).Scan(&sellerWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var brandWiseReport []entities.BrandWiseReport
@@ -309,8 +301,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 		`, startDate, endDate).Scan(&brandWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var modelWiseReport []entities.ModelWiseReport
@@ -339,8 +330,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 		`, startDate, endDate).Scan(&modelWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	var sizeWiseReport []entities.SizeWiseReport
@@ -357,8 +347,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 		`, startDate, endDate).Scan(&sizeWiseReport)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	for i := range sizeWiseReport {
@@ -382,8 +371,7 @@ func (repo *DashboardDataRepo) GetSalesReportBetweenDates(startDate time.Time, e
 		`, startDate, endDate).Scan(&revenueGraph)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. query.Error= ", query.Error, "\n----")
-		return nil, nil, nil, nil, nil, nil, query.Error
+		return nil, nil, nil, nil, nil, nil, &e.Error{Err: query.Error, StatusCode: 500}
 	}
 
 	for i := range revenueGraph {
