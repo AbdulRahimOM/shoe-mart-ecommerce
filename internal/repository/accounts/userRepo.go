@@ -52,7 +52,7 @@ func (repo *UserRepo) DoAddressExistsByID(id uint) (bool, *e.Error) {
 	}
 }
 
-func (repo *UserRepo) EditUserAddress(newAddress *entities.UserAddress) error {
+func (repo *UserRepo) EditUserAddress(newAddress *entities.UserAddress)*e.Error {
 	result := repo.DB.Model(&entities.UserAddress{}).Where("id = ?", newAddress.ID).Updates(newAddress)
 	if result.Error != nil {
 		return &e.Error{Err: result.Error, StatusCode: 500}
@@ -61,7 +61,7 @@ func (repo *UserRepo) EditUserAddress(newAddress *entities.UserAddress) error {
 	return nil
 }
 
-func (repo *UserRepo) AddUserAddress(newAddress *entities.UserAddress) error {
+func (repo *UserRepo) AddUserAddress(newAddress *entities.UserAddress)*e.Error {
 	result := repo.DB.Create(&newAddress)
 	if result.Error != nil {
 		return &e.Error{Err: result.Error, StatusCode: 500}
@@ -89,7 +89,7 @@ func (repo *UserRepo) DoAddressNameExists(name string) (bool, *e.Error) {
 	}
 }
 
-func (repo *UserRepo) UpdateUserStatus(email string, newStatus string) error {
+func (repo *UserRepo) UpdateUserStatus(email string, newStatus string)*e.Error {
 	var user entities.User
 	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
@@ -133,7 +133,7 @@ func (repo *UserRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 	return true, nil
 }
 
-func (repo *UserRepo) CreateUser(user *entities.User) error {
+func (repo *UserRepo) CreateUser(user *entities.User)*e.Error {
 	userCreation := repo.DB.Create(&user)
 	if userCreation.Error != nil {
 		return &e.Error{Err: userCreation.Error, StatusCode: 500}
@@ -142,7 +142,7 @@ func (repo *UserRepo) CreateUser(user *entities.User) error {
 }
 
 // DeleteUserAddress
-func (repo *UserRepo) DeleteUserAddress(id uint) error {
+func (repo *UserRepo) DeleteUserAddress(id uint)*e.Error {
 	result := repo.DB.Delete(&entities.UserAddress{}, id)
 	if result.Error != nil {
 		return &e.Error{Err: result.Error, StatusCode: 500}
@@ -223,7 +223,7 @@ func (repo *UserRepo) GetProfile(userID uint) (*entities.UserDetails, *e.Error) 
 }
 
 // EditProfile implements repository_interface.IUserRepo.
-func (repo *UserRepo) EditProfile(userID uint, req *request.EditProfileReq) error {
+func (repo *UserRepo) EditProfile(userID uint, req *request.EditProfileReq)*e.Error {
 
 	result := repo.DB.Model(&entities.User{}).Where("id = ?", userID).Updates(req)
 	if result.Error != nil {
@@ -264,7 +264,7 @@ func (repo *UserRepo) GetUserByEmail(email string) (*entities.User, *e.Error) {
 	return &user, nil
 }
 
-func (repo *UserRepo) ResetPassword(id uint, newPassword *string) error {
+func (repo *UserRepo) ResetPassword(id uint, newPassword *string)*e.Error {
 	result := repo.DB.Model(&entities.User{}).Where("id = ?", id).Update("password", newPassword)
 	if result.Error != nil {
 		return &e.Error{Err: result.Error, StatusCode: 500}

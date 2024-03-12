@@ -24,34 +24,25 @@ func NewUserUseCase(repo repoInterface.IUserRepo) usecase.IUserUC {
 	return &UserUseCase{userRepo: repo}
 }
 
-func (uc *UserUseCase) SendOtp(phone string) error {
+func (uc *UserUseCase) SendOtp(phone string) *e.Error {
 	err := otpManager.SendOtp(phone)
 	if err != nil {
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "Error occured while sending otp"), StatusCode: 500}
 	}
 	return nil
 }
 
-func (uc *UserUseCase) VerifyOtp(phone string, email string, otp string) (bool, error) {
-	matchStatus, err := otpManager.VerifyOtp(phone, otp)
-	if err != nil {
-		fmt.Println("Error occured while verifying otp")
-		return false, err
-	}
-	if !matchStatus {
-		fmt.Println("otp mismatch")
-		return false, errors.New("otp mismatch")
+func (uc *UserUseCase) VerifyOtp(phone string, email string, otp string) (bool, *e.Error) {
+	if matchStatus, err := otpManager.VerifyOtp(phone, otp); err != nil {
+		return false, &e.Error{Err: err, StatusCode: 500}
+	} else if !matchStatus {
+		return false, nil
 	} else {
-		fmt.Println("otp matched")
-		err := uc.userRepo.UpdateUserStatus(email, "verified")
-		if err != nil {
-			fmt.Println("Error occured while updating user status")
-			return true, err
-		}
-		return true, nil
+		//otp matched!!!, update status
+		return true, uc.userRepo.UpdateUserStatus(email, "verified")
 	}
 }
-func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, error) {
+func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, *e.Error) {
 	// fmt.Println("req.email=", req.Email)
 	isEmailRegistered, err := uc.userRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -60,7 +51,7 @@ func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, error) {
 	}
 	if !(isEmailRegistered) {
 		fmt.Println("\n-- email is not registered\n.")
-		return nil, e.ErrEmailNotRegistered
+		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
 	}
 
 	//get userpassword from database
@@ -73,20 +64,20 @@ func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, error) {
 	//check for password
 	if hashpassword.CompareHashedPassword(userForToken.Password, req.Password) != nil {
 		fmt.Println("Password Mismatch")
-		return nil, e.ErrInvalidPassword
+		return nil, &e.Error{Err: e.ErrInvalidPassword, StatusCode: 400}
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("user", userForToken, time.Hour*24*30)
-	if err != nil {
-		return nil, err
+	tokenString, errr := jwttoken.GenerateToken("user", userForToken, time.Hour*24*30)
+	if errr != nil {
+		return nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 
 	// fmt.Println("token created + 'BNo error' is sending to handler layer")
 	return &tokenString, nil
 }
 
-func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, error) {
+func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, *e.Error) {
 	// fmt.Println("-----\nreq.email:", req.Email, "\n------")
 	emailAlreadyUsed, err := uc.userRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -95,13 +86,13 @@ func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, error) {
 	}
 	if emailAlreadyUsed {
 		fmt.Println("\n email is already used!!\n.")
-		return nil, e.ErrEmailAlreadyUsed
+		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
 	}
 
-	hashedPwd, err := hashpassword.Hashpassword(req.Password)
-	if err != nil {
-		fmt.Println("\n error while hashing pw. Error:)", err, "\n.")
-		return nil, err
+	hashedPwd, errr := hashpassword.Hashpassword(req.Password)
+	if errr != nil {
+		errr = errors.New("error while hashing pw. Error:)" + err.Error())
+		return nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 	fmt.Println("\n\n\n\nhashedpw=", hashedPwd)
 	var signingUser = entities.User{
@@ -116,7 +107,6 @@ func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, error) {
 
 	err = uc.userRepo.CreateUser(&signingUser)
 	if err != nil {
-		fmt.Println("\nUC: error recieved from ~repo.createuser()")
 		return nil, err
 	}
 
@@ -129,48 +119,39 @@ func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, error) {
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("user", userForToken, time.Hour*5)
-	if err != nil {
-		return nil, err
+	tokenString, errr := jwttoken.GenerateToken("user", userForToken, time.Hour*5)
+	if errr != nil {
+		return nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 	return &tokenString, nil
 }
 
-func (uc *UserUseCase) AddUserAddress(req *request.AddUserAddress) error {
+func (uc *UserUseCase) AddUserAddress(req *request.AddUserAddress) *e.Error {
 	//check if address name already exists
 	doAddressNameAlreadyExists, err := uc.userRepo.DoAddressNameExists(req.AddressName)
 	if err != nil {
-		fmt.Println("Error occured while checking if address name exists")
 		return err
 	}
 	if doAddressNameAlreadyExists {
-		fmt.Println("An address already exists for user")
-		return errors.New("address name already exists")
+		return &e.Error{Err: errors.New("address name already exists"), StatusCode: 400} //P-update
 	}
 	var address entities.UserAddress
 	if err := copier.Copy(&address, &req); err != nil {
-		fmt.Println("Error occured while copying request to cart entity")
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
 	}
 	//add address
-	if err := uc.userRepo.AddUserAddress(&address); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.userRepo.AddUserAddress(&address)
 }
 
 // EditUserAddress
-func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) error {
+func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) *e.Error {
 	//check if address name exists by ID
 	doAddressExistsByID, err := uc.userRepo.DoAddressExistsByID(req.ID)
 	if err != nil {
-		fmt.Println("Error occured while checking if address name exists")
 		return err
 	}
 	if !doAddressExistsByID {
-		fmt.Println("Address ID doesn't exist")
-		return errors.New("address ID doesn't exist")
+		return &e.Error{Err: errors.New("address ID doesn't exist"), StatusCode: 400}
 	}
 
 	//check if userid is not changed
@@ -180,8 +161,7 @@ func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) error {
 		return err
 	}
 	if userID != req.UserID {
-		fmt.Println("UserID is not same, Corrupt request")
-		return errors.New("UserID is not same, Corrupt request")
+		return &e.Error{Err: errors.New("UserID is not same, Corrupt request"), StatusCode: 401}
 	}
 
 	//get old address name
@@ -194,30 +174,23 @@ func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) error {
 		//check if AddressNameExistsForAnotherAddressOfUser,
 		doAddressNameAlreadyExists, err := uc.userRepo.DoAddressNameExists(req.AddressName)
 		if err != nil {
-			fmt.Println("Error occured while checking if address name already exists for another address")
 			return err
 		}
 		if doAddressNameAlreadyExists {
-			fmt.Println("An address already exists for user's another address")
-			return errors.New("address name already exists for user's another address")
+			return &e.Error{Err: errors.New("address name already exists for user's another address"), StatusCode: 400}
 		}
 	}
 
 	var address entities.UserAddress
 	if err := copier.Copy(&address, &req); err != nil {
-		fmt.Println("Error occured while copying request to cart entity")
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
 	}
 	//edit address
-	if err := uc.userRepo.EditUserAddress(&address); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.userRepo.EditUserAddress(&address)
 }
 
 // DeleteUserAddress
-func (uc *UserUseCase) DeleteUserAddress(req *request.DeleteUserAddress) error {
+func (uc *UserUseCase) DeleteUserAddress(req *request.DeleteUserAddress) *e.Error {
 	//check if address exists by ID
 	doAddressExistsByID, err := uc.userRepo.DoAddressExistsByID(req.ID)
 	if err != nil {
@@ -225,8 +198,7 @@ func (uc *UserUseCase) DeleteUserAddress(req *request.DeleteUserAddress) error {
 		return err
 	}
 	if !doAddressExistsByID {
-		fmt.Println("Address ID doesn't exist")
-		return errors.New("address ID doesn't exist")
+		return &e.Error{Err: errors.New("address ID doesn't exist"), StatusCode: 400}
 	}
 
 	//check if userid is conforming
@@ -236,67 +208,46 @@ func (uc *UserUseCase) DeleteUserAddress(req *request.DeleteUserAddress) error {
 		return err
 	}
 	if userID != req.UserID {
-		fmt.Println("UserID is not same, Corrupt request")
-		return errors.New("UserID is not same, Corrupt request")
+		return &e.Error{Err: errors.New("UserID is not same, Corrupt request"), StatusCode: 401}
 	}
 
 	//delete address
-	if err := uc.userRepo.DeleteUserAddress(req.ID); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.userRepo.DeleteUserAddress(req.ID)
 }
 
 // GetUserAddresses
-func (uc *UserUseCase) GetUserAddresses(userID uint) (*[]entities.UserAddress, error) {
+func (uc *UserUseCase) GetUserAddresses(userID uint) (*[]entities.UserAddress, *e.Error) {
 	//check if user exists //this is required because if user is deleted from records, jwt token may not have expired.
 	doUserExists, err := uc.userRepo.DoUserExistsByID(userID)
 	if err != nil {
-		fmt.Println("Error occured while checking if user exists")
 		return nil, err
 	}
 	if !doUserExists {
-		fmt.Println("User ID doesn't exist")
-		return nil, errors.New("user ID doesn't exist")
+		return nil, &e.Error{Err: errors.New("user ID doesn't exist"), StatusCode: 400}
 	}
 
 	//get user addresses
-	addresses, err := uc.userRepo.GetUserAddresses(userID)
-	if err != nil {
-		fmt.Println("Error occured while getting user addresses")
-		return nil, err
-	}
-
-	return addresses, nil
+	return uc.userRepo.GetUserAddresses(userID)
 }
 
 // GetProfile
-func (uc *UserUseCase) GetProfile(userID uint) (*entities.UserDetails, error) {
+func (uc *UserUseCase) GetProfile(userID uint) (*entities.UserDetails, *e.Error) {
 	//check if user exists //this is required because if user is deleted from records, jwt token may not have expired.
 	doUserExists, err := uc.userRepo.DoUserExistsByID(userID)
 	if err != nil {
-		fmt.Println("Error occured while checking if user exists")
 		return nil, err
 	}
 	if !doUserExists {
 		fmt.Println("User ID doesn't exist")
-		return nil, errors.New("user ID doesn't exist")
+		return nil, &e.Error{Err: errors.New("user ID doesn't exist"), StatusCode: 400}
 	}
 
 	//get user profile
-	var user *entities.UserDetails
-	user, err = uc.userRepo.GetProfile(userID)
-	if err != nil {
-		fmt.Println("Error occured while getting user profile")
-		return nil, err
-	}
-
-	return user, nil
+	return uc.userRepo.GetProfile(userID)
 }
 
 // EditProfile
-func (uc *UserUseCase) EditProfile(userID uint, req *request.EditProfileReq) error {
+func (uc *UserUseCase) EditProfile(userID uint, req *request.EditProfileReq) *e.Error {
 	//check if user exists //this is required because if user is deleted from records, jwt token may not have expired.
 	doUserExists, err := uc.userRepo.DoUserExistsByID(userID)
 	if err != nil {
@@ -304,8 +255,7 @@ func (uc *UserUseCase) EditProfile(userID uint, req *request.EditProfileReq) err
 		return err
 	}
 	if !doUserExists {
-		fmt.Println("User ID doesn't exist")
-		return errors.New("user ID doesn't exist")
+		return &e.Error{Err: errors.New("user ID doesn't exist"), StatusCode: 400}
 	}
 
 	//check if email is not changed
@@ -322,21 +272,16 @@ func (uc *UserUseCase) EditProfile(userID uint, req *request.EditProfileReq) err
 			return err
 		}
 		if doEmailAlreadyExists {
-			fmt.Println("Email already exists for another user")
-			return errors.New("email already exists for another user")
+			return &e.Error{Err: errors.New("email already exists for another user"), StatusCode: 400}
 		}
 	}
 
 	//edit profile
-	if err := uc.userRepo.EditProfile(userID, req); err != nil {
-		return err
-	}
-
-	return nil
+	return uc.userRepo.EditProfile(userID, req)
 }
 
 // GetUserPhoneByEmail
-func (uc *UserUseCase) GetUserByEmail(email string) (*entities.User, error) {
+func (uc *UserUseCase) GetUserByEmail(email string) (*entities.User, *e.Error) {
 	//check if email is registered
 	doEmailExist, err := uc.userRepo.IsEmailRegistered(email)
 	if err != nil {
@@ -345,23 +290,16 @@ func (uc *UserUseCase) GetUserByEmail(email string) (*entities.User, error) {
 	}
 	if !doEmailExist {
 		fmt.Println("Email doesn't exist")
-		return nil, errors.New("email doesn't exist")
+		return nil, &e.Error{Err: errors.New("email doesn't exist"), StatusCode: 400}
 	}
 
 	//get user
-	var user *entities.User
-	user, err = uc.userRepo.GetUserByEmail(email)
-	if err != nil {
-		fmt.Println("Error occured while getting user phone")
-		return nil, err
-	}
-
-	return user, nil
+	return uc.userRepo.GetUserByEmail(email)
 }
 
-func (uc *UserUseCase) SendOtpForPWChange(user *entities.User) (*string, error) {
+func (uc *UserUseCase) SendOtpForPWChange(user *entities.User) (*string, *e.Error) {
 	if err := otpManager.SendOtp(user.Phone); err != nil {
-		return nil, err
+		return nil, &e.Error{Err: err, StatusCode: 500}
 	}
 	resetPWClaims := struct {
 		ID     uint
@@ -372,22 +310,21 @@ func (uc *UserUseCase) SendOtpForPWChange(user *entities.User) (*string, error) 
 		Phone:  user.Phone,
 		Status: "PW change requested, otp not verified",
 	}
-	tokenString, err := jwttoken.GenerateToken("user", resetPWClaims, time.Minute*5)
-	if err != nil {
-		return nil, err
+	tokenString, errr := jwttoken.GenerateToken("user", resetPWClaims, time.Minute*5)
+	if errr != nil {
+		return nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 
 	return &tokenString, nil
 }
-func (uc *UserUseCase) VerifyOtpForPWChange(id uint, phone string, otp string) (bool, *string, error) {
+func (uc *UserUseCase) VerifyOtpForPWChange(id uint, phone string, otp string) (bool, *string, *e.Error) {
 	matchStatus, err := otpManager.VerifyOtp(phone, otp)
 	if err != nil {
 		fmt.Println("Error occured while verifying otp")
-		return false, nil, err
+		return false, nil, &e.Error{Err: err, StatusCode: 500}
 	}
 	if !matchStatus {
-		fmt.Println("otp mismatch")
-		return false, nil, errors.New("otp mismatch")
+		return false, nil, nil
 	}
 	resetPWClaims := struct {
 		ID     uint
@@ -398,22 +335,19 @@ func (uc *UserUseCase) VerifyOtpForPWChange(id uint, phone string, otp string) (
 		Phone:  phone,
 		Status: "PW change requested, otp verified",
 	}
-	tokenString, err := jwttoken.GenerateToken("user", resetPWClaims, time.Minute*60)
-	if err != nil {
-		return false, nil, err
+	tokenString, errr := jwttoken.GenerateToken("user", resetPWClaims, time.Minute*60)
+	if errr != nil {
+		return false, nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 	return true, &tokenString, nil
 
 }
 
-func (uc *UserUseCase) ResetPassword(id uint, newPassword *string) error {
+func (uc *UserUseCase) ResetPassword(id uint, newPassword *string) *e.Error {
 	hashedPwd, err := hashpassword.Hashpassword(*newPassword)
 	if err != nil {
 		fmt.Println("\n error while hashing pw. Error:)", err, "\n.")
-		return err
+		return &e.Error{Err: err, StatusCode: 500}
 	}
-	if err := uc.userRepo.ResetPassword(id, &hashedPwd); err != nil {
-		return err
-	}
-	return nil
+	return uc.userRepo.ResetPassword(id, &hashedPwd)
 }

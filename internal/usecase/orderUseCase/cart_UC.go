@@ -1,13 +1,13 @@
 package orderusecase
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	repo "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/copier"
 )
@@ -20,93 +20,67 @@ func NewCartUseCase(cartRepo repo.ICartRepo) usecase.ICartUC {
 	return &CartUseCase{cartRepo: cartRepo}
 }
 
-func (uc *CartUseCase) DeleteFromCart(req *request.DeleteFromCartReq) error {
+func (uc *CartUseCase) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 	var cart entities.Cart
 	if err := copier.Copy(&cart, &req); err != nil {
-		fmt.Println("Error occured while copying request to cart entity")
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
 	}
 	//check if the product exists
 	DoProductExists, quantityIfExist, err := uc.cartRepo.DoProductExistAlready(&cart)
 	if err != nil {
-		fmt.Println("Error occured while checking if product exists in cart")
 		return err
 	}
 	if !DoProductExists {
-		return errors.New("product doesn't exist in cart")
+		return &e.Error{Err: errors.New("product doesn't exist in cart"), StatusCode: 400}
 	}
 	if quantityIfExist == 1 {
 		//delete product from cart
-		err = uc.cartRepo.DeleteFromCart(req)
-		if err != nil {
-			fmt.Println("Error occured while deleting product from cart")
-			return err
-		}
-	} else if quantityIfExist > 1 {
+		return uc.cartRepo.DeleteFromCart(req)
+	} else { //case: quantityIfExist > 1 {
 		//decrease quantity
 		cart.Quantity = quantityIfExist - 1
-		err = uc.cartRepo.UpdateCartItemQuantity(&cart)
-		if err != nil {
-			fmt.Println("Error occured while decreasing quantity")
-			return err
-		}
+		return uc.cartRepo.UpdateCartItemQuantity(&cart)
 	}
-
-	return nil
 }
 
-func (uc *CartUseCase) GetCart(userID uint) (*[]response.ResponseCartItems, float32, error) {
+func (uc *CartUseCase) GetCart(userID uint) (*[]response.ResponseCartItems, float32, *e.Error) {
 	var responseCart []response.ResponseCartItems
 
 	cart, totalValue, err := uc.cartRepo.GetCart(userID)
 	if err != nil {
-		fmt.Println("Error occured while getting cart")
 		return &responseCart, totalValue, err
 	}
 
 	if err := copier.Copy(&responseCart, &cart); err != nil {
-		fmt.Println("Error occured while copying cart to response cart")
-		return nil, totalValue, err
+		return nil, totalValue, &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
 	}
 
 	return &responseCart, totalValue, nil
 }
 
-func (c *CartUseCase) AddToCart(req *request.AddToCartReq) error {
+func (c *CartUseCase) AddToCart(req *request.AddToCartReq) *e.Error {
 	var cart entities.Cart
 	if err := copier.Copy(&cart, &req); err != nil {
-		fmt.Println("Error occured while copying request to cart entity")
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
 	}
 
 	//check if the product already exists
 	DoProductExists, quantityIfExist, err := c.cartRepo.DoProductExistAlready(&cart)
 	if err != nil {
-		fmt.Println("Error occured while checking if product exists in cart")
 		return err
 	}
 	if DoProductExists {
 		cart.Quantity = quantityIfExist + 1
 		//add quantity
-		err = c.cartRepo.UpdateCartItemQuantity(&cart)
-		if err != nil {
-			fmt.Println("Error occured while adding quantity")
-			return err
-		}
-		return nil
+		return c.cartRepo.UpdateCartItemQuantity(&cart)
 	} else {
 		//add product to cart
 		cart.Quantity = 1
-		err = c.cartRepo.AddToCart(&cart)
-		if err != nil {
-			fmt.Println("Error occured while adding product to cart")
-			return err
-		}
-		return nil
+		return c.cartRepo.AddToCart(&cart)
 	}
 }
 
 // ClearCart
-func (uc *CartUseCase) ClearCartOfUser(userID uint) error {
+func (uc *CartUseCase) ClearCartOfUser(userID uint) *e.Error {
 	return uc.cartRepo.ClearCartOfUser(userID)
 }

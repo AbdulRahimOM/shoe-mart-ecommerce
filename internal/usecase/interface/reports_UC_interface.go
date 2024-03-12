@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	response "MyShoo/internal/models/responseModels"
 	"time"
@@ -8,30 +9,30 @@ import (
 
 type ReportsUC interface {
 	// GetDashBoardData returns a dashboard data for a given date range
-	GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataBetweenDates(startDate time.Time, endDate time.Time) (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataLastYear() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataThisYear() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataLastMonth() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataThisMonth() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataLastWeek() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataThisWeek() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataYesterday() (*entities.DashboardData, *[]entities.SalePerDay, error)
-	GetDashBoardDataToday() (*entities.DashboardData, *[]entities.SalePerDay, error)
+	GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataBetweenDates(startDate time.Time, endDate time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataLastYear() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataThisYear() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataLastMonth() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataThisMonth() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataLastWeek() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataThisWeek() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataYesterday() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
+	GetDashBoardDataToday() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
 
-	ExportSalesReportFullTime() (string, error)
-	ExportSalesReportBetweenDates(startDate time.Time, endDate time.Time) (string, error)
-	ExportSalesReportThisMonth() (string, error)
-	ExportSalesReportLastMonth() (string, error)
-	ExportSalesReportThisYear() (string, error)
-	ExportSalesReportLastYear() (string, error)
-	ExportSalesReportThisWeek() (string, error)
-	ExportSalesReportLastWeek() (string, error)
-	ExportSalesReportToday() (string, error)
-	ExportSalesReportYesterday() (string, error)
+	ExportSalesReportFullTime() (*string, *e.Error)
+	ExportSalesReportBetweenDates(startDate time.Time, endDate time.Time) (*string, *e.Error)
+	ExportSalesReportThisMonth() (*string, *e.Error)
+	ExportSalesReportLastMonth() (*string, *e.Error)
+	ExportSalesReportThisYear() (*string, *e.Error)
+	ExportSalesReportLastYear() (*string, *e.Error)
+	ExportSalesReportThisWeek() (*string, *e.Error)
+	ExportSalesReportLastWeek() (*string, *e.Error)
+	ExportSalesReportToday() (*string, *e.Error)
+	ExportSalesReportYesterday() (*string, *e.Error)
 
-	GetTopProducts(limit int) (*[]response.TopProducts, error)
-	GetTopSellers(limit int) (*[]response.TopSellers, error)
-	GetTopBrands(limit int) (*[]response.TopBrands, error)
-	GetTopModels(limit int) (*[]response.TopModels, error)
+	GetTopProducts(limit int) (*[]response.TopProducts, *e.Error)
+	GetTopSellers(limit int) (*[]response.TopSellers, *e.Error)
+	GetTopBrands(limit int) (*[]response.TopBrands, *e.Error)
+	GetTopModels(limit int) (*[]response.TopModels, *e.Error)
 }

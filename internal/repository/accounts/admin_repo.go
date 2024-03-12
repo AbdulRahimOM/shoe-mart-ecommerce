@@ -68,7 +68,7 @@ func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) {
 	return &sellersList, nil
 }
 
-func (repo *AdminRepo) UpdateUserStatus(email string, newStatus string) error {
+func (repo *AdminRepo) UpdateUserStatus(email string, newStatus string)*e.Error {
 	var user entities.User
 	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
@@ -78,7 +78,7 @@ func (repo *AdminRepo) UpdateUserStatus(email string, newStatus string) error {
 	return nil
 }
 
-func (repo *AdminRepo) UpdateSellerStatus(email string, newStatus string) error {
+func (repo *AdminRepo) UpdateSellerStatus(email string, newStatus string)*e.Error {
 	var seller entities.Seller
 	err := repo.DB.Model(&seller).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
@@ -157,7 +157,7 @@ func (repo *AdminRepo) IsEmailRegisteredAsAdmin(email string) (bool, *e.Error) {
 	return true, nil
 }
 
-func (repo *AdminRepo) CreateAdmin(admin *entities.Admin) error {
+func (repo *AdminRepo) CreateAdmin(admin *entities.Admin)*e.Error {
 	adminCreation := repo.DB.Create(&admin)
 	if adminCreation.Error != nil {
 		return &e.Error{Err: adminCreation.Error, StatusCode: 500}
@@ -166,7 +166,7 @@ func (repo *AdminRepo) CreateAdmin(admin *entities.Admin) error {
 }
 
 // VerifySeller
-func (repo *AdminRepo) VerifySeller(id uint) error {
+func (repo *AdminRepo) VerifySeller(id uint)*e.Error {
 	err := repo.DB.Model(&entities.Seller{}).Where("id = ?", id).Update("status", "verified").Error
 	if err != nil {
 		return &e.Error{Err: err, StatusCode: 500}

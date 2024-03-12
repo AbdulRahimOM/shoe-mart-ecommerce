@@ -1,34 +1,28 @@
 package productusecase
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/copier"
 )
 
-func (uc *ProductsUC) AddDimensionalVariant(req *request.AddDimensionalVariantReq) error {
+func (uc *ProductsUC) AddDimensionalVariant(req *request.AddDimensionalVariantReq) *e.Error {
 	var dimensionalVariant entities.DimensionalVariant
 	if err := copier.Copy(&dimensionalVariant, &req); err != nil {
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to dimensionalVariant entity"), StatusCode: 500}
 	}
 	//check if the dimensionalVariant already exists
 	doDimensionalVariantExists, err := uc.ProductsRepo.DoDimensionalVariantExistsByAttributes(&dimensionalVariant)
 	if err != nil {
-		fmt.Println("Error occured while checking if dimensionalVariant exists")
 		return err
 	}
 	if doDimensionalVariantExists {
-		return errors.New("dimensionalVariant already exists")
+		return &e.Error{Err: errors.New("dimensionalVariant already exists"), StatusCode: 400}
 	}
 
 	//add dimensionalVariant and its product combinations
-	err = uc.ProductsRepo.AddDimensionalVariantAndProductCombinations(&dimensionalVariant)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return uc.ProductsRepo.AddDimensionalVariantAndProductCombinations(&dimensionalVariant)
 }

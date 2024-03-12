@@ -25,57 +25,53 @@ func NewPaymentUseCase(
 }
 
 // VerifyPayment implements usecase.IPaymentUC.
-func (uc *PaymentUC) VerifyPayment(req *request.VerifyPaymentReq) (bool, *entities.Order, string, error) {
+func (uc *PaymentUC) VerifyPayment(req *request.VerifyPaymentReq) (bool, *entities.Order, *e.Error) {
 	//verify payment
 	isPaymentValid := services.VerifyPayment(req.RazorpayOrderID, req.RazorpayPaymentID, req.RazorpaySignature)
 	if !isPaymentValid {
-		return false, nil, "Payment failed", nil
+		return false, nil, nil
 	}
 
 	//get orderID from orders table with transactionID=razorpayOrderID
 	orderID, err := uc.orderRepo.GetOrderByTransactionID(req.RazorpayOrderID)
 	if err != nil {
-		return false, nil, "Some error occured while fetching order details", err
+		return false, nil, err
 	}
 
 	//UpdateOrderToPaid_UpdateStock_ClearCart
 	order, err := uc.orderRepo.UpdateOrderToPaid_UpdateStock_ClearCart(orderID)
 	if err != nil {
-		return false, nil, "", err
+		return false, nil, err
 	}
 
-	return true, order, "Hoorray!!.. Payment recieved. Your order is placed.", nil
+	return true, order, nil
 }
 
 // RetryPayment(req *request.RetryPaymentReq) (*req.ProceedToPaymentReq, string, error)
-func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*request.ProceedToPaymentReq, string, error) {
+func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*request.ProceedToPaymentReq, *e.Error) {
 	//check if order belongs to user
 	userIDOfOrder, err := uc.orderRepo.GetUserIDByOrderID(req.OrderID)
 	if err != nil {
-		if err.Error() == "record not found" {
-			return nil, msg.InvalidRequest, e.ErrOrderIDDoesNotExist
-		} else {
-			return nil, "Error from repo", err
-		}
+		return nil, err
 	} else {
 		if userIDOfOrder != userID {
-			return nil, msg.InvalidRequest, e.ErrOrderNotOfUser
+			// return nil,  e.ErrOrderNotOfUser
+			return nil, &e.Error{Err: errors.New("OrderNotOfUser"), StatusCode: 400}
 		}
 	}
 
 	//get order details
 	order, err := uc.orderRepo.GetOrderSummaryByID(req.OrderID)
 	if err != nil {
-		return nil, "Error from repo", err
+		return nil, err
 	}
 
 	//check if payment method is online and order is not paid
 	if order.Status != "payment pending" {
-		return nil, msg.InvalidRequest, errors.New("order payment status is not 'payment pending'")
+		return nil, &e.Error{Err: errors.New("order payment status is not 'payment pending'"), StatusCode: 400}
 	} else {
-		order.TransactionID, err = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo)
-		if err != nil {
-			return nil, "Service error", err
+		if order.TransactionID, err = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo);err != nil {
+			return nil, &e.Error{Err: errors.New("Service error"), StatusCode: 500}
 		}
 
 		//update order with transactionID

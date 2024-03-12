@@ -2,9 +2,11 @@ package reportsusecases
 
 import (
 	"MyShoo/internal/config"
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -25,16 +27,11 @@ func NewReportsUseCase(reportsRepo repoInterface.IReportsRepo, orderRepo repoInt
 	}
 }
 
-func (uc *ReportsUseCase) ExportSalesReportFullTime() (string, error) {
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportFullTime())
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+func (uc *ReportsUseCase) ExportSalesReportFullTime() (*string, *e.Error) {
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportFullTime())
 }
 
-func (uc *ReportsUseCase) ExportSalesReportLastMonth() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportLastMonth() (*string, *e.Error) {
 	var start, end time.Time
 	if time.Now().Month() == 1 {
 		start = time.Date(time.Now().Year()-1, 12, 1, 0, 0, 0, 0, time.Now().Location())
@@ -42,102 +39,56 @@ func (uc *ReportsUseCase) ExportSalesReportLastMonth() (string, error) {
 		start = time.Date(time.Now().Year(), time.Now().Month()-1, 1, 0, 0, 0, 0, time.Now().Location())
 	}
 	end = start.AddDate(0, 1, 0)
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportLastWeek() (string, error) {
-	var url string
+func (uc *ReportsUseCase) ExportSalesReportLastWeek() (*string, *e.Error) {
 	lastWeekSundayThisTime := time.Now().AddDate(0, 0, -int(time.Now().Weekday()-7)) //need this to prevent negative day
 	start := time.Date(lastWeekSundayThisTime.Year(), lastWeekSundayThisTime.Month(), lastWeekSundayThisTime.Day(), 0, 0, 0, 0, time.Now().Location())
 	end := start.AddDate(0, 0, 7)
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
 }
-func (uc *ReportsUseCase) ExportSalesReportLastYear() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportLastYear() (*string, *e.Error) {
 	now := time.Now()
 	start := time.Date(now.Year()-1, 1, 1, 0, 0, 0, 0, now.Location())
 	end := start.AddDate(1, 0, 0)
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportThisMonth() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportThisMonth() (*string, *e.Error) {
 	now := time.Now()
 	start := time.Date(now.Year(), now.Month(), 1, 0, 0, 0, 0, now.Location())
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportThisWeek() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportThisWeek() (*string, *e.Error) {
 	now := time.Now()
 	thisWeekSundayThisTime := now.AddDate(0, 0, -int(now.Weekday())) //need this to prevent negative day
 	start := time.Date(thisWeekSundayThisTime.Year(), thisWeekSundayThisTime.Month(), thisWeekSundayThisTime.Day(), 0, 0, 0, 0, now.Location())
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportThisYear() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportThisYear() (*string, *e.Error) {
 	now := time.Now()
 	start := time.Date(now.Year(), 1, 1, 0, 0, 0, 0, now.Location())
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportToday() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportToday() (*string, *e.Error) {
 	now := time.Now()
 	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, now))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportYesterday() (string, error) {
+func (uc *ReportsUseCase) ExportSalesReportYesterday() (*string, *e.Error) {
 	now := time.Now()
 	end := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 	start := end.AddDate(0, 0, -1)
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(start, end))
 }
 
-func (uc *ReportsUseCase) ExportSalesReportBetweenDates(startDate time.Time, endDate time.Time) (string, error) {
-	url, err := uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(startDate, endDate))
-	if err != nil {
-		fmt.Println("error:", err)
-		return "", err
-	}
-	return url, nil
+func (uc *ReportsUseCase) ExportSalesReportBetweenDates(startDate time.Time, endDate time.Time) (*string, *e.Error) {
+	return uc.processAdminExcelReport(uc.reportsRepo.GetSalesReportBetweenDates(startDate, endDate))
 }
 
 func (uc *ReportsUseCase) processAdminExcelReport(
@@ -147,25 +98,20 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 	modelWiseReport *[]entities.ModelWiseReport,
 	sizeWiseReport *[]entities.SizeWiseReport,
 	revenueGraph *[]entities.RevenueGraph,
-	err error,
-) (string, error) {
-
-	var url string
+	err *e.Error,
+) (*string, *e.Error) {
 	if err != nil {
-		fmt.Println("Error getting sales report:", err)
-		return "", err
+		return nil, err
 	}
 	filePath := filepath.Join(config.ExecutableDir, "internal/templates/TemplateExcel.xlsx")
-	file, err := excelize.OpenFile(filePath)
-	if err != nil {
-		fmt.Println("Error opening template:", err)
-		return "", err
+	file, errr := excelize.OpenFile(filePath)
+	if errr != nil {
+		return nil, &e.Error{Err: errors.New("Error opening template:" + errr.Error()), StatusCode: 500}
 	}
 
-	_, err = file.NewSheet("All Orders")
-	if err != nil {
-		fmt.Println(err)
-		return "", err
+	_, errr = file.NewSheet("All Orders")
+	if errr != nil {
+		return nil, &e.Error{Err: errors.New("Error creating new sheet:" + errr.Error()), StatusCode: 500}
 	}
 
 	// Set value of title cells
@@ -254,8 +200,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 			},
 		},
 	}); err != nil {
-		fmt.Println("error occured while creating chart:", err)
-		return "", err
+		return nil, &e.Error{Err: errors.New("error occured while creating chart:" + err.Error()), StatusCode: 500}
 	}
 
 	for i, revenueData := range *revenueGraph {
@@ -266,28 +211,21 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 
 	// Save the Excel file in the temporary directory
 	tempFilePath := filepath.Join(os.TempDir(), "output.xlsx")
-	err = file.SaveAs(tempFilePath)
+	errr = file.SaveAs(tempFilePath)
 	defer os.Remove(tempFilePath)
-	if err != nil {
-		fmt.Println("Error saving Excel file:-", err)
-		return "", err
+	if errr != nil {
+		return nil, &e.Error{Err: errors.New("error saving excel file:" + errr.Error()), StatusCode: 500}
 	}
 
 	if config.ShouldUploadExcel {
-		url, err = uc.reportsRepo.UploadSalesReportExcel(tempFilePath, "myrange")
-		if err != nil {
-			fmt.Println("Error uploading Excel file:", err)
-			return "", err
-		}
-		return url, nil
+		return uc.reportsRepo.UploadSalesReportExcel(tempFilePath, "myrange")
 	} else {
 		// Saving the Excel file locally (for dev/testing purposes)
 		localUrl := filepath.Join(config.ExecutableDir, "testKit/salesReportOutput.xlsx")
-		if err := file.SaveAs(localUrl); err != nil {
-			fmt.Println("Error saving Excel file:", err)
-			return "", err
+		if errr = file.SaveAs(localUrl); errr != nil {
+			return nil, &e.Error{Err: errors.New("error saving excel file:" + errr.Error()), StatusCode: 500}
 		} else {
-			return localUrl, nil
+			return &localUrl, nil
 		}
 	}
 }

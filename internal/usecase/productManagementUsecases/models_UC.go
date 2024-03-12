@@ -1,11 +1,12 @@
 package productusecase
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
-	"fmt"
+	"errors"
 
 	"github.com/jinzhu/copier"
 )
@@ -18,57 +19,37 @@ func NewModelUseCase(repo repoInterface.IModelsRepo) usecase.IModelsUC {
 	return &ModelsUC{ModelsRepo: repo}
 }
 
-func (uc *ModelsUC) AddModel(req *request.AddModelReq) error {
+func (uc *ModelsUC) AddModel(req *request.AddModelReq) *e.Error {
 	var model entities.Models
 	if err := copier.Copy(&model, &req); err != nil {
-		fmt.Println("Error occured while copying request to model")
-		return err
+		return &e.Error{Err: errors.New(err.Error() + "error occured while copying request to model entity"), StatusCode: 500}
 	}
 
 	//check if the model already exists
 	doModelExists, err := uc.ModelsRepo.DoModelExistsbyName(req.Name)
 	if err != nil {
-		fmt.Println("Error occured while checking if model exists")
 		return err
 	}
 	if doModelExists {
-		return fmt.Errorf("model already exists")
+		return &e.Error{Err: errors.New("model already exists"), StatusCode: 400}
 	}
 
 	//add model
-	err = uc.ModelsRepo.AddModel(&model)
-	if err != nil {
-		fmt.Println("Error occured while adding model")
-		return err
-	}
-	return nil
+	return uc.ModelsRepo.AddModel(&model)
 }
 
-func (uc *ModelsUC) EditModelName(req *request.EditModelReq) error {
+func (uc *ModelsUC) EditModelName(req *request.EditModelReq) *e.Error {
 	//check if the model exists
 	if doModelExists, err := uc.ModelsRepo.DoModelExistsByID(req.ID); err != nil {
-		fmt.Println("Error occured while checking if model exists")
 		return err
 	} else if !doModelExists {
-		return fmt.Errorf("model doesn't exist")
+		return &e.Error{Err: errors.New("model doesn't exist"), StatusCode: 400}
 	}
 
 	//edit model name
-	err := uc.ModelsRepo.EditModel(req)
-	if err != nil {
-		fmt.Println("Error occured while editing model name")
-		return err
-	}
-
-	return nil
+	return uc.ModelsRepo.EditModel(req)
 }
 
-func (uc *ModelsUC) GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, error) {
-	var models *[]entities.Models
-	models, err := uc.ModelsRepo.GetModelsByBrandsAndCategories(brandExists, brandIDInts, categoryExists, categoryIDInts)
-	if err != nil {
-		fmt.Println("Error occured while getting models list")
-		return nil, err
-	}
-	return models, nil
+func (uc *ModelsUC) GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, *e.Error) {
+	return uc.ModelsRepo.GetModelsByBrandsAndCategories(brandExists, brandIDInts, categoryExists, categoryIDInts)
 }

@@ -21,16 +21,14 @@ func NewSellerUseCase(repo repoInterface.ISellerRepo) usecase.ISellerUC {
 	return &SellerUseCase{sellerRepo: repo}
 }
 
-func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, error) {
+func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, *e.Error) {
 	// fmt.Println("req.email=", req.Email)
 	isEmailRegistered, err := uc.sellerRepo.IsEmailRegistered(req.Email)
 	if err != nil {
-		fmt.Println("Error occured while searching email, error:", err)
 		return nil, err
 	}
 	if !(isEmailRegistered) {
-		fmt.Println("\n-- email is not registered\n.")
-		return nil, e.ErrEmailNotRegistered
+		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
 	}
 
 	//get sellerpassword from database
@@ -43,19 +41,19 @@ func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, error) {
 	//check for password
 	if hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password) != nil {
 		fmt.Println("Password Mismatch")
-		return nil, e.ErrInvalidPassword
+		return nil, &e.Error{Err: e.ErrInvalidPassword,StatusCode: 400}
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*24*30)
-	if err != nil {
-		return nil, err
+	tokenString, errr := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*24*30)
+	if errr != nil {
+		return nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 	// fmt.Println("token created + 'BNo error' is sending to handler layer")
 	return &tokenString, nil
 }
 
-func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, error) {
+func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, *e.Error) {
 	// fmt.Println("-----\nreq.email:", req.Email, "\n------")
 	emailAlreadyUsed, err := uc.sellerRepo.IsEmailRegistered(req.Email)
 	if err != nil {
@@ -64,11 +62,11 @@ func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, error) {
 	}
 	if emailAlreadyUsed {
 		fmt.Println("\n email is already used!!\n.")
-		return nil, e.ErrEmailAlreadyUsed
+		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
 	}
 
-	hashedPwd, err := hashpassword.Hashpassword(req.Password)
-	if err != nil {
+	hashedPwd, errr := hashpassword.Hashpassword(req.Password)
+	if errr != nil {
 		fmt.Println("\n error while hashing pw. Error:)", err, "\n.")
 		return nil, err
 	}
@@ -103,9 +101,9 @@ func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, error) {
 	}
 
 	//generate token
-	tokenString, err := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*5)
-	if err != nil {
-		return nil, err
+	tokenString, errr := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*5)
+	if errr != nil {
+		return nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 	// fmt.Println("token created + 'BNo error' is sending to handler layer")
 	return &tokenString, nil

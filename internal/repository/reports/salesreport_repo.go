@@ -26,7 +26,7 @@ func NewReportRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInt
 	}
 }
 
-func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabel string) (string, *e.Error) {
+func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabel string) (*string, *e.Error) {
 	uploadParams := uploader.UploadParams{
 		Folder:    "MyShoo/adminreports",
 		PublicID:  rangeLabel + "ReportForAdmin",
@@ -34,14 +34,14 @@ func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabe
 	}
 	result, err := repo.Cld.Upload.Upload(context.Background(), filePath, uploadParams)
 	if err != nil {
-		return "", &e.Error{Err: errors.New("error while uploading file to cloudinary. err: " + err.Error()), StatusCode: 500}
+		return nil, &e.Error{Err: errors.New("error while uploading file to cloudinary. err: " + err.Error()), StatusCode: 500}
 	}
 
 	if result.Error.Message != "" {
-		return "", &e.Error{Err: errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message), StatusCode: 500}
+		return nil, &e.Error{Err: errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message), StatusCode: 500}
 	}
 
-	return result.SecureURL, nil
+	return &result.SecureURL, nil
 }
 
 func (repo *DashboardDataRepo) GetSalesReportFullTime() (

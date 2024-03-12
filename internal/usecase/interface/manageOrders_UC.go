@@ -31,8 +31,8 @@ type IOrderUC interface {
 
 	//returns orderInfo, message, *e.Error
 	MakeOrder(req *request.MakeOrderReq) (*entities.OrderInfo, *response.ProceedToPaymentInfo, *e.Error)
-	GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, string, *e.Error)
-	GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, string, *e.Error)
+	GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo,  *e.Error)
+	GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, *e.Error)
 	CancelOrderByUser(orderID uint, userID uint) *e.Error
 	CancelOrderByAdmin(orderID uint) *e.Error
 	ReturnOrderRequestByUser(orderID uint, userID uint) *e.Error

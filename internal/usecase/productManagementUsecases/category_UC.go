@@ -1,6 +1,7 @@
 package productusecase
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
@@ -21,23 +22,22 @@ func NewCategoryUseCase(categoryRepo repoInterface.ICategoryRepo) usecase.ICateg
 	}
 }
 
-func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) error {
+func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) *e.Error {
 
 	var category entities.Categories
 	if err := copier.Copy(&category, &req); err != nil {
 		fmt.Println("Error occured while copying request to category entity")
-		return err
+		return &e.Error{Err: errors.New("error occured while copying request to category entity" + err.Error()), StatusCode: 500}
 	}
 
 	//check if the category already exists
 
 	DoCategoryExistsByName, err := uc.CategoryRepo.DoCategoryExistsByName(req.Name)
 	if err != nil {
-		fmt.Println("Error occured while checking if category exists")
 		return err
 	}
 	if DoCategoryExistsByName {
-		return errors.New("category already exists")
+		return &e.Error{Err: errors.New("category already exists"), StatusCode: 400}
 	}
 
 	//add category
@@ -50,42 +50,28 @@ func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) error {
 	return nil
 }
 
-func (uc *CategoryUC) GetCategories() (*[]entities.Categories, error) {
-	var categories *[]entities.Categories
-	categories, err := uc.CategoryRepo.GetCategories()
-	if err != nil {
-		fmt.Println("Error occured while getting categories list")
-		return nil, err
-	}
-	return categories, nil
+func (uc *CategoryUC) GetCategories() (*[]entities.Categories, *e.Error) {
+	return uc.CategoryRepo.GetCategories()
 }
 
 // edit category
-func (uc *CategoryUC) EditCategory(req *request.EditCategoryReq) error {
+func (uc *CategoryUC) EditCategory(req *request.EditCategoryReq) *e.Error {
 	// check if the category really exists
 	DoCategoryExistsByName, err := uc.CategoryRepo.DoCategoryExistsByName(req.OldName)
 	if err != nil {
-		fmt.Println("Error occured while checking if category exists")
 		return err
 	}
 	if !DoCategoryExistsByName {
-		return errors.New("category doesn't exist with this old name")
+		return &e.Error{Err: errors.New("category doesn't exist"), StatusCode: 400}
 	}
 
 	//check if the new name already exists for another category
 	if DoCategoryExistsByName, err := uc.CategoryRepo.DoCategoryExistsByName(req.NewName); err != nil {
-		fmt.Println("Error occured while checking if category exists")
 		return err
 	} else if DoCategoryExistsByName {
-		return errors.New("category already exists with the sugested new name")
+		return &e.Error{Err: errors.New("category already exists with the sugested new name"),StatusCode: 400}
 	}
 
 	//edit category
-	err = uc.CategoryRepo.EditCategory(req)
-	if err != nil {
-		fmt.Println("Error occured while editing category")
-		return err
-	}
-
-	return nil
+	return uc.CategoryRepo.EditCategory(req)
 }

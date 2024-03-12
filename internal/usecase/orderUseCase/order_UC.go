@@ -43,7 +43,7 @@ func NewOrderUseCase(
 	}
 }
 
-func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInfo, *response.ProceedToPaymentInfo, error) {
+func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInfo, *response.ProceedToPaymentInfo, *e.Error) {
 	var orderInfo entities.OrderInfo
 	var couponDiscount, totalProductValue float32
 	var orderItems []entities.OrderItem
@@ -53,7 +53,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 	//validate payment method
 	paymentValid := tools.IsValidPaymentMethod(req.PaymentMethod)
 	if !paymentValid {
-		return nil, nil, errors.New("invalid payment method")
+		return nil, nil, &e.Error {Err:errors.New("invalid payment method"), StatusCode: 400}
 	}
 
 	//check if address exists
@@ -64,7 +64,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 	}
 
 	if !addressExists {
-		return nil, nil, errors.New("address doesn't exist by ID")
+		return nil, nil, &e.Error {Err:errors.New("address doesn't exist by ID"), StatusCode: 400}
 	}
 	address, err := uc.userRepo.GetUserAddress(req.AddressID)
 	if err != nil {
@@ -78,13 +78,12 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 		return nil, nil, err
 	}
 	if cartEmpty {
-		return nil, nil, errors.New("cart is empty")
+		return nil, nil, &e.Error {Err:errors.New("cart is empty"), StatusCode: 400}
 	}
 	//get cart
 	var cart *[]entities.Cart
 	cart, totalProductValue, err = uc.cartRepo.GetCart(req.UserID)
 	if err != nil {
-		fmt.Println("Error occured while getting cart")
 		return nil, nil, err
 	}
 
@@ -168,8 +167,6 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 		FkAddress:      *address,
 	}
 
-	fmt.Println("order.finalAmount=", order.FinalAmount)
-
 	if order.Status == "payment pending" {
 		order.ID, err = uc.orderRepo.MakeOrder_UpdateStock_ClearCart(&order, &orderItems)
 		if err != nil {
@@ -177,7 +174,6 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 			return nil, nil, err
 		}
 	} else {
-		fmt.Println("_____________+++++++++++")
 		order.ID, err = uc.orderRepo.MakeOrder(&order, &orderItems)
 		if err != nil {
 			fmt.Println("Error occured while placing order")
@@ -205,21 +201,18 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 }
 
 // GetOrdersOfUser
-func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, string, error) {
+func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, string, *e.Error) {
 	var orders *[]entities.DetailedOrderInfo
 	var responseOrders []response.ResponseOrderInfo
-	var err error
 	offset := (page - 1) * limit
-	orders, err = uc.orderRepo.GetOrdersOfUser(userID, offset, limit)
+	orders, err := uc.orderRepo.GetOrdersOfUser(userID, offset, limit)
 	if err != nil {
 		fmt.Println("Error occured while getting orders")
 		return &responseOrders, "Error occured while getting orders", err
 	}
 
-	//convert orders to responseOrders using "github.com/jinzhu/copier"
 	err = copier.Copy(&responseOrders, &orders)
 	if err != nil {
-		fmt.Println("Error occured while copying orders to responseOrders")
 		return &responseOrders, "Error occured while copying orders to responseOrders", err
 	}
 
@@ -227,15 +220,14 @@ func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]re
 }
 
 // GetAllOrders
-func (uc *OrderUseCase) GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, string, error) {
+func (uc *OrderUseCase) GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, *e.Error) {
 	var orders *[]entities.DetailedOrderInfo
 	var responseOrders []response.ResponseOrderInfo
 	var err error
 	offset := (page - 1) * limit
 	orders, err = uc.orderRepo.GetOrders(offset, limit)
 	if err != nil {
-		fmt.Println("Error occured while getting orders")
-		return &responseOrders, "Error occured while getting orders", err
+		return &responseOrders, err
 	}
 
 	//convert orders to responseOrders using "github.com/jinzhu/copier"
@@ -248,7 +240,7 @@ func (uc *OrderUseCase) GetOrders(page int, limit int) (*[]response.ResponseOrde
 }
 
 // CancelOrder(orderID uint) (string, error)
-func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) error {
+func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
@@ -299,7 +291,7 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) error {
 }
 
 // CancelOrderByAdmin(orderID uint) (string, error)
-func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) error {
+func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
@@ -337,7 +329,7 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) error {
 }
 
 // ReturnOrderRequestByUser
-func (uc *OrderUseCase) ReturnOrderRequestByUser(orderID, userID uint) error {
+func (uc *OrderUseCase) ReturnOrderRequestByUser(orderID, userID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
@@ -381,7 +373,7 @@ func (uc *OrderUseCase) ReturnOrderRequestByUser(orderID, userID uint) error {
 }
 
 // MarkOrderAsReturned
-func (uc *OrderUseCase) MarkOrderAsReturned(orderID uint) error {
+func (uc *OrderUseCase) MarkOrderAsReturned(orderID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
@@ -415,7 +407,7 @@ func (uc *OrderUseCase) MarkOrderAsReturned(orderID uint) error {
 }
 
 // MarkOrderAsDelivered
-func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) error {
+func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
@@ -497,7 +489,7 @@ func getShippingCharge(address *entities.UserAddress, productsValue float32) flo
 	return config.DeliveryConfig.DistantDeliveryCharge
 }
 
-func getCouponDiscount(coupon *entities.Coupon, orderValue float32, usageCount uint) (float32, error) {
+func getCouponDiscount(coupon *entities.Coupon, orderValue float32, usageCount uint) (float32, *e.Error) {
 	var discount float32
 	switch {
 	case coupon.Blocked:
@@ -522,7 +514,7 @@ func getCouponDiscount(coupon *entities.Coupon, orderValue float32, usageCount u
 }
 
 // GetAddressForCheckout implements usecase.IOrderUC.
-func (uc *OrderUseCase) GetAddressForCheckout(userID uint) (*[]entities.UserAddress, uint, float32, error) {
+func (uc *OrderUseCase) GetAddressForCheckout(userID uint) (*[]entities.UserAddress, uint, float32, *e.Error) {
 	quantity, totalValue, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
 	if err != nil {
 		return nil, 0, 0, err
@@ -537,14 +529,14 @@ func (uc *OrderUseCase) GetAddressForCheckout(userID uint) (*[]entities.UserAddr
 }
 
 // SetAddressGetCoupons implements usecase.IOrderUC.
-func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddressForCheckOutReq) (*response.SetAddrGetCouponsResponse, error) {
+func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddressForCheckOutReq) (*response.SetAddrGetCouponsResponse, *e.Error) {
 	// var resp response.SetAddrGetCouponsResponse
-	var err error
 	address, err := uc.userRepo.GetUserAddress(req.AddressID)
 	if err != nil {
 		return nil, err
-	} else if address.UserID != userID {
-		return nil, errors.New("address doesn't belong to user")
+	}
+	if address.UserID != userID {
+		return nil, &e.Error {Err:errors.New("address doesn't belong to user"), StatusCode: 401}
 	}
 
 	totalQuantiy, totalProductsValue, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
@@ -586,13 +578,13 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 }
 
 // SetCouponGetPaymentMethods implements usecase.IOrderUC.
-func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.SetCouponForCheckoutReq) (*response.GetPaymentMethodsForCheckoutResponse, error) {
+func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.SetCouponForCheckoutReq) (*response.GetPaymentMethodsForCheckoutResponse, *e.Error) {
 
 	address, err := uc.userRepo.GetUserAddress(req.AddressID)
 	if err != nil {
 		return nil, err
 	} else if address.UserID != userID {
-		return nil, errors.New("address doesn't belong to user")
+		return nil, &e.Error {Err:errors.New("address doesn't belong to user"), StatusCode: 401}
 	}
 
 	//get coupon by id
@@ -659,7 +651,7 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 	return &resp, nil
 }
 
-func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, error) {
+func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *e.Error) {
 
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
@@ -668,7 +660,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, e
 		return nil, err
 	}
 	if !orderExists {
-		return nil, errors.New("order doesn't exist by ID")
+		return nil, &e.Error {Err:errors.New("order doesn't exist by ID"), StatusCode: 400}
 	}
 
 	//check if order belongs to userID
@@ -679,7 +671,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, e
 	}
 
 	if userID != userIDFromOrder {
-		return nil, errors.New("order doesn't belong to user")
+		return nil, &e.Error {Err:errors.New("order doesn't belong to user"), StatusCode: 401}
 	}
 
 	//check if payment status is "paid"
@@ -690,7 +682,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, e
 	}
 	if paymentStatus != "paid" {
 		message := "Cannot generate invoice. Payment status is '" + paymentStatus + "'"
-		return nil, errors.New(message)
+		return nil, &e.Error {Err:errors.New(message), StatusCode: 400}
 	}
 
 	//get orderInfo

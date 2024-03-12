@@ -11,7 +11,7 @@ type IReportsRepo interface {
 	GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
 	GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error)
 
-	UploadSalesReportExcel(filePath string, rangeLabel string) (string, *e.Error)
+	UploadSalesReportExcel(filePath string, rangeLabel string) (*string, *e.Error)
 
 	GetSalesReportFullTime() (
 		*[]entities.SalesReportOrderList,
