@@ -4,9 +4,9 @@ import "MyShoo/internal/domain/entities"
 
 // get products response
 type GetProductsResponse struct {
-	Status   string            `json:"status"`
-	Message  string            `json:"message"`
-	Error    string            `json:"error"`
+	//Status   string            `json:"status"`
+	//Message  string            `json:"message"`
+	//Error    string            `json:"error"`
 	Products []ResponseProduct `json:"products"`
 }
 
@@ -29,41 +29,41 @@ type ResponseProduct struct {
 
 // get categories response
 type GetCategoriesResponse struct {
-	Status     string                `json:"status"`
-	Message    string                `json:"message"`
-	Error      string                `json:"error"`
+	//Status     string                `json:"status"`
+	//Message    string                `json:"message"`
+	//Error      string                `json:"error"`
 	Categories []entities.Categories `json:"categories"`
 }
 
 // get models response
 type GetModelsResponse struct {
-	Status  string            `json:"status"`
-	Message string            `json:"message"`
-	Error   string            `json:"error"`
+	//Status  string            `json:"status"`
+	//Message string            `json:"message"`
+	//Error   string            `json:"error"`
 	Models  []entities.Models `json:"models"`
 }
 
 // get brands response
 type GetBrandsResponse struct {
-	Status           string                        `json:"status"`
-	Message          string                        `json:"message"`
-	Error            string                        `json:"error"`
+	//Status           string                        `json:"status"`
+	//Message          string                        `json:"message"`
+	//Error            string                        `json:"error"`
 	BrandsByAlphabet [26]entities.BrandsByAlphabet `json:"brandsByAlphabet"`
 }
 
 // get dimentional variations response
 type GetDimensionalVariationsResponse struct { //Not used, may be SMED is being used instead
-	Status                string                          `json:"status"`
-	Message               string                          `json:"message"`
-	Error                 string                          `json:"error"`
+	//Status                string                          `json:"status"`
+	//Message               string                          `json:"message"`
+	//Error                 string                          `json:"error"`
 	DimentionalVariations []entities.DimensionalVariation `json:"dimentionalVariations"`
 }
 
 // GetColourVariantsUnderModelResponse
 type GetColourVariantsUnderModelResponse struct {
-	Status         string                  `json:"status"`
-	Message        string                  `json:"message"`
-	Error          string                  `json:"error"`
+	//Status         string                  `json:"status"`
+	//Message        string                  `json:"message"`
+	//Error          string                  `json:"error"`
 	ColourVariants []ResponseColourVarient `json:"colourVariants"`
 }
 

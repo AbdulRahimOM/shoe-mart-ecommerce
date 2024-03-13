@@ -511,8 +511,6 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 	}
 
 	response := response.SetAddrGetCouponsResponse{
-		Status:       "success",
-		Message:      "Address and coupons fetched successfully",
 		Coupons:      respCoupons,
 		Address:      *address,
 		TotalQuantiy: totalQuantiy,
@@ -573,8 +571,6 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 	}
 
 	resp := response.GetPaymentMethodsForCheckoutResponse{
-		Status:       "success",
-		Message:      "Payment methods fetched successfully",
 		Address:      *address,
 		TotalQuantiy: totalQuantiy,
 		BillSumary: response.BillAfterCoupon{

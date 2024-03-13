@@ -1,12 +1,10 @@
 package producthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -30,53 +28,50 @@ func (cvh *ProductHandler) AddColourVariant(c *gin.Context) {
 
 	var req request.AddColourVariantReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get sellerID from token
-	sellerID, err := tools.GetSellerID(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error occurred. Try Again", err))
+	sellerID, errr := tools.GetSellerID(c)
+	if errr != nil {
+		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting sellerID from token:", errr))
 		return
 	}
 
 	//image upload handling
-	formFile, err := c.FormFile("imageUrl")
-	if err != nil {
-		fmt.Println("error getting image file from request. err: ", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error uploading image file. Try Again", err))
+	formFile, errr := c.FormFile("imageUrl")
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error getting image file from request:", errr))
 		return
 	}
 
 	path := filepath.Join(os.TempDir(), formFile.Filename)
-	if err := c.SaveUploadedFile(formFile, path); err != nil {
-		fmt.Println("error saving image file to temp dir. err: ", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error uploading image file. Try Again", err))
+	if errr := c.SaveUploadedFile(formFile, path); errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error saving image file to temp dir:", errr))
 		return
 	}
 
-	file, err := os.Open(path)
-	if err != nil {
-		fmt.Println("error opening image file. err: ", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error uploading image file. Try Again", err))
+	file, errr := os.Open(path)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error opening image file:", errr))
 		return
 	}
 	defer file.Close()
 
 	//add colour variant
 	if err := cvh.productUseCase.AddColourVariant(sellerID, &req, file); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding colour variant. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Colour variant added successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // edit colour variant handler
@@ -94,23 +89,23 @@ func (cvh *ProductHandler) EditColourVariant(c *gin.Context) {
 
 	var req request.EditColourVariantReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//add colour variant
 	if err := cvh.productUseCase.EditColourVariant(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing colour variant. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Colour variant edited successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // get colour variants under model handler
@@ -128,23 +123,20 @@ func (cvh *ProductHandler) EditColourVariant(c *gin.Context) {
 func (cvh *ProductHandler) GetColourVariantsUnderModel(c *gin.Context) {
 
 	modelIDParam := c.Param("modelID")
-	modelIDstring, err := strconv.ParseUint(modelIDParam, 10, 64)
-	if err != nil {
-		fmt.Println("error parsing modelID. err: ", err)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error occured. Try Again", err))
+	modelIDstring, errr := strconv.ParseUint(modelIDParam, 10, 64)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing modelID:", errr))
 		return
 	}
 
 	modelID := uint(modelIDstring)
 	colourVariants, err := cvh.productUseCase.GetColourVariantsUnderModel(modelID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching colour variants under model. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetColourVariantsUnderModelResponse{
-		Status:         "success",
-		Message:        "Colour variants under model fetched successfully",
 		ColourVariants: *colourVariants,
 	})
 }

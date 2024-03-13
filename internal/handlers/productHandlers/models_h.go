@@ -1,13 +1,11 @@
 package producthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,23 +34,23 @@ func (h *ModelHandler) AddModel(c *gin.Context) {
 
 	var req request.AddModelReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//add model
 	if err := h.modelsUseCase.AddModel(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding model. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Model added successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // get models by brands and categories handler
@@ -79,41 +77,37 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 
 	var brandExists, categoryExists bool
 	var brandIDs, categoryIDs []uint
-	var err error
+	var errr error
 
 	// Validate and convert the string parameters to arrays of integers
 	if brandIDParam != "" {
 		brandExists = true
-		brandIDs, err = requestValidation.ValidateAndParseIDs(brandIDParam)
-		if err != nil {
-			fmt.Println("error parsing brand id. error:", err)
-			c.JSON(http.StatusBadRequest, response.FailedSME("Invalid request. Try Again", err))
+		brandIDs, errr = requestValidation.ValidateAndParseIDs(brandIDParam)
+		if errr != nil {
+			c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing brand id (param):", errr))
 			return
 		}
 	}
 
 	if categoryIDParam != "" {
 		categoryExists = true
-		categoryIDs, err = requestValidation.ValidateAndParseIDs(categoryIDParam)
-		if err != nil {
-			fmt.Println("error parsing category id. error:", err)
-			c.JSON(http.StatusBadRequest, response.FailedSME("Invalid request. Try Again", err))
+		categoryIDs, errr = requestValidation.ValidateAndParseIDs(categoryIDParam)
+		if errr != nil {
+			c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing category id (param):", errr))
 			return
 		}
 	}
 
 	//get models
 	var models *[]entities.Models
-	models, err = h.modelsUseCase.GetModelsByBrandsAndCategories(brandExists, brandIDs, categoryExists, categoryIDs)
+	models, err := h.modelsUseCase.GetModelsByBrandsAndCategories(brandExists, brandIDs, categoryExists, categoryIDs)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching models. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetModelsResponse{
-		Status:  "success",
-		Message: "Models fetched successfully",
-		Models:  *models,
+		Models: *models,
 	})
 
 }
@@ -133,21 +127,21 @@ func (h *ModelHandler) EditModel(c *gin.Context) {
 
 	var req request.EditModelReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//edit model name
 	if err := h.modelsUseCase.EditModelName(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing model name. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Model name edited successfully"))
+	c.JSON(http.StatusOK, nil)
 }

@@ -3,12 +3,9 @@ package orderhandler
 import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	msg "MyShoo/internal/domain/messages"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	requestValidation "MyShoo/pkg/validation"
-	"errors"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,24 +27,23 @@ func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 	//get req from body
 	var req request.NewCouponReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//call usecase
 	err := h.orderUseCase.CreateNewCoupon(&req)
 	if err != nil {
-		c.JSON(err.StatusCode, response.FailedSME(message, err))
-		return
+		c.JSON(err.StatusCode, response.FromError(err))
+	} else {
+		c.JSON(200, nil)
 	}
-
-	c.JSON(200, response.SuccessSM(message))
 }
 
 // BlockCouponHandler
@@ -66,24 +62,23 @@ func (h *OrderHandler) BlockCouponHandler(c *gin.Context) {
 	//get req from body
 	var req request.BlockCouponReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//call usecase
-	message, err := h.orderUseCase.BlockCoupon(&req)
+	err := h.orderUseCase.BlockCoupon(&req)
 	if err != nil {
-		c.JSON(400, response.FailedSME(message, err))
-		return
+		c.JSON(err.StatusCode, response.FromError(err))
+	} else {
+		c.JSON(200, nil)
 	}
-
-	c.JSON(200, response.SuccessSM(message))
 }
 
 // UnblockCouponHandler
@@ -102,24 +97,23 @@ func (h *OrderHandler) UnblockCouponHandler(c *gin.Context) {
 	//get req from body
 	var req request.UnblockCouponReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//call usecase
-	message, err := h.orderUseCase.UnblockCoupon(&req)
+	err := h.orderUseCase.UnblockCoupon(&req)
 	if err != nil {
-		c.JSON(400, response.FailedSME(message, err))
-		return
+		c.JSON(err.StatusCode, response.FromError(err))
+	} else {
+		c.JSON(200, nil)
 	}
-
-	c.JSON(200, response.SuccessSM(message))
 }
 
 // GetCoupons
@@ -137,40 +131,37 @@ func (h *OrderHandler) GetCoupons(c *gin.Context) {
 
 	criteria := c.Query("criteria")
 	var coupons *[]entities.Coupon
-	var message string
-	var err error
+	var err *e.Error
 	switch criteria {
 	case "all":
-		coupons, message, err = h.orderUseCase.GetAllCoupons()
+		coupons, err = h.orderUseCase.GetAllCoupons()
 		if err != nil {
-			c.JSON(400, response.FailedSME(message, err))
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		}
-
 	case "expired":
-		coupons, message, err = h.orderUseCase.GetExpiredCoupons()
+		coupons, err = h.orderUseCase.GetExpiredCoupons()
 		if err != nil {
-			c.JSON(400, response.FailedSME(message, err))
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		}
 	case "active":
-		coupons, message, err = h.orderUseCase.GetActiveCoupons()
+		coupons, err = h.orderUseCase.GetActiveCoupons()
 		if err != nil {
-			c.JSON(400, response.FailedSME(message, err))
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		}
 	case "upcoming":
-		coupons, message, err = h.orderUseCase.GetUpcomingCoupons()
+		coupons, err = h.orderUseCase.GetUpcomingCoupons()
 		if err != nil {
-			c.JSON(400, response.FailedSME(message, err))
+			c.JSON(err.StatusCode, response.FromError(err))
+			return
 		}
 	default:
-		c.JSON(400, response.FailedSME(msg.InvalidRequest, errors.New("invalid url parameter")))
+		c.JSON(400, gin.H{"error": "invalid url parameter"})
 	}
 
 	c.JSON(200, response.GetCouponRes{
-		Status:  "success",
-		Message: "Coupons fetched successfully",
 		Coupons: *coupons,
 	})
 

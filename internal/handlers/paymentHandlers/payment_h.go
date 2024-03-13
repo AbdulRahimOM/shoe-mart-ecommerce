@@ -2,7 +2,6 @@ package paymentHandlers
 
 import (
 	"MyShoo/internal/config"
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -42,13 +41,13 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 	//get req from body
 	var req request.ProceedToPaymentReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
@@ -78,7 +77,7 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 
 	if err := c.Request.ParseForm(); err != nil {
-		c.JSON(500, response.FailedSME("Error parsing form data", err))
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("Error parsing form:", err))
 		return
 	}
 
@@ -88,20 +87,18 @@ func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 		RazorpaySignature: string(c.Request.Form.Get("razorpay_signature")),
 	}
 
-	paymentValid, orderDetails, message, err := h.paymentUseCase.VerifyPayment(&req)
+	paymentValid, orderDetails, err := h.paymentUseCase.VerifyPayment(&req)
 	if err != nil {
-		fmt.Println("Error verifying payment:", err)
-		c.JSON(500, response.FailedSME("Error verifying payment", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 	if !paymentValid {
-		c.JSON(http.StatusExpectationFailed, response.FailedSME("Payment failed", nil))
+		// c.JSON(http.StatusExpectationFailed, response.FailedSME("Payment failed", nil))
+		c.JSON(http.StatusOK, response.FromErrByText("Payment failed"))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.PaidOrderResponse{
-		Status:    "success",
-		Message:   message,
 		OrderInfo: *orderDetails,
 	})
 }
@@ -122,27 +119,27 @@ func (h *PaymentHandler) RetryPayment(c *gin.Context) {
 	//get req from body
 	var req request.RetryPaymentReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error getting userID from token", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//do the retry payment
-	paymentInfo, message, err := h.paymentUseCase.RetryPayment(&req, userID)
+	paymentInfo, err := h.paymentUseCase.RetryPayment(&req, userID)
 	if err != nil {
-		c.JSON(500, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 

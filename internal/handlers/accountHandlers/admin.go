@@ -1,12 +1,10 @@
 package accounthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -30,7 +28,7 @@ func NewAdminHandler(useCase usecase.IAdminUC) *AdminHandler {
 // @Success 200 {object} string
 // @Router /admin/login [get]
 func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
-	c.JSON(http.StatusOK,"")
+	c.JSON(http.StatusOK, "")
 }
 
 // to login admin
@@ -46,27 +44,25 @@ func (h *AdminHandler) GetAdminLogin(c *gin.Context) {
 // @Router /admin/login [post]
 func (h *AdminHandler) PostLogIn(c *gin.Context) {
 
-	var signInReq request.AdminSignInReq
-	if err := c.ShouldBindJSON(&signInReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+	var req request.AdminSignInReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
-	if err := requestValidation.ValidateRequest(signInReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
-	token, err := h.AdminUseCase.SignIn(&signInReq)
+	token, err := h.AdminUseCase.SignIn(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "",
-			Token:   *token,
+			Token: *token,
 		})
 	}
 }
@@ -85,16 +81,10 @@ func (h *AdminHandler) GetUsersList(c *gin.Context) {
 
 	usersList, err := h.AdminUseCase.GetUsersList()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error occured while getting users list. Please try again.",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.GetUsersListResponse{
-			Status:    "success",
-			Message:   "The list of users",
 			UsersList: *usersList,
 		})
 	}
@@ -114,17 +104,10 @@ func (h *AdminHandler) GetSellersList(c *gin.Context) {
 
 	sellersList, err := h.AdminUseCase.GetSellersList()
 	if err != nil {
-		errResponse := "error while getting sellers list"
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error occured while getting sellers list. Please try again.",
-			Error:   errResponse,
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.GetSellersListResponse{
-			Status:      "success",
-			Message:     "The list of sellers",
 			SellersList: *sellersList,
 		})
 	}
@@ -146,29 +129,23 @@ func (h *AdminHandler) BlockUser(c *gin.Context) {
 	//get user info from request
 	var req request.BlockUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//block user
 	err := h.AdminUseCase.BlockUser(&req)
 	if err != nil {
-		errResponse := fmt.Sprint("error while blocking user. Error: ", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Some error occured while blocking user.",
-			Error:   errResponse,
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSM("User blocked successfully"))
+		c.JSON(http.StatusOK, nil)
 	}
 
 }
@@ -189,32 +166,23 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 	//get user info from request
 	var req request.UnblockUserReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//unblock user
 	err := h.AdminUseCase.UnblockUser(&req)
 	if err != nil {
-		errResponse := fmt.Sprint("error while unblocking user. Error: ", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Some error occured while unblocking user.",
-			Error:   errResponse,
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SM{
-			Status:  "success",
-			Message: "User unblocked successfully",
-		})
+		c.JSON(http.StatusOK, nil)
 	}
 
 }
@@ -235,29 +203,23 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 	//get seller info from request
 	var req request.BlockSellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//block seller
 	err := h.AdminUseCase.BlockSeller(&req)
 	if err != nil {
-		errResponse := fmt.Sprint("error while blocking seller. Error: ", err)
-		fmt.Println(errResponse)
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Some error occured while blocking seller.",
-			Error:   errResponse,
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSM("Seller blocked successfully"))
+		c.JSON(http.StatusOK, nil)
 	}
 
 }
@@ -278,23 +240,23 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 	//get seller info from request
 	var req request.UnblockSellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//unblock seller
 	err := h.AdminUseCase.UnblockSeller(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSM("Seller unblocked successfully"))
+		c.JSON(http.StatusOK, nil)
 	}
 
 }
@@ -303,23 +265,23 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 func (h *AdminHandler) VerifySeller(c *gin.Context) {
 	var req request.VerifySellerReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	err := h.AdminUseCase.VerifySeller(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Failed to verify seller", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Seller verified successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // ReloadConfig
@@ -335,8 +297,8 @@ func (h *AdminHandler) VerifySeller(c *gin.Context) {
 func (h *AdminHandler) RestartConfig(c *gin.Context) {
 	err := h.AdminUseCase.RestartConfig()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Failed to reload config", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
-	c.JSON(http.StatusOK, response.SuccessSM("Config reloaded successfully"))
+	c.JSON(http.StatusOK, nil)
 }

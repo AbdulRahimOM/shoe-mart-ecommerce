@@ -1,7 +1,6 @@
 package producthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
@@ -36,22 +35,22 @@ func (h *CategoryHandler) AddCategory(c *gin.Context) {
 
 	var req request.AddCategoryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	err := h.CategoryUseCase.AddCategory(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't add category. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSM("Category added successfully"))
+		c.JSON(http.StatusOK, nil)
 		return
 	}
 }
@@ -74,13 +73,11 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 	var categories *[]entities.Categories
 	categories, err := h.CategoryUseCase.GetCategories()
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't fetch categories. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		fmt.Println("categories fetched successfully")
 		c.JSON(http.StatusOK, response.GetCategoriesResponse{
-			Status:     "success",
-			Message:    "Categories fetched successfully",
 			Categories: *categories,
 		})
 		return
@@ -102,22 +99,22 @@ func (h *CategoryHandler) EditCategory(c *gin.Context) {
 
 	var req request.EditCategoryReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	err := h.CategoryUseCase.EditCategory(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Couldn't edit category. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SuccessSM("Category edited successfully"))
+		c.JSON(http.StatusOK,  nil)
 		return
 	}
 }

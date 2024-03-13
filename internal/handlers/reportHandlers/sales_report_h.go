@@ -39,140 +39,111 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 	case "full-time":
 		fileURL, err := h.reportsUC.ExportSalesReportFullTime()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportFullTimeForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 	case "date-range":
 		startDate := c.Query("sd")
 		endDate := c.Query("ed")
-		if startDate == "" && endDate == "" {
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "No date range provided. Please recheck URL and try again",
-				Error:   "No date range provided in url.",
-			})
-			return
+		if startDate == "" || endDate == "" {
+			c.JSON(http.StatusBadRequest, response.FromErrByText("start and end date ranges not provided inURL"))
 		} else {
 			// validate date params, and recieve time
-			startTime, err := requestValidation.ValidateAndParseDate(startDate)
-			if err != nil {
-				fmt.Println("error occured in validating and parsing start date")
-				c.JSON(http.StatusBadRequest, response.SME{
-					Status:  "failed",
-					Message: "Invalid date provided. Please recheck URL and try again",
-					Error:   err.Error(),
-				})
+			startTime, errr := requestValidation.ValidateAndParseDate(startDate)
+			if errr != nil {
+				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing start date", errr))
 				return
 			}
-			endTime, err := requestValidation.ValidateAndParseDate(endDate)
-			if err != nil {
-				fmt.Println("error occured in validating and parsing end date")
-				c.JSON(http.StatusBadRequest, response.SME{
-					Status:  "failed",
-					Message: "Invalid date provided. Please recheck URL and try again",
-					Error:   err.Error(),
-				})
-				return
+			endTime, errr := requestValidation.ValidateAndParseDate(endDate)
+			if errr != nil {
+				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing end date", errr))
 			}
 
 			fileURL, err := h.reportsUC.ExportSalesReportBetweenDates(startTime, endTime)
 			if err != nil {
-				c.JSON(500, response.FailedSME("An Error occured!", err))
+				c.JSON(err.StatusCode, response.FromError(err))
 				return
 			} else {
 				c.Header("Content-Disposition", "attachment; filename=SalesReportBwCustomDatesForAdmin.xlsx")
-				c.File(fileURL)
+				c.File(*fileURL)
 			}
 		}
 	case "this-month":
 		fileURL, err := h.reportsUC.ExportSalesReportThisMonth()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisMonthForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
+		
 	case "last-month":
 		fmt.Println("last month entered")
 		fileURL, err := h.reportsUC.ExportSalesReportLastMonth()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportLastMonth.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	case "this-year":
 		fileURL, err := h.reportsUC.ExportSalesReportThisYear()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisYearForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	case "last-year":
 		fileURL, err := h.reportsUC.ExportSalesReportLastYear()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportLastYearForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	case "this-week":
 		fileURL, err := h.reportsUC.ExportSalesReportThisWeek()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisWeekForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	case "last-week":
 		fileURL, err := h.reportsUC.ExportSalesReportLastWeek()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportLastWeekForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	case "today":
 		fileURL, err := h.reportsUC.ExportSalesReportToday()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
-			return
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportTodayForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	case "yesterday":
 		fileURL, err := h.reportsUC.ExportSalesReportYesterday()
 		if err != nil {
-			c.JSON(500, response.FailedSME("An Error occured!", err))
+			c.JSON(err.StatusCode, response.FromError(err))
 		} else {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportYesterdayForAdmin.xlsx")
-			c.File(fileURL)
+			c.File(*fileURL)
 		}
 
 	default:
-		fmt.Println("Invalid range type provided")
-		c.JSON(400, response.SME{
-			Status:  "failed",
-			Message: "Invalid range type provided. Please recheck URL and try again",
-			Error:   "Invalid range type provided in url.",
-		})
-		return
+		c.JSON(http.StatusBadRequest, response.FromErrByText("invalid range type provided inURL"))
 	}
 }

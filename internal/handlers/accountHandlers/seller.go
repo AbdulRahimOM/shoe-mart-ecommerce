@@ -1,12 +1,10 @@
 package accounthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -46,24 +44,23 @@ func (h *SellerHandler) GetLogin(c *gin.Context) {
 func (h *SellerHandler) PostSignUp(c *gin.Context) {
 
 	var req request.SellerSignUpReq
-	if err := c.Bind(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	token, err := h.SellerUseCase.SignUp(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status: "success",
-			Token:  *token,
+			Token: *token,
 		})
 	}
 }
@@ -82,24 +79,23 @@ func (h *SellerHandler) PostLogIn(c *gin.Context) {
 
 	var req request.SellerSignInReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	token, err := h.SellerUseCase.SignIn(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status: "success",
-			Token:  *token,
+			Token: *token,
 		})
 	}
 }

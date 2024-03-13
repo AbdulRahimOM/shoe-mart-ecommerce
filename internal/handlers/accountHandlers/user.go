@@ -2,14 +2,12 @@ package accounthandler
 
 import (
 	"MyShoo/internal/config"
-	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -51,26 +49,24 @@ func (h *UserHandler) GetLogin(c *gin.Context) {
 // @Router /signup [post]
 func (h *UserHandler) PostSignUp(c *gin.Context) {
 
-	var signUpReq request.UserSignUpReq
-	if err := c.Bind(&signUpReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+	var req request.UserSignUpReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
-	if err := requestValidation.ValidateRequest(signUpReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
-	token, err := h.UserUseCase.SignUp(&signUpReq)
+	token, err := h.UserUseCase.SignUp(&req)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "",
-			Token:   *token,
+			Token: *token,
 		})
 	}
 }
@@ -87,34 +83,25 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 // @Router /login [post]
 func (h *UserHandler) PostLogIn(c *gin.Context) {
 
-	var signInReq request.UserSignInReq
-	if err := c.ShouldBindJSON(&signInReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+	var req request.UserSignInReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
-	if err := requestValidation.ValidateRequest(signInReq); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
-	token, err := h.UserUseCase.SignIn(&signInReq)
+	token, err := h.UserUseCase.SignIn(&req)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		errResponse := "error while signing in"
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "#",
-			Error:   errResponse,
-		})
-
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "",
-			Token:   *token,
+			Token: *token,
 		})
 	}
 }
@@ -132,18 +119,14 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 
 	user, ok := c.Get("UserModel")
 	if !ok {
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error happened. Please login again",
-			Error:   "Error getting user model from context",
-		})
+		c.JSON(http.StatusBadRequest, response.FromErrByText("error getting user model from context"))
 		return
 	}
 	userMap := user.(map[string]interface{})
 	phone := userMap["phone"].(string)
 	err := h.UserUseCase.SendOtp(phone)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 		c.JSON(http.StatusOK, response.SuccessSM("OTP sent successfully"))
@@ -164,46 +147,46 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 
 	var otpStruct request.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.FromError(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(otpStruct); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	user, ok := c.Get("UserModel")
 	if !ok {
-		fmt.Println("error getting user model from context")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Error happened. Please try again",
-			Error:   "Error getting user model from context",
-		})
+		// fmt.Println("error getting user model from context")
+		// c.JSON(http.StatusBadRequest, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "Error happened. Please try again",
+		// 	Error:   "Error getting user model from context",
+		// })
+		c.JSON(http.StatusBadRequest, response.FromErrByText("error getting user model from context"))
 		return
 	}
 	phone := user.(map[string]interface{})["phone"].(string)
 	email := user.(map[string]interface{})["email"].(string)
 	isVerified, err := h.UserUseCase.VerifyOtp(phone, email, otpStruct.OTP)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "error occured while verifying otp. Please try again",
-			Error:   err.Error(),
-		})
+		// fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
+		// c.JSON(http.StatusBadRequest, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "error occured while verifying otp. Please try again",
+		// 	Error:   err.Error(),
+		// })
+		c.JSON(http.StatusBadRequest, response.FromError(err))
 		return
 	}
 	if isVerified {
-		c.JSON(http.StatusOK, response.SM{
-			Status:  "success",
+		c.JSON(http.StatusOK, response.NewSM{
 			Message: "OTP verified successfully",
 		})
 	} else {
-		c.JSON(http.StatusBadRequest, response.SM{
-			Status:  "failed",
+		c.JSON(http.StatusUnauthorized, response.NewSM{
 			Message: "OTP verification failed. Please try again",
 		})
 	}
@@ -224,49 +207,33 @@ func (h *UserHandler) AddUserAddress(c *gin.Context) {
 
 	var req request.AddUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//check if userID in token and request body match
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding to cart. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 	if userID != req.UserID {
-		fmt.Println("User ID in token and request body do not match. Corrupted request!!")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Corrupted request. Try Again",
-			Error:   "User ID in token and request body do not match",
-		})
+		c.JSON(http.StatusBadRequest, response.FromErrByText("user ID in token and request body do not match"))
 		return
 	}
 
 	if err := h.UserUseCase.AddUserAddress(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding address. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Address added successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 
 }
 
@@ -285,49 +252,34 @@ func (h *UserHandler) EditUserAddress(c *gin.Context) {
 
 	var req request.EditUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//check if userID in token and request body match
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing address. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
+
 	if userID != req.UserID {
-		fmt.Println("User ID in token and request body do not match. Corrupted request!!")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Corrupted request. Try Again",
-			Error:   "User ID in token and request body do not match",
-		})
+		c.JSON(http.StatusBadRequest, response.FromErrByText("user ID in token and request body do not match"))
 		return
 	}
 
 	if err := h.UserUseCase.EditUserAddress(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing address. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Address edited successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // DeleteUserAddress
@@ -345,49 +297,34 @@ func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 
 	var req request.DeleteUserAddress
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//check if userID in token and request body match
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error deleting address. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
+
 	if userID != req.UserID {
-		fmt.Println("User ID in token and request body do not match. Corrupted request!!")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Corrupted request. Try Again",
-			Error:   "User ID in token and request body do not match",
-		})
+		c.JSON(http.StatusBadRequest, response.FromErrByText("user ID in token and request body do not match"))
 		return
 	}
 
 	if err := h.UserUseCase.DeleteUserAddress(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error deleting address. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SM{
-		Status:  "success",
-		Message: "Address deleted successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // Get user addresses
@@ -402,29 +339,19 @@ func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 func (h *UserHandler) GetUserAddresses(c *gin.Context) {
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.GetUserAddressesResponse{
-			Status:  "failed",
-			Message: "Error getting addresses. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	addresses, err := h.UserUseCase.GetUserAddresses(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.GetUserAddressesResponse{
-			Status:  "failed",
-			Message: "Error getting addresses. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetUserAddressesResponse{
-		Status:    "success",
-		Message:   "Addresses fetched successfully",
 		Addresses: *addresses,
 	})
 }
@@ -441,40 +368,26 @@ func (h *UserHandler) GetUserAddresses(c *gin.Context) {
 func (h *UserHandler) GetProfile(c *gin.Context) {
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.GetProfileResponse{
-			Status:  "failed",
-			Message: "Error getting profile. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	profile, err := h.UserUseCase.GetProfile(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.GetProfileResponse{
-			Status:  "failed",
-			Message: "Error getting profile. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	var addresses *[]entities.UserAddress
 	addresses, err = h.UserUseCase.GetUserAddresses(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.GetProfileResponse{
-			Status:  "failed",
-			Message: "Error getting addresses. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetProfileResponse{
-		Status:  "success",
-		Message: "Profile fetched successfully",
 		Profile: struct {
 			UserDetails entities.UserDetails   `json:"userDetails"`
 			Addresses   []entities.UserAddress `json:"addresses"`
@@ -500,40 +413,29 @@ func (h *UserHandler) EditProfile(c *gin.Context) {
 
 	var req request.EditProfileReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing profile. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	if err := h.UserUseCase.EditProfile(userID, &req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing profile. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Profile edited successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // GetResetPassword
@@ -551,13 +453,13 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 
 	var req request.ApplyForPasswordResetReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
@@ -565,29 +467,18 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 	var user *entities.User
 	user, err := h.UserUseCase.GetUserByEmail(req.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting reset password. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	token, err := h.UserUseCase.SendOtpForPWChange(user)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "error while sending otp",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
 
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "OTP sent successfully. Please verify",
-			Token:   *token,
+			Token: *token,
 		})
 	}
 }
@@ -610,28 +501,24 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 
 	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, config.SecretKey)
 	if !isTokenValid {
-		fmt.Println("token is invalid")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "token is invalid"})
 		return
 	}
 	//getting claims
 	claims, ok := tokenClaims.(*jwttoken.CustomClaims)
 	if !ok {
-		fmt.Println("claims type assertion failed")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "error getting claims"})
 		return
 	}
 
 	//checking if role is user
 	if claims.Role != "user" {
-		fmt.Println("role is not user")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "role is not user"})
 		return
 	}
 	status := claims.Model.(map[string]interface{})["Status"].(string)
 	if status != "PW change requested, otp not verified" {
-		fmt.Println("status is not PW change requested, otp not verified")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "status is not PW change requested, otp not verified"})
 		return
 	}
 
@@ -640,36 +527,27 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 
 	var otpStruct request.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(otpStruct); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	isVerified, newtoken, err := h.UserUseCase.VerifyOtpForPWChange(id, phone, otpStruct.OTP)
 	if err != nil {
-		fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "error occured while verifying otp. Please try again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 	if isVerified {
-		fmt.Println("New token: ", *newtoken)
 		c.JSON(http.StatusOK, response.SMT{
-			Status:  "success",
-			Message: "OTP verified successfully",
-			Token:   *newtoken,
+			Token: *newtoken,
 		})
 	} else {
-		c.JSON(http.StatusBadRequest, response.SM{
-			Status:  "failed",
+		c.JSON(http.StatusBadRequest, response.NewSM{
 			Message: "OTP verification failed. Please try again",
 		})
 	}
@@ -692,59 +570,47 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	// fmt.Println("tokenString: ", tokenString)
 	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, config.SecretKey)
 	if !isTokenValid {
-		fmt.Println("token is invalid!")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("token is invalid"))
 		return
 	}
 
 	//getting claims
 	claims, ok := tokenClaims.(*jwttoken.CustomClaims)
 	if !ok {
-		fmt.Println("claims type assertion failed")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("error getting claims"))
 		return
 	}
 
 	//checking if role is user
 	if claims.Role != "user" {
-		fmt.Println("role is not user")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("role is not user"))
 		return
 	}
 
 	status := claims.Model.(map[string]interface{})["Status"].(string)
 	if status != "PW change requested, otp verified" {
-		fmt.Println("status is not PW change requested, otp not verified")
-		c.JSON(http.StatusUnauthorized, response.UnauthorizedAccess)
-		c.Abort()
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("status is not PW change requested, otp verified"))
 		return
 	}
 
 	var req request.ResetPasswordReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//change password
 	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
 	if err := h.UserUseCase.ResetPassword(id, &req.NewPassword); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error resetting password. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(http.StatusUnauthorized, response.FromErrByTextCumError("error getting id from token. error:", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SM{
-		Status:  "success",
-		Message: "Password reset successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }

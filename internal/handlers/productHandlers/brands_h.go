@@ -1,13 +1,11 @@
 package producthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,23 +34,23 @@ func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 
 	var req request.AddBrandReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//add brand
 	if err := bh.brandsUseCase.AddBrand(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding brand. Try Again", err))
+		c.JSON(err.StatusCode,response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Brand added successfully"))
+	c.JSON(http.StatusOK,  nil)
 }
 
 // get brands handler
@@ -73,13 +71,11 @@ func (bh *BrandsHandler) GetBrands(c *gin.Context) {
 	var brands *[26]entities.BrandsByAlphabet
 	brands, err := bh.brandsUseCase.GetBrands()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching brands. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetBrandsResponse{
-		Status:           "success",
-		Message:          "Brands fetched successfully",
 		BrandsByAlphabet: *brands,
 	})
 }
@@ -99,21 +95,21 @@ func (bh *BrandsHandler) EditBrand(c *gin.Context) {
 
 	var req request.EditBrandReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//edit brand
 	if err := bh.brandsUseCase.EditBrand(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing brand. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Brand edited successfully"))
+	c.JSON(http.StatusOK,  nil)
 }

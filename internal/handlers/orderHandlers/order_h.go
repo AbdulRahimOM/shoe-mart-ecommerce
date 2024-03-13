@@ -1,7 +1,6 @@
 package orderhandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
@@ -9,7 +8,6 @@ import (
 	requestValidation "MyShoo/pkg/validation"
 	"strconv"
 
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,47 +37,43 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 
 	var req *request.MakeOrderReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error making order. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 	req.UserID = userID
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//make order
-	orderInfo, proceedToPaymentInfo, message, err := h.orderUseCase.MakeOrder(req)
+	orderInfo, proceedToPaymentInfo, err := h.orderUseCase.MakeOrder(req)
 	if err != nil {
 		switch err.Error() {
 		case "cart is empty":
-			c.JSON(http.StatusBadRequest, response.FailedSME(message, err))
+			c.JSON(http.StatusBadRequest, response.FromError(err))
 		case "stock not available":
-			c.JSON(http.StatusForbidden, response.FailedSME(message, err))
+			c.JSON(http.StatusForbidden, response.FromError(err))
 		default:
-			c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+			c.JSON(http.StatusInternalServerError, response.FromError(err))
 		}
 		return
 
 	}
 	if proceedToPaymentInfo == nil {
 		c.JSON(http.StatusCreated, response.CODOrderResponse{
-			Status:    "success",
-			Message:   message,
 			OrderInfo: *orderInfo,
 		})
 	} else {
 		c.JSON(http.StatusCreated, response.OnlinePaymentOrderResponse{
-			Status:               "success",
-			Message:              message,
 			OrderInfo:            *orderInfo,
 			ProceedToPaymentInfo: *proceedToPaymentInfo,
 		})
@@ -109,33 +103,33 @@ func (h *OrderHandler) GetOrdersOfUser(c *gin.Context) {
 		limit = "10"
 	}
 	// Validate and convert the string parameters to integers
-	pageInt, err1 := requestValidation.ValidateAndParseInt(page)
-	limitInt, err2 := requestValidation.ValidateAndParseInt(limit)
-	if err1 != nil || err2 != nil {
-		fmt.Println("error parsing p parameter. error:", err1, ",", err2)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error in url. Try Again", fmt.Errorf("%v, %v", err1, err2)))
+	pageInt, errr := requestValidation.ValidateAndParseInt(page)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing page(p) parameter. error:", errr))
+		return
+	}
+
+	limitInt, errr := requestValidation.ValidateAndParseInt(limit)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing limit(l) parameter. error:", errr))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting orders. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//get orders
-	var orders *[]response.ResponseOrderInfo
-	orders, message, err := h.orderUseCase.GetOrdersOfUser(userID, pageInt, limitInt)
+	orders, err := h.orderUseCase.GetOrdersOfUser(userID, pageInt, limitInt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetOrdersResponse{
-		Status:  "success",
-		Message: "Orders fetched successfully",
-
 		OrdersInfo: *orders,
 	})
 }
@@ -162,26 +156,28 @@ func (h *OrderHandler) GetOrders(c *gin.Context) {
 	if limit == "" {
 		limit = "10"
 	}
+
 	// Validate and convert the string parameters to integers
-	pageInt, err1 := requestValidation.ValidateAndParseInt(page)
-	limitInt, err2 := requestValidation.ValidateAndParseInt(limit)
-	if err1 != nil || err2 != nil {
-		fmt.Println("error parsing p parameter. error:", err1, ",", err2)
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error in url. Try Again", fmt.Errorf("%v, %v", err1, err2)))
+	pageInt, errr := requestValidation.ValidateAndParseInt(page)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing page(p) parameter. error:", errr))
+		return
+	}
+
+	limitInt, errr := requestValidation.ValidateAndParseInt(limit)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing limit(l) parameter. error:", errr))
 		return
 	}
 
 	//get orders
-	var orders *[]response.ResponseOrderInfo
-	orders, message, err := h.orderUseCase.GetOrders(pageInt, limitInt)
+	orders, err := h.orderUseCase.GetOrders(pageInt, limitInt)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetOrdersResponse{
-		Status:     "success",
-		Message:    "Orders fetched successfully",
 		OrdersInfo: *orders,
 	})
 }
@@ -202,34 +198,31 @@ func (h *OrderHandler) CancelMyOrder(c *gin.Context) {
 	//get req from body
 	var req *request.CancelOrderReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error cancelling order. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//cancel order
-	message, err := h.orderUseCase.CancelOrderByUser(req.OrderID, userID)
+	err := h.orderUseCase.CancelOrderByUser(req.OrderID, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Order cancelled successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 
 }
 
@@ -249,27 +242,24 @@ func (h *OrderHandler) CancelOrderByAdmin(c *gin.Context) {
 	//get req from body
 	var req *request.CancelOrderReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//cancel order
-	message, err := h.orderUseCase.CancelOrderByAdmin(req.OrderID)
+	err := h.orderUseCase.CancelOrderByAdmin(req.OrderID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: "Order cancelled successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // return order of user
@@ -288,34 +278,31 @@ func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 	//get req from body
 	var req *request.ReturnOrderReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error returning order. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//return order
-	message, err := h.orderUseCase.ReturnOrderRequestByUser(req.OrderID, userID)
+	err := h.orderUseCase.ReturnOrderRequestByUser(req.OrderID, userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SME{
-		Status:  "success",
-		Message: message,
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // mark order as returned by admin
@@ -334,24 +321,24 @@ func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
 	//get req from body
 	var req *request.ReturnOrderReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//mark order as returned
-	message, err := h.orderUseCase.MarkOrderAsReturned(req.OrderID)
+	err := h.orderUseCase.MarkOrderAsReturned(req.OrderID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Order marked as returned successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // MarkOrderAsDelivered by admin
@@ -370,24 +357,24 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 	//get req from body
 	var req *request.MarkOrderAsDeliveredReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//mark order as delivered
-	message, err := h.orderUseCase.MarkOrderAsDelivered(req.OrderID)
+	err := h.orderUseCase.MarkOrderAsDelivered(req.OrderID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Order marked as delivered successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // get invoice
@@ -402,23 +389,23 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 // @Router /order-invoice [get]
 func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting invoice. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	orderIdParam := c.Query("orderID")
-	orderId, err := strconv.Atoi(orderIdParam)
-	if err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME("Error getting invoice. Try Again", err))
+	orderId, errr := strconv.Atoi(orderIdParam)
+	if errr != nil {
+		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("invalid order ID in query param", errr))
 		return
 	}
 
 	//get invoice
-	invoiceURL, message, err := h.orderUseCase.GetInvoiceOfOrder(userID, uint(orderId))
+	invoiceURL, err := h.orderUseCase.GetInvoiceOfOrder(userID, uint(orderId))
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
@@ -440,22 +427,22 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 // @Router /selectaddress [get]
 func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
 
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting address for checkout. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		// c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting address for checkout. Try Again", err))
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//get address for checkout
-	address, totalQuantiy, totalValue, message, err := h.orderUseCase.GetAddressForCheckout(userID)
+	address, totalQuantiy, totalValue, err := h.orderUseCase.GetAddressForCheckout(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		// c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetAddressesForCheckoutResponse{
-		Status:       "success",
-		Message:      "Address fetched successfully",
 		Addresses:    *address,
 		TotalQuantiy: totalQuantiy,
 		TotalValue:   totalValue,
@@ -478,27 +465,27 @@ func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
 	//get req from body
 	var req *request.SetAddressForCheckOutReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error setting address. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//set address and get coupons
-	resp, message, err := h.orderUseCase.SetAddressGetCoupons(userID, req)
+	resp, err := h.orderUseCase.SetAddressGetCoupons(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
@@ -521,27 +508,29 @@ func (h *OrderHandler) SetCouponGetPaymentMethods(c *gin.Context) {
 	//get req from body
 	var req *request.SetCouponForCheckoutReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//get userID from token
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error setting coupon. Try Again", err))
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		// c.JSON(http.StatusInternalServerError, response.FailedSME("Error setting coupon. Try Again", err))
+		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//set coupon and get payment methods
-	resp, message, err := h.orderUseCase.SetCouponGetPaymentMethods(userID, req)
+	resp, err := h.orderUseCase.SetCouponGetPaymentMethods(userID, req)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		// c.JSON(http.StatusInternalServerError, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 

@@ -3,15 +3,15 @@ package response
 import "MyShoo/internal/domain/entities"
 
 type GetDashBoardDataResponse struct {
-	Status        string                 `json:"status"`
-	Message       string                 `json:"message"`
-	Error         string                 `json:"error"`
+	//Status        string                 `json:"status"`
+	//Message       string                 `json:"message"`
+	//Error         string                 `json:"error"`
 	DashboardData entities.DashboardData `json:"sales_report"` //need update
 	SalePerDay    []entities.SalePerDay  `json:"sale_per_day"`
 }
 
 type TopProductsResponse struct {
-	Status      string        `json:"status"`
+	//Status      string        `json:"status"`
 	Limit 	 int           `json:"limit"`
 	TopProducts []TopProducts `json:"topProducts"`
 }
@@ -29,7 +29,7 @@ type TopProducts struct {
 }
 
 type TopSellersResponse struct {
-	Status     string         `json:"status"`
+	//Status     string         `json:"status"`
 	Limit 	 int           `json:"limit"`
 	TopSellers []TopSellers `json:"topSellers"`
 }
@@ -43,7 +43,7 @@ type TopSellers struct {
 }
 
 type TopBrandsResponse struct {
-	Status    string        `json:"status"`
+	//Status    string        `json:"status"`
 	Limit 	 int           `json:"limit"`
 	TopBrands []TopBrands `json:"topBrands"`
 }
@@ -58,7 +58,7 @@ type TopBrands struct {
 }
 
 type TopModelsResponse struct {
-	Status    string        `json:"status"`
+	//Status    string        `json:"status"`
 	Limit 	 int           `json:"limit"`
 	TopModels []TopModels `json:"topModels"`
 }

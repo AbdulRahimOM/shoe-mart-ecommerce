@@ -1,13 +1,11 @@
 package orderhandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -36,49 +34,39 @@ func (h *CartHandler) AddToCart(c *gin.Context) {
 
 	var req *request.AddToCartReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//check if userID in token and request body match
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding to cart. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+
 		return
 	}
 	if userID != req.UserID {
-		fmt.Println("User ID in token and request body do not match. Corrupted request!!")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Corrupted request. Try Again",
-			Error:   "User ID in token and request body do not match",
-		})
+		c.JSON(http.StatusBadRequest, response.FromErrByText("user ID in token and request body do not match"))
 		return
 	}
 
 	if err := h.cartUseCase.AddToCart(req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding to cart. Try Again",
-			Error:   err.Error(),
-		})
+		// c.JSON(http.StatusInternalServerError, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "Error adding to cart. Try Again",
+		// 	Error:   err.Error(),
+		// })
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SM{
-		Status:  "success",
-		Message: "Added to (or increased quantity in) cart successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // get cart
@@ -92,32 +80,33 @@ func (h *CartHandler) AddToCart(c *gin.Context) {
 // @Router /cart [get]
 func (h *CartHandler) GetCart(c *gin.Context) {
 
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error adding to cart. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		// c.JSON(http.StatusInternalServerError, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "Error adding to cart. Try Again",
+		// 	Error:   err.Error(),
+		// })
+		// c.JSON(http.StatusInternalServerError, response.FromError(errr))
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//get cart
 	var cart *[]response.ResponseCartItems
 	var totalValue float32
-	cart, totalValue, err = h.cartUseCase.GetCart(userID)
+	cart, totalValue, err := h.cartUseCase.GetCart(userID)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error getting cart. Try Again",
-			Error:   err.Error(),
-		})
+		// c.JSON(http.StatusInternalServerError, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "Error getting cart. Try Again",
+		// 	Error:   err.Error(),
+		// })
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.GetCartResponse{
-		Status:     "success",
-		Message:    "Cart fetched successfully",
 		Cart:       *cart,
 		TotalValue: totalValue,
 	})
@@ -138,30 +127,28 @@ func (h *CartHandler) DeleteFromCart(c *gin.Context) {
 
 	var req *request.DeleteFromCartReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//delete from cart
 	if err := h.cartUseCase.DeleteFromCart(req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error deleting from cart. Try Again",
-			Error:   err.Error(),
-		})
+		// c.JSON(http.StatusInternalServerError, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "Error deleting from cart. Try Again",
+		// 	Error:   err.Error(),
+		// })
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SM{
-		Status:  "success",
-		Message: "Deleted from (or decreased quantity in) cart successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }
 
 // clear cart
@@ -175,28 +162,17 @@ func (h *CartHandler) DeleteFromCart(c *gin.Context) {
 // @Router /clearcart [delete]
 func (h *CartHandler) ClearCart(c *gin.Context) {
 
-	userID, err := tools.GetUserID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error clearing cart. Try Again",
-			Error:   err.Error(),
-		})
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	//clear cart
 	if err := h.cartUseCase.ClearCartOfUser(userID); err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error clearing cart. Try Again",
-			Error:   err.Error(),
-		})
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SM{
-		Status:  "success",
-		Message: "Cleared cart successfully",
-	})
+	c.JSON(http.StatusOK, nil)
 }

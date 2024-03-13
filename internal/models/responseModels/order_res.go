@@ -4,22 +4,22 @@ import "MyShoo/internal/domain/entities"
 
 // OrderResponse
 type CODOrderResponse struct {
-	Status    string             `json:"status"`
-	Message   string             `json:"message"`
-	Error     string             `json:"error"`
+	// Status    string             `json:"status"`
+	// Message   string             `json:"message"`
+	// Error     string             `json:"error"`
 	OrderInfo entities.OrderInfo `json:"orderInfo"`
 }
 
 type OnlinePaymentOrderResponse struct {
-	Status               string               `json:"status"`
-	Message              string               `json:"message"`
-	Error                string               `json:"error"`
+	// Status               string               `json:"status"`
+	// Message              string               `json:"message"`
+	// Error                string               `json:"error"`
 	OrderInfo            entities.OrderInfo   `json:"orderInfo"`
 	ProceedToPaymentInfo ProceedToPaymentInfo `json:"proceedToPaymentInfo"`
 }
 type PaidOrderResponse struct {
-	Status    string         `json:"status"`
-	Message   string         `json:"message"`
+	// Status    string         `json:"status"`
+	// Message   string         `json:"message"`
 	OrderInfo entities.Order `json:"order"`
 }
 
@@ -30,17 +30,17 @@ type ResponseOrderInfo struct {
 }
 
 type GetOrdersResponse struct {
-	Status     string              `json:"status"`
-	Message    string              `json:"message"`
-	Error      string              `json:"error"`
+	// Status     string              `json:"status"`
+	// Message    string              `json:"message"`
+	// Error      string              `json:"error"`
 	OrdersInfo []ResponseOrderInfo `json:"ordersInfo"`
 }
 
 // get cart response
 type GetCartResponse struct {
-	Status     string              `json:"status"`
-	Message    string              `json:"message"`
-	Error      string              `json:"error"`
+// 	//Status     string              `json:"status"`
+// 	//Message    string              `json:"message"`
+	//Error      string              `json:"error"`
 	TotalValue float32             `json:"totalValue"`
 	Cart       []ResponseCartItems `json:"cart"`
 }
@@ -58,17 +58,17 @@ type ResponseCartItems struct {
 }
 
 type GetAllWishListsResponse struct {
-	Status     string              `json:"status"`
-	Message    string              `json:"message"`
-	Error      string              `json:"error"`
+	// Status     string              `json:"status"`
+	// Message    string              `json:"message"`
+	// Error      string              `json:"error"`
 	WishLists  []entities.WishList `json:"wishLists"`
 	TotalCount int                 `json:"totalCount"`
 }
 
 type GetWishListByIDResponse struct {
-	Status       string             `json:"status"`
-	Message      string             `json:"message"`
-	Error        string             `json:"error"`
+	// Status       string             `json:"status"`
+	// Message      string             `json:"message"`
+	// Error        string             `json:"error"`
 	WishListName string             `json:"wishListName"`
 	WishItems    []ResponseProduct2 `json:"wishItems"`
 	TotalCount   int                `json:"totalCount"`
@@ -88,9 +88,9 @@ type ResponseProduct2 struct {
 
 // GetInvoiceResponse
 type GetInvoiceResponse struct {
-	Status  string `json:"status"`
-	Message string `json:"message"`
-	Error   string `json:"error"`
+	// Status  string `json:"status"`
+	// Message string `json:"message"`
+	// Error   string `json:"error"`
 	Invoice string `json:"invoice"`
 }
 
@@ -104,15 +104,15 @@ type CheckOutInfo struct {
 
 // GetCheckoutResponse
 type GetCheckoutResponse struct {
-	Status       string       `json:"status"`
-	Message      string       `json:"message"`
+	// Status       string       `json:"status"`
+	// Message      string       `json:"message"`
 	CheckOutInfo CheckOutInfo `json:"checkOutInfo"`
 }
 
 // CheckoutEstimateResponse
 type CheckoutEstimateResponse struct {
-	Status         string   `json:"status"`
-	Message        string   `json:"message"`
+	//Status         string   `json:"status"`
+	//Message        string   `json:"message"`
 	ProductsValue  float32  `json:"productsValue"`
 	Discount       float32  `json:"discount"`
 	ShippingCharge float32  `json:"shippingCharge"`
@@ -129,8 +129,8 @@ type EstimateInfo struct {
 
 // GetAddressesForCheckoutResponse
 type GetAddressesForCheckoutResponse struct {
-	Status       string                 `json:"status"`
-	Message      string                 `json:"message"`
+	//Status       string                 `json:"status"`
+	//Message      string                 `json:"message"`
 	Addresses    []entities.UserAddress `json:"addresses"`
 	TotalQuantiy uint                   `json:"totalQuantiy"`
 	TotalValue   float32                `json:"totalValue"`
@@ -138,8 +138,8 @@ type GetAddressesForCheckoutResponse struct {
 
 // SetAddrGetCouponsResponse
 type SetAddrGetCouponsResponse struct {
-	Status       string               `json:"status"`
-	Message      string               `json:"message"`
+	//Status       string               `json:"status"`
+	//Message      string               `json:"message"`
 	Coupons      []ResponseCoupon    `json:"coupons"`
 	Address      entities.UserAddress `json:"address"`
 	TotalQuantiy uint                 `json:"totalQuantiy"`
@@ -154,8 +154,8 @@ type BillBeforeCoupon struct {
 
 // GetPaymentMethodsForCheckoutResponse
 type GetPaymentMethodsForCheckoutResponse struct {
-	Status              string               `json:"status"`
-	Message             string               `json:"message"`
+	//Status              string               `json:"status"`
+	//Message             string               `json:"message"`
 	Address             entities.UserAddress `json:"address"`
 	TotalQuantiy        uint                 `json:"totalQuantiy"`
 	BillSumary          BillAfterCoupon      `json:"billSummary"`

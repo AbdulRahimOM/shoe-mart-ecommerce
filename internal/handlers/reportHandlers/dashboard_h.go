@@ -1,10 +1,10 @@
 package reporthandlers
 
 import (
+	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	response "MyShoo/internal/models/responseModels"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -27,7 +27,7 @@ func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
 
 	var dashBoardData *entities.DashboardData
 	var salesPerDay *[]entities.SalePerDay
-	var err error
+	var err *e.Error
 
 	//get url param
 	rangeType := c.Param("range")
@@ -36,18 +36,10 @@ func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
 	case "full-time":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataFullTime()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - full time",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
@@ -57,51 +49,34 @@ func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
 		startDate := c.Query("sd")
 		endDate := c.Query("ed")
 		if startDate == "" && endDate == "" {
-			fmt.Println("No date range provided")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "No date range provided. Please recheck URL and try again",
-				Error:   "No date range provided in url.",
-			})
+			// fmt.Println("No date range provided")
+			// c.JSON(400, response.SME{
+			// 	Status:  "failed",
+			// 	Message: "No date range provided. Please recheck URL and try again",
+			// 	Error:   "No date range provided in url.",
+			// })
+			c.JSON(http.StatusBadRequest, response.FromErrByText("no date range provided inURL"))
 			return
 		} else {
 			// validate date params, and recieve time
-			startTime, err := requestValidation.ValidateAndParseDate(startDate)
-			if err != nil {
-				fmt.Println("error occured in validating and parsing start date")
-				c.JSON(http.StatusBadRequest, response.SME{
-					Status:  "failed",
-					Message: "Error occured. Please recheck URL and try again",
-					Error:   err.Error(),
-				})
+			startTime, errr := requestValidation.ValidateAndParseDate(startDate)
+			if errr != nil {
+				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing start date", errr))
 				return
 			}
-			endTime, err := requestValidation.ValidateAndParseDate(endDate)
-			if err != nil {
-				fmt.Println("error occured in validating and parsing end date")
-				c.JSON(400, response.SME{
-					Status:  "failed",
-					Message: "Error occured. Please recheck URL and try again",
-					Error:   err.Error(),
-				})
+			endTime, errr := requestValidation.ValidateAndParseDate(endDate)
+			if errr != nil {
+				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing end date", errr))
 				return
 			}
 
 			//get dashboard data
 			dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataBetweenDates(startTime, endTime)
 			if err != nil {
-				fmt.Println("error occured in getting dashboard data")
-				c.JSON(400, response.SME{
-					Status:  "failed",
-					Message: "Error occured. Please recheck URL and try again", //need update
-					Error:   err.Error(),
-				})
+				c.JSON(err.StatusCode, response.FromError(err))
 				return
 			} else {
 				c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-					Status:        "success",
-					Message:       fmt.Sprint("DashBoard Data between ", startDate, " and ", endDate),
-					Error:         "",
 					DashboardData: *dashBoardData,
 					SalePerDay:    *salesPerDay,
 				})
@@ -112,167 +87,107 @@ func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
 	case "this-month":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataThisMonth()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for this month")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - this month",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 
 	case "last-month":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataLastMonth()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for last month")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - last month",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 
 	case "this-week":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataThisWeek()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for this week")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - this week",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 
 	case "last-week":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataLastWeek()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for last week")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - last week",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 	case "this-year":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataThisYear()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for this year")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - this year",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 
 	case "last-year":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataLastYear()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for last year")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - last year",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 
 	case "today":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataToday()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for today")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - today",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 	case "yesterday":
 		dashBoardData, salesPerDay, err = h.reportsUC.GetDashBoardDataYesterday()
 		if err != nil {
-			fmt.Println("error occured in getting dashboard data for yesterday")
-			c.JSON(400, response.SME{
-				Status:  "failed",
-				Message: "Error occured. Please recheck URL and try again",
-				Error:   err.Error(),
-			})
+			c.JSON(err.StatusCode, response.FromError(err))
 			return
 		} else {
 			c.JSON(http.StatusOK, response.GetDashBoardDataResponse{
-				Status:        "success",
-				Message:       "DashBoard Data - yesterday",
-				Error:         "",
 				DashboardData: *dashBoardData,
 				SalePerDay:    *salesPerDay,
 			})
+			return
 		}
 
 	default:
-		c.JSON(400, response.SME{
-			Status:  "failed",
-			Message: "Please recheck URL and try again",
-			Error:   "Invalid url query.",
-		})
+		c.JSON(http.StatusBadRequest, response.FromErrByText("invalid url query"))
 		return
 	}
 }

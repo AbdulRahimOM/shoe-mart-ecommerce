@@ -1,13 +1,11 @@
 package producthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	request "MyShoo/internal/models/requestModels"
 	response "MyShoo/internal/models/responseModels"
 	"MyShoo/internal/tools"
 	usecase "MyShoo/internal/usecase/interface"
 	requestValidation "MyShoo/pkg/validation"
-	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -37,17 +35,14 @@ func NewProductHandler(productUseCase usecase.IProductsUC) *ProductHandler {
 func (h *ProductHandler) GetProducts(c *gin.Context) {
 
 	//get products
-	var products *[]response.ResponseProduct
 	products, err := h.productUseCase.GetProducts()
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error fetching products. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.SMED{
-		Status:  "success",
-		Message: "Products fetched successfully",
-		Data:    products,
+		Data: products,
 	})
 
 }
@@ -67,39 +62,40 @@ func (h *ProductHandler) AddStock(c *gin.Context) {
 
 	var req request.AddStockReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//check if sellerID in token and request body match
-	sellerID, err := tools.GetSellerID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error occured", err))
+	sellerID, errr := tools.GetSellerID(c)
+	if errr != nil {
+		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting sellerID from token:", errr))
 		return
 	}
 	if sellerID != req.SellerID {
-		fmt.Println("Seller ID in token and request body do not match. Corrupted request!!")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Corrupted request. Try Again",
-			Error:   "Seller ID in token and request body do not match",
-		})
+		// fmt.Println("Seller ID in token and request body do not match. Corrupted request!!")
+		// c.JSON(http.StatusBadRequest, response.SME{
+		// 	Status:  "failed",
+		// 	Message: "Corrupted request. Try Again",
+		// 	Error:   "Seller ID in token and request body do not match",
+		// })
+		c.JSON(http.StatusForbidden, response.FromErrByText("seller ID in token and request body do not match"))
 		return
 	}
 
 	//add stock
 	if err := h.productUseCase.AddStock(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error adding stock. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Stock added successfully"))
+	c.JSON(http.StatusOK, nil)
 }
 
 // edit stock handler
@@ -117,41 +113,32 @@ func (h *ProductHandler) EditStock(c *gin.Context) {
 
 	var req request.EditStockReq
 	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(err.Error(), e.ErrOnBindingReq))
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
 		return
 	}
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {
-		c.JSON(http.StatusBadRequest, response.FailedSME(fmt.Sprint(err), e.ErrOnValidation))
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
 		return
 	}
 
 	//check if sellerID in token and request body match
-	sellerID, err := tools.GetSellerID(c)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, response.SME{
-			Status:  "failed",
-			Message: "Error editing stock. Try Again",
-			Error:   err.Error(),
-		})
+	sellerID, errr := tools.GetSellerID(c)
+	if errr != nil {
+		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting sellerID from token:", errr))
 		return
 	}
 	if sellerID != req.SellerID {
-		fmt.Println("Seller ID in token and request body do not match. Corrupted request!!")
-		c.JSON(http.StatusBadRequest, response.SME{
-			Status:  "failed",
-			Message: "Corrupted request. Try Again",
-			Error:   "Seller ID in token and request body do not match",
-		})
+		c.JSON(http.StatusForbidden, response.FromErrByText("seller ID in token and request body do not match"))
 		return
 	}
 
 	//add stock
 	if err := h.productUseCase.EditStock(&req); err != nil {
-		c.JSON(http.StatusInternalServerError, response.FailedSME("Error editing stock. Try Again", err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, response.SuccessSM("Stock edited successfully"))
+	c.JSON(http.StatusOK, nil)
 }
