@@ -4,7 +4,6 @@ import (
 	"MyShoo/internal/config"
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	msg "MyShoo/internal/domain/messages"
 	request "MyShoo/internal/models/requestModels"
 	repo "MyShoo/internal/repository/interface"
 	"MyShoo/internal/services"
@@ -70,14 +69,15 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 	if order.Status != "payment pending" {
 		return nil, &e.Error{Err: errors.New("order payment status is not 'payment pending'"), StatusCode: 400}
 	} else {
-		if order.TransactionID, err = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo);err != nil {
-			return nil, &e.Error{Err: errors.New("Service error"), StatusCode: 500}
+		var errr error
+		if order.TransactionID, errr = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo); errr != nil {
+			return nil, &e.Error{Err: errors.New("Service error at creating razorpay order:" + errr.Error()), StatusCode: 500}
 		}
 
 		//update order with transactionID
 		err = uc.orderRepo.UpdateOrderTransactionID(order.ID, order.TransactionID)
 		if err != nil {
-			return nil, "Error updating order with transactionID", err
+			return nil, err
 		}
 	}
 
@@ -94,5 +94,5 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 		Phone:              order.FkAddress.Phone,
 	}
 
-	return &proceedToPaymentReq, "Kinldy proceed to payment", nil
+	return &proceedToPaymentReq, nil
 }

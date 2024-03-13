@@ -41,9 +41,9 @@ func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 	}
 
 	//call usecase
-	message, err := h.orderUseCase.CreateNewCoupon(&req)
+	err := h.orderUseCase.CreateNewCoupon(&req)
 	if err != nil {
-		c.JSON(400, response.FailedSME(message, err))
+		c.JSON(err.StatusCode, response.FailedSME(message, err))
 		return
 	}
 

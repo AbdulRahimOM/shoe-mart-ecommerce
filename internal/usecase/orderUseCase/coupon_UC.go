@@ -6,7 +6,6 @@ import (
 	request "MyShoo/internal/models/requestModels"
 	requestValidation "MyShoo/pkg/validation"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/jinzhu/copier"
@@ -22,19 +21,16 @@ func (uc *OrderUseCase) CreateNewCoupon(req *request.NewCouponReq) *e.Error {
 
 	var coupon entities.Coupon
 	if errr := copier.Copy(&coupon, &req); errr != nil {
-		errr = fmt.Errorf("Error occured while copying req to coupon,error:", errr)
-		return &e.Error{Err: errr, StatusCode: 500}
+		return &e.Error{Err: errors.New("error occured while copying req to coupon" + errr.Error()), StatusCode: 500}
 	}
 
 	startDate, errr := time.Parse("2006-01-02", req.StartDate)
 	if errr != nil {
-		errr = fmt.Errorf("Error occured while parsing start date", errr)
-		return &e.Error{Err: errr, StatusCode: 400}
+		return &e.Error{Err: errors.New("invalid start date. error on parsing:" + errr.Error()), StatusCode: 400}
 	}
 	endDate, errr := time.Parse("2006-01-02", req.EndDate)
 	if errr != nil {
-		errr = fmt.Errorf("Error occured while parsing end date", errr)
-		return &e.Error{Err: errr, StatusCode: 400}
+		return &e.Error{Err: errors.New("invalid end date. error on parsing:" + errr.Error()), StatusCode: 400}
 	}
 	startDate = startDate.UTC().Add(-5*time.Hour - 30*time.Minute)
 	endDate = endDate.UTC().Add(-5*time.Hour - 30*time.Minute)

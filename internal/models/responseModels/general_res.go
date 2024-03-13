@@ -1,5 +1,11 @@
 package response
 
+import (
+	e "MyShoo/internal/domain/customErrors"
+
+	"github.com/gin-gonic/gin"
+)
+
 type SM struct {
 	Status  string `json:"status"`
 	Message string `json:"message"`
@@ -35,4 +41,10 @@ func SuccessSM(message string) SM {
 		Message: message,
 	}
 
+}
+func ErrorOf(err *e.Error) gin.H{
+	if err == nil {
+		return gin.H{"error": ""}
+	}
+	return gin.H{"error": err.Err.Error()}
 }

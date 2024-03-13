@@ -53,7 +53,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 	//validate payment method
 	paymentValid := tools.IsValidPaymentMethod(req.PaymentMethod)
 	if !paymentValid {
-		return nil, nil, &e.Error {Err:errors.New("invalid payment method"), StatusCode: 400}
+		return nil, nil, &e.Error{Err: errors.New("invalid payment method"), StatusCode: 400}
 	}
 
 	//check if address exists
@@ -64,7 +64,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 	}
 
 	if !addressExists {
-		return nil, nil, &e.Error {Err:errors.New("address doesn't exist by ID"), StatusCode: 400}
+		return nil, nil, &e.Error{Err: errors.New("address doesn't exist by ID"), StatusCode: 400}
 	}
 	address, err := uc.userRepo.GetUserAddress(req.AddressID)
 	if err != nil {
@@ -78,7 +78,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 		return nil, nil, err
 	}
 	if cartEmpty {
-		return nil, nil, &e.Error {Err:errors.New("cart is empty"), StatusCode: 400}
+		return nil, nil, &e.Error{Err: errors.New("cart is empty"), StatusCode: 400}
 	}
 	//get cart
 	var cart *[]entities.Cart
@@ -91,12 +91,11 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 		//check for stock availability
 		stock, err := uc.productRepo.GetStockOfProduct(cartItem.ProductID)
 		if err != nil {
-			fmt.Println("Error occured while getting stock")
 			return nil, nil, err
 		}
 		if stock < cartItem.Quantity {
-			err := fmt.Errorf("Stock not available for product with product ID:", cartItem.ProductID, ". Available stock left:", stock)
-			return nil, nil, err //update needed
+			err := fmt.Errorf("stock not available for product with product id: %d. Available stock left:%d", cartItem.ProductID, stock)
+			return nil, nil, &e.Error{Err: err,StatusCode: 400} 
 		}
 
 		orderItems = append(orderItems, entities.OrderItem{
@@ -106,10 +105,9 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 		})
 	}
 
-	referenceNo, err := tools.MakeRandomUUID()
-	if err != nil {
-		fmt.Println("Error occured while generating reference number")
-		return nil, nil, err
+	referenceNo, errr := tools.MakeRandomUUID()
+	if errr != nil {
+		return nil, nil, &e.Error{Err: errr, StatusCode: 500}
 	}
 
 	shippingCharges := getShippingCharge(address, totalProductValue)
@@ -135,18 +133,19 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 
 	if strings.ToUpper(req.PaymentMethod) == "COD" {
 		if !config.DeliveryConfig.CashOnDeliveryAvailable {
-			return nil, nil, e.ErrCODNotAvailable
+			return nil, nil, &e.Error{Err: e.ErrCODNotAvailable, StatusCode: 400}
 		}
 		if totalProductValue > config.DeliveryConfig.MaxOrderAmountForCOD {
-			return nil, nil, e.ErrOrderExceedsMaxAmountForCOD
+			return nil, nil, &e.Error{Err: e.ErrOrderExceedsMaxAmountForCOD, StatusCode: 400}
 		}
 		status = "placed"
 	} else {
 
 		status = "payment pending"
-		transactionID, err = services.CreateRazorpayOrder(finalAmount, referenceNo)
-		if err != nil {
-			return nil, nil, err
+		var errr error
+		transactionID, errr = services.CreateRazorpayOrder(finalAmount, referenceNo)
+		if errr != nil {
+			return nil, nil, &e.Error{Err: errr, StatusCode: 500}
 		}
 	}
 	order := entities.Order{
@@ -201,42 +200,40 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 }
 
 // GetOrdersOfUser
-func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, string, *e.Error) {
+func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, *e.Error) {
 	var orders *[]entities.DetailedOrderInfo
 	var responseOrders []response.ResponseOrderInfo
 	offset := (page - 1) * limit
 	orders, err := uc.orderRepo.GetOrdersOfUser(userID, offset, limit)
 	if err != nil {
-		fmt.Println("Error occured while getting orders")
-		return &responseOrders, "Error occured while getting orders", err
+		return &responseOrders, err
 	}
 
-	err = copier.Copy(&responseOrders, &orders)
-	if err != nil {
-		return &responseOrders, "Error occured while copying orders to responseOrders", err
+	if errr := copier.Copy(&responseOrders, &orders); errr != nil {
+		// return &responseOrders,  errr
+		return nil, &e.Error{Err: errors.New("Error occured while copying orders to responseOrders" + errr.Error()), StatusCode: 500}
+
 	}
 
-	return &responseOrders, "Orders fetched successfully", nil
+	return &responseOrders, nil
 }
 
 // GetAllOrders
 func (uc *OrderUseCase) GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, *e.Error) {
-	var orders *[]entities.DetailedOrderInfo
-	var responseOrders []response.ResponseOrderInfo
-	var err error
+
 	offset := (page - 1) * limit
-	orders, err = uc.orderRepo.GetOrders(offset, limit)
+	orders, err := uc.orderRepo.GetOrders(offset, limit)
 	if err != nil {
-		return &responseOrders, err
+		return nil, &e.Error{Err: err, StatusCode: 500}
 	}
 
-	//convert orders to responseOrders using "github.com/jinzhu/copier"
-	err = copier.Copy(&responseOrders, &orders)
-	if err != nil {
-		fmt.Println("Error occured while copying orders to responseOrders")
-		return &responseOrders, "Error occured while copying orders to responseOrders", err
+	//copy necessary fields of orders to responseOrders
+	var responseOrders []response.ResponseOrderInfo
+	var errr error
+	if errr = copier.Copy(&responseOrders, &orders);errr != nil {
+		return nil, &e.Error{Err: errors.New("Error occured while copying orders to responseOrders" + errr.Error()), StatusCode: 500}
 	}
-	return &responseOrders, "Orders fetched successfully", nil
+	return &responseOrders,  nil
 }
 
 // CancelOrder(orderID uint) (string, error)
@@ -244,50 +241,41 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while checking if order exists")
 		return err
 	}
 	if !orderExists {
-		return errors.New("order doesn't exist by ID")
+		return &e.Error{Err: errors.New("order doesn't exist by ID"), StatusCode: 400}
 	}
 
 	//check if order belongs to userID
 	userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting userID")
 		return err
 	}
 
 	//check if userID in argument and userID from order match
 	if userID != userIDFromOrder {
-		return errors.New("order doesn't belong to user")
+		return &e.Error{Err: errors.New("order doesn't belong to user"), StatusCode: 401}
 	}
 
 	//check if order is already cancelled
 	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order status")
 		return err
 	}
 
 	if orderStatus != "placed" && orderStatus != "payment pending" {
 		if orderStatus == "cancelled" {
 			message := "Order is already in '" + orderStatus + "' status"
-			return errors.New(message)
+			return &e.Error{Err: errors.New(message), StatusCode: 400}
 		} else {
 			message := "Cannot cancel. Order is in '" + orderStatus + "' status"
-			return errors.New(message)
+			return &e.Error{Err: errors.New(message), StatusCode: 400}
 		}
 	}
 
 	//cancel order, update stock, refund to wallet if already paid
-	err = uc.orderRepo.CancelOrder(orderID)
-	if err != nil {
-		fmt.Println("Error occured while cancelling order")
-		return err
-	}
-
-	return nil
+	return uc.orderRepo.CancelOrder(orderID)
 }
 
 // CancelOrderByAdmin(orderID uint) (string, error)
@@ -295,37 +283,29 @@ func (uc *OrderUseCase) CancelOrderByAdmin(orderID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while checking if order exists")
 		return err
 	}
 	if !orderExists {
-		return errors.New("order doesn't exist by ID")
+		return &e.Error{Err: errors.New("order doesn't exist by ID"), StatusCode: 400}
 	}
 
 	//check if order is already cancelled
 	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order status")
 		return err
 	}
 	if orderStatus != "placed" && orderStatus != "payment pending" {
 		if orderStatus == "cancelled" {
 			message := "Order is already in '" + orderStatus + "' status"
-			return errors.New(message)
+			return &e.Error{Err: errors.New(message), StatusCode: 400}
 		} else {
 			message := "Cannot cancel. Order is in '" + orderStatus + "' status"
-			return errors.New(message)
+			return &e.Error{Err: errors.New(message), StatusCode: 400}
 		}
 	}
 
 	//cancel order, update stock, refund to wallet if already paid
-	err = uc.orderRepo.CancelOrder(orderID)
-	if err != nil {
-		fmt.Println("Error occured while cancelling order")
-		return err
-	}
-
-	return nil
+	return uc.orderRepo.CancelOrder(orderID)
 }
 
 // ReturnOrderRequestByUser
@@ -333,43 +313,33 @@ func (uc *OrderUseCase) ReturnOrderRequestByUser(orderID, userID uint) *e.Error 
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while checking if order exists")
 		return err
 	}
 	if !orderExists {
-		return errors.New("order doesn't exist by ID")
+		return &e.Error{Err: errors.New("order doesn't exist by ID"),StatusCode: 400}
 	}
 
 	//check if order belongs to userID
 	userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting userID")
 		return err
 	}
 	if userID != userIDFromOrder {
-		return errors.New("order doesn't belong to user")
+		return &e.Error{Err: errors.New("order doesn't belong to user"),StatusCode: 401}
 	}
 
 	//check if order is in "delivered" status
 	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order status")
 		return err
 	}
 	if orderStatus != "delivered" {
 		message := "Cannot return. Order is in '" + orderStatus + "' status"
-		fmt.Println(message)
-		return errors.New(message)
+		return &e.Error{Err: errors.New(message), StatusCode: 400}
 	}
 
-	//return order
-	err = uc.orderRepo.ReturnOrderRequest(orderID)
-	if err != nil {
-		fmt.Println("Error occured while returning order")
-		return err
-	}
-
-	return nil
+	//request return order
+	return uc.orderRepo.ReturnOrderRequest(orderID)
 }
 
 // MarkOrderAsReturned
@@ -377,33 +347,24 @@ func (uc *OrderUseCase) MarkOrderAsReturned(orderID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while checking if order exists")
 		return err
 	}
 	if !orderExists {
-		return errors.New("order doesn't exist by ID")
+		return &e.Error{Err: errors.New("order doesn't exist by ID"), StatusCode: 400}
 	}
 
 	//check if order is in "return requested" status
 	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order status")
 		return err
 	}
 	if orderStatus != "return requested" {
 		message := "Cannot mark as returned. Order is in '" + orderStatus + "' status"
-		fmt.Println(message)
-		return errors.New(message)
+		return &e.Error{Err: errors.New(message), StatusCode: 400}
 	}
 
 	//mark order as returned, update stock, refund to wallet
-	err = uc.orderRepo.MarkOrderAsReturned(orderID)
-	if err != nil {
-		fmt.Println("Error occured while marking order as returned")
-		return err
-	}
-
-	return nil
+	return uc.orderRepo.MarkOrderAsReturned(orderID)
 }
 
 // MarkOrderAsDelivered
@@ -411,39 +372,31 @@ func (uc *OrderUseCase) MarkOrderAsDelivered(orderID uint) *e.Error {
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while checking if order exists")
 		return err
 	}
 	if !orderExists {
-		return errors.New("order doesn't exist by ID")
+		return &e.Error{Err: errors.New("order doesn't exist by ID"), StatusCode: 400}
 	}
 
 	//check if order is in "placed" status
 	orderStatus, err := uc.orderRepo.GetOrderStatusByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order status")
 		return err
 	}
 	if orderStatus != "placed" {
 		if orderStatus == "delivered" {
 			message := "Order is already in '" + orderStatus + "' status"
-			return errors.New(message)
+			return &e.Error{Err: errors.New(message), StatusCode: 400}
 		} else {
 			message := "Cannot mark as delivered. Order is in '" + orderStatus + "' status"
-			return errors.New(message)
+			return &e.Error{Err: errors.New(message), StatusCode: 400}
 		}
 	}
 
-	err = uc.orderRepo.MarkOrderAsDelivered(orderID)
-	if err != nil {
-		fmt.Println("Error occured while marking order as delivered")
-		return err
-	}
-
-	return nil
+	return uc.orderRepo.MarkOrderAsDelivered(orderID)
 }
 
-func getPaymentMethods(orderValue float32) (*[]string, bool, string) {
+func getPaymentMethods(orderValue float32) (*[]string, bool, *string) {
 	var paymentMethods []string
 	var codAvailability bool = true
 	var codAvailabilityNote string //if COD not available
@@ -464,7 +417,7 @@ func getPaymentMethods(orderValue float32) (*[]string, bool, string) {
 		}
 	}
 
-	return &paymentMethods, codAvailability, codAvailabilityNote
+	return &paymentMethods, codAvailability, &codAvailabilityNote
 }
 
 func getShippingCharge(address *entities.UserAddress, productsValue float32) float32 {
@@ -493,15 +446,15 @@ func getCouponDiscount(coupon *entities.Coupon, orderValue float32, usageCount u
 	var discount float32
 	switch {
 	case coupon.Blocked:
-		return 0, e.Error{Err: errors.New("coupon is blocked"), StatusCode: 403}
+		return 0, &e.Error{Err: errors.New("coupon is blocked"), StatusCode: 403}
 	case coupon.StartDate.After(time.Now()):
-		return 0, e.Error{Err: errors.New("coupon is not active yet"), StatusCode: 403}
+		return 0, &e.Error{Err: errors.New("coupon is not active yet"), StatusCode: 403}
 	case coupon.EndDate.Before(time.Now()):
-		return 0, e.Error{Err: errors.New("coupon is expired"), StatusCode: 403}
+		return 0, &e.Error{Err: errors.New("coupon is expired"), StatusCode: 403}
 	case coupon.MinOrderValue > orderValue:
-		return 0, e.Error{Err: errors.New("order amount is less than required for coupon"), StatusCode: 403}
+		return 0, &e.Error{Err: errors.New("order amount is less than required for coupon"), StatusCode: 403}
 	case usageCount >= coupon.UsageLimit:
-		return 0, e.Error{Err: errors.New("coupon usage limit exceeded"), StatusCode: 403}
+		return 0, &e.Error{Err: errors.New("coupon usage limit exceeded"), StatusCode: 403}
 	default:
 		if coupon.Type == "fixed" {
 			discount = myMath.RoundFloat32(coupon.MaxDiscount, 2)
@@ -536,7 +489,7 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 		return nil, err
 	}
 	if address.UserID != userID {
-		return nil, &e.Error {Err:errors.New("address doesn't belong to user"), StatusCode: 401}
+		return nil, &e.Error{Err: errors.New("address doesn't belong to user"), StatusCode: 401}
 	}
 
 	totalQuantiy, totalProductsValue, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
@@ -546,9 +499,6 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 
 	//get shipping charge
 	shippingCharge := getShippingCharge(address, totalProductsValue)
-	if err != nil {
-		return nil, err
-	}
 
 	//get coupons
 	coupons, err := uc.orderRepo.GetActiveCoupons()
@@ -556,10 +506,8 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 		return nil, err
 	}
 	var respCoupons []response.ResponseCoupon
-	err = copier.Copy(&respCoupons, &coupons)
-	if err != nil {
-		fmt.Println("Error occured while copying coupons to responseCoupons, error:", err)
-		return nil, err
+	if errr := copier.Copy(&respCoupons, &coupons);errr != nil {
+		return nil, &e.Error{Err: errors.New("error occured while copying coupons to responseCoupons" + errr.Error()), StatusCode: 500}
 	}
 
 	response := response.SetAddrGetCouponsResponse{
@@ -584,7 +532,7 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 	if err != nil {
 		return nil, err
 	} else if address.UserID != userID {
-		return nil, &e.Error {Err:errors.New("address doesn't belong to user"), StatusCode: 401}
+		return nil, &e.Error{Err: errors.New("address doesn't belong to user"), StatusCode: 401}
 	}
 
 	//get coupon by id
@@ -595,9 +543,6 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 	}
 
 	shippingCharge := getShippingCharge(address, totalProductsValue)
-	if err != nil {
-		return nil, err
-	}
 
 	coupon, err := uc.orderRepo.GetCouponByID(req.CouponID)
 	if err != nil {
@@ -623,10 +568,8 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 	paymentMethods, codAvailability, codAvailabilityNote := getPaymentMethods(grandTotal)
 
 	var respCoupon response.ResponseCoupon
-	err = copier.Copy(&respCoupon, &coupon)
-	if err != nil {
-		fmt.Println("Error occured while copying coupon to responseCoupon")
-		return nil, err
+	if errr := copier.Copy(&respCoupon, &coupon);errr != nil {
+		return nil, &e.Error{Err: errors.New("Error occured while copying coupon to responseCoupon" + errr.Error()), StatusCode: 500}
 	}
 
 	resp := response.GetPaymentMethodsForCheckoutResponse{
@@ -643,7 +586,7 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 			GrandTotal:         grandTotal,
 		},
 		CODAvailability:     codAvailability,
-		CODAvailabilityNote: codAvailabilityNote,
+		CODAvailabilityNote: *codAvailabilityNote,
 		PaymentMethods:      *paymentMethods,
 		WalletBalance:       walletBalance,
 	}
@@ -656,51 +599,45 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *
 	//check if order exists
 	orderExists, err := uc.orderRepo.DoOrderExistByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while checking if order exists")
 		return nil, err
 	}
 	if !orderExists {
-		return nil, &e.Error {Err:errors.New("order doesn't exist by ID"), StatusCode: 400}
+		return nil, &e.Error{Err: errors.New("order doesn't exist by ID"), StatusCode: 400}
 	}
 
 	//check if order belongs to userID
 	userIDFromOrder, err := uc.orderRepo.GetUserIDByOrderID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting userID")
 		return nil, err
 	}
 
 	if userID != userIDFromOrder {
-		return nil, &e.Error {Err:errors.New("order doesn't belong to user"), StatusCode: 401}
+		return nil, &e.Error{Err: errors.New("order doesn't belong to user"), StatusCode: 401}
 	}
 
 	//check if payment status is "paid"
 	paymentStatus, err := uc.orderRepo.GetPaymentStatusByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting payment status")
 		return nil, err
 	}
 	if paymentStatus != "paid" {
 		message := "Cannot generate invoice. Payment status is '" + paymentStatus + "'"
-		return nil, &e.Error {Err:errors.New(message), StatusCode: 400}
+		return nil, &e.Error{Err: errors.New(message), StatusCode: 400}
 	}
 
 	//get orderInfo
 	order, err := uc.orderRepo.GetOrderSummaryByID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order summary")
 		return nil, err
 	}
 	orderItems, err := uc.orderRepo.GetOrderItemsPQRByOrderID(orderID)
 	if err != nil {
-		fmt.Println("Error occured while getting order items")
 		return nil, err
 	}
 
 	//get user details
 	userInfo, err := uc.userRepo.GetUserBasicInfoByID(userID)
 	if err != nil {
-		fmt.Println("Error occured while getting user basic info")
 		return nil, err
 	}
 
@@ -716,34 +653,28 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *
 		fmt.Println("Uploading invoice to cloud is disabled. Invoice will be saved locally and link will be provided from that.")
 		// Output the PDF to a file
 		outputPath := filepath.Join(config.ExecutableDir, "testKit/invoiceOutput.pdf")
-		err = pdf.OutputFileAndClose(outputPath)
-		if err != nil {
-			fmt.Println("Error saving PDF:", err)
-			return nil, err
+		if errr := pdf.OutputFileAndClose(outputPath);errr != nil {
+			return nil, &e.Error{Err: errors.New("error saving pdf:" + errr.Error()), StatusCode: 500}
 		} else {
 			return &outputPath, nil
 		}
 	} else {
 		tempFileName, err := tools.MakeRandomUUID()
 		if err != nil {
-			fmt.Println("Error occured while generating random UUID")
-			return nil, err
+			return nil, &e.Error{Err: errors.New("error occured while generating random UUID:"+err.Error()), StatusCode: 500}
 		}
 		tempFilePath := filepath.Join(os.TempDir(), tempFileName+"invoice.pdf")
 		defer os.Remove(tempFilePath)
-		err = pdf.OutputFileAndClose(tempFilePath)
-		if err != nil {
-			fmt.Println("Error saving PDF:", err)
-			return nil, err
+		if errr := pdf.OutputFileAndClose(tempFilePath);errr != nil {
+			return nil, &e.Error{Err: errors.New("error saving pdf:" + errr.Error()), StatusCode: 500}
 		}
-		url, err := uc.orderRepo.UploadInvoice(tempFilePath, fmt.Sprint("invoice", orderID))
-		if err != nil {
+		url, errr := uc.orderRepo.UploadInvoice(tempFilePath, fmt.Sprint("invoice", orderID))
+		if errr != nil {
 			fmt.Println("Error uploading PDF:", err)
-			return nil, err
+			return nil, &e.Error{Err: errors.New("error saving pdf:" + errr.Error()), StatusCode: 500}
 		}
 
 		fmt.Println("url: ", url)
-
 		return &url, nil
 	}
 
