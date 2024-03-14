@@ -24,30 +24,24 @@ type IModelsRepo interface {
 	AddModel(req *entities.Models) *e.Error
 	DoModelExistsbyName(name string) (bool, *e.Error)
 	EditModel(req *request.EditModelReq) *e.Error
-	DoModelExistsByID(id uint) (bool, *e.Error)
 	GetModelsByBrandsAndCategories(brandExists bool, brandIDInts []uint, categoryExists bool, categoryIDInts []uint) (*[]entities.Models, *e.Error)
-	DoModelExistByIDAndBelongsToUser(id uint, sellerID uint) (bool, bool, *e.Error)
+	GetSellerIdOfModel(id uint) (uint, *e.Error)
 }
 
 type IProductsRepo interface {
-	DoColourVariantExists(req *entities.ColourVariant) (bool, *e.Error)
+	DoColourVariantExistByAttributes(req *entities.ColourVariant) (bool, *e.Error)
 	AddColourVariant(req *entities.ColourVariant, file *os.File) *e.Error
 	EditColourVariant(req *entities.ColourVariant) *e.Error
-	DoColourVariantExistByID(id uint) (bool, *e.Error)
 	GetColourVariantsUnderModel(modelID uint) (*[]entities.ColourVariant, *e.Error)
 
-	GetProducts() (*[]entities.Product, *e.Error)
-
 	DoDimensionalVariantExistsByAttributes(req *entities.DimensionalVariant) (bool, *e.Error)
-	DoDimensionalVariantExistByID(id uint) (bool, *e.Error)
-
 	AddDimensionalVariantAndProductCombinations(dimensionalVariant *entities.DimensionalVariant) *e.Error
 
 	GetStockOfProduct(productID uint) (uint, *e.Error)
 	AddStock(req *request.AddStockReq) *e.Error
-	DoProductExistsByID(id uint) (bool, *e.Error)
 	EditStock(req *request.EditStockReq) *e.Error
 	DoesProductExistByID(id uint) (bool, *e.Error)
 
+	GetProducts() (*[]entities.Product, *e.Error)
 	GetPriceOfProduct(productID uint) (float32, *e.Error)
 }

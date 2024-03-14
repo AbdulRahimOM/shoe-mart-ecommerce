@@ -27,44 +27,25 @@ func (repo *UserRepo) GetAddressNameByID(id uint) (string, *e.Error) {
 		id).Scan(&name)
 
 	if query.Error != nil {
-		return "", &e.Error{Err: query.Error, StatusCode: 500}
+		return "", e.DBQueryError(&query.Error)
 	}
 
 	return name, nil
 }
 
-func (repo *UserRepo) DoAddressExistsByID(id uint) (bool, *e.Error) {
-	var temp entities.UserAddress
-	query := repo.DB.Raw(`
-		SELECT *
-		FROM user_addresses
-		WHERE id = ?`,
-		id).Scan(&temp)
-
-	if query.Error != nil {
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-}
-
-func (repo *UserRepo) EditUserAddress(newAddress *entities.UserAddress)*e.Error {
+func (repo *UserRepo) EditUserAddress(newAddress *entities.UserAddress) *e.Error {
 	result := repo.DB.Model(&entities.UserAddress{}).Where("id = ?", newAddress.ID).Updates(newAddress)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
 }
 
-func (repo *UserRepo) AddUserAddress(newAddress *entities.UserAddress)*e.Error {
+func (repo *UserRepo) AddUserAddress(newAddress *entities.UserAddress) *e.Error {
 	result := repo.DB.Create(&newAddress)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
@@ -79,7 +60,7 @@ func (repo *UserRepo) DoAddressNameExists(name string) (bool, *e.Error) {
 		name).Scan(&temp)
 
 	if query.Error != nil {
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
+		return false, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -89,7 +70,7 @@ func (repo *UserRepo) DoAddressNameExists(name string) (bool, *e.Error) {
 	}
 }
 
-func (repo *UserRepo) UpdateUserStatus(email string, newStatus string)*e.Error {
+func (repo *UserRepo) UpdateUserStatus(email string, newStatus string) *e.Error {
 	var user entities.User
 	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
@@ -109,7 +90,7 @@ func (repo *UserRepo) GetPasswordAndUserDetailsByEmail(email string) (*entities.
 		email).Scan(&user)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500} //existence
+		return nil, e.DBQueryError(&query.Error) //existence
 	}
 
 	return &user, nil
@@ -124,7 +105,7 @@ func (repo *UserRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 		email).Scan(&emptyStruct)
 
 	if query.Error != nil {
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
+		return false, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -133,7 +114,7 @@ func (repo *UserRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 	return true, nil
 }
 
-func (repo *UserRepo) CreateUser(user *entities.User)*e.Error {
+func (repo *UserRepo) CreateUser(user *entities.User) *e.Error {
 	userCreation := repo.DB.Create(&user)
 	if userCreation.Error != nil {
 		return &e.Error{Err: userCreation.Error, StatusCode: 500}
@@ -142,10 +123,10 @@ func (repo *UserRepo) CreateUser(user *entities.User)*e.Error {
 }
 
 // DeleteUserAddress
-func (repo *UserRepo) DeleteUserAddress(id uint)*e.Error {
+func (repo *UserRepo) DeleteUserAddress(id uint) *e.Error {
 	result := repo.DB.Delete(&entities.UserAddress{}, id)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
@@ -161,29 +142,13 @@ func (repo *UserRepo) GetUserIDFromAddressID(id uint) (uint, *e.Error) {
 		id).Scan(&userID)
 
 	if query.Error != nil {
-		return 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&query.Error)
+	}
+	if query.RowsAffected == 0 {
+		return 0, e.TextError("no address found with this id", 400)
 	}
 
 	return userID, nil
-}
-
-func (repo *UserRepo) DoUserExistsByID(userId uint) (bool, *e.Error) {
-	var temp entities.User
-	query := repo.DB.Raw(`
-		SELECT *
-		FROM users
-		WHERE id = ?`,
-		userId).Scan(&temp)
-
-	if query.Error != nil {
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
 }
 
 func (repo *UserRepo) GetUserAddresses(userId uint) (*[]entities.UserAddress, *e.Error) {
@@ -195,7 +160,10 @@ func (repo *UserRepo) GetUserAddresses(userId uint) (*[]entities.UserAddress, *e
 		userId).Scan(&addresses)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
+	}
+	if query.RowsAffected == 0 {
+		return nil, e.TextError("no address found with this id", 200)
 	}
 
 	return &addresses, nil
@@ -216,25 +184,28 @@ func (repo *UserRepo) GetProfile(userID uint) (*entities.UserDetails, *e.Error) 
 		userID).Scan(&userDetails)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
+	}
+	if query.RowsAffected == 0 {
+		return nil, e.TextError("no user found with this id", 400)
 	}
 
 	return userDetails, nil
 }
 
 // EditProfile implements repository_interface.IUserRepo.
-func (repo *UserRepo) EditProfile(userID uint, req *request.EditProfileReq)*e.Error {
+func (repo *UserRepo) EditProfile(userID uint, req *request.EditProfileReq) *e.Error {
 
 	result := repo.DB.Model(&entities.User{}).Where("id = ?", userID).Updates(req)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
 }
 
-// GetEmailByID implements repository_interface.IUserRepo.
-func (repo *UserRepo) GetEmailByID(userID uint) (string, *e.Error) {
+// GetEmailByUserID implements repository_interface.IUserRepo.
+func (repo *UserRepo) GetEmailByUserID(userID uint) (string, *e.Error) {
 	var email string
 	query := repo.DB.Raw(`
 		SELECT email
@@ -243,7 +214,10 @@ func (repo *UserRepo) GetEmailByID(userID uint) (string, *e.Error) {
 		userID).Scan(&email)
 
 	if query.Error != nil {
-		return "", &e.Error{Err: query.Error, StatusCode: 500}
+		return "", e.DBQueryError(&query.Error)
+	}
+	if query.RowsAffected == 0 {
+		return "", e.TextError("no user found with this id", 400)
 	}
 
 	return email, nil
@@ -258,38 +232,19 @@ func (repo *UserRepo) GetUserByEmail(email string) (*entities.User, *e.Error) {
 		email).Scan(&user)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &user, nil
 }
 
-func (repo *UserRepo) ResetPassword(id uint, newPassword *string)*e.Error {
+func (repo *UserRepo) ResetPassword(id uint, newPassword *string) *e.Error {
 	result := repo.DB.Model(&entities.User{}).Where("id = ?", id).Update("password", newPassword)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
-}
-
-// DoAddressExistsByIDForUser
-func (repo *UserRepo) DoAddressExistsByIDForUser(id uint, userID uint) (bool, *e.Error) {
-	var temp entities.UserAddress
-	query := repo.DB.Raw(`
-		SELECT *
-		FROM user_addresses
-		WHERE id = ? AND "userId" = ?`,
-		id, userID).Scan(&temp)
-	if query.Error != nil {
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
 }
 
 // GetUserAddress(userID uint, addressID uint) (*entities.UserAddress, error)
@@ -301,7 +256,10 @@ func (repo *UserRepo) GetUserAddress(addressID uint) (*entities.UserAddress, *e.
 		WHERE id = ?`,
 		addressID).Scan(&address)
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
+	}
+	if query.RowsAffected == 0 {
+		return nil, e.TextError("no address found with this id", 400)
 	}
 
 	return &address, nil
@@ -316,7 +274,7 @@ func (repo *UserRepo) GetWalletBalance(userID uint) (float32, *e.Error) {
 		WHERE id = ?`,
 		userID).Scan(&balance)
 	if query.Error != nil {
-		return 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&query.Error)
 	}
 
 	return balance, nil
@@ -336,7 +294,7 @@ func (repo *UserRepo) GetUserBasicInfoByID(id uint) (*response.UserInfoForInvoic
 		id).Scan(&user)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return user, nil

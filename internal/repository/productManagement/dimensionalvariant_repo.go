@@ -4,31 +4,9 @@ import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"MyShoo/internal/tools"
-	"fmt"
 
 	"gorm.io/gorm"
 )
-
-func (repo *ProductsRepo) DoDimensionalVariantExistByID(id uint) (bool, *e.Error) {
-	var temp entities.DimensionalVariant
-	query := repo.DB.Raw(`
-		SELECT *
-		FROM dimensional_variants
-		WHERE id = ?`,
-		id).Scan(&temp)
-
-	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-dimensionalVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return false,&e.Error{Err: query.Error, StatusCode: 500}
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
-
-}
 
 func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.DimensionalVariant) (bool, *e.Error) {
 	var temp entities.DimensionalVariant
@@ -39,14 +17,12 @@ func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.D
 		req.ColourVariantID, req.DVIndex).Scan(&temp)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-dimensionalVariant is existing or not. query.Error= ", query.Error, "\n----")
-		return false,&e.Error{Err: query.Error, StatusCode: 500}
+		return false, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
 		return false, nil
 	} else {
-		fmt.Println("rowsaffected!=0")
 		return true, nil
 	}
 }
@@ -60,7 +36,6 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't add dimensionalVariant. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -68,15 +43,13 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 	//add dimensionalVariant
 	result = tx.Create(&dimensionalVariant)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't add dimensionalVariant. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//preload dimensionalVariant
 	result = tx.Preload("FkColourVariant.FkModel.FkBrand").First(&dimensionalVariant, dimensionalVariant.ID)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't preload dimensionalVariant. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//add productCombinations
@@ -92,8 +65,7 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 		//add productCombination
 		result := tx.Create(&productCombinations)
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't add productCombination. query.Error= ", result.Error, "\n----")
-			return &e.Error{Err: result.Error, StatusCode: 500}
+			return e.DBQueryError(&result.Error)
 		}
 	}
 

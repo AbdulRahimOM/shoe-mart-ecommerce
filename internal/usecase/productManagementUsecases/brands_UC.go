@@ -7,7 +7,6 @@ import (
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
 	"errors"
-	"fmt"
 
 	"github.com/jinzhu/copier"
 )
@@ -24,11 +23,10 @@ func (uc *BrandsUC) AddBrand(req *request.AddBrandReq) *e.Error {
 	//check if the brand already exists
 	doBrandExistsByName, err := uc.BrandsRepo.DoBrandExistsByName(req.Name)
 	if err != nil {
-		fmt.Println("Error occured while checking if brand exists")
 		return err
 	}
 	if doBrandExistsByName {
-		return &e.Error{Err: errors.New("brand already exists"), StatusCode: 400}
+		return e.TextError("brand already exists", 400)
 	}
 
 	var brand entities.Brands
@@ -49,20 +47,20 @@ func (uc *BrandsUC) EditBrand(req *request.EditBrandReq) *e.Error {
 		return err
 	}
 	if !DoBrandExistsByName {
-		return &e.Error{Err: errors.New("brand doesn't exist"), StatusCode: 400}
+		return e.TextError("brand doesn't exist", 400)
 	}
 
 	//check if the new name already exists for another brand
 	if DoBrandExistsByName, err := uc.BrandsRepo.DoBrandExistsByName(req.NewName); err != nil {
 		return err
 	} else if DoBrandExistsByName {
-		return &e.Error{Err: errors.New("brand already exists with the sugested new name"), StatusCode: 400}
+		return e.TextError("brand already exists with the sugested new name", 400)
 	}
 
 	//edit brand
 	return uc.BrandsRepo.EditBrand(req)
 }
 
-func (uc *BrandsUC) GetBrands() (*[26]entities.BrandsByAlphabet, *e.Error ){
+func (uc *BrandsUC) GetBrands() (*[26]entities.BrandsByAlphabet, *e.Error) {
 	return uc.BrandsRepo.GetBrands()
 }

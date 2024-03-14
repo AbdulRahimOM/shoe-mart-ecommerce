@@ -26,7 +26,7 @@ func (repo *SellerRepo) GetSellerWithPwByEmail(email string) (*entities.Seller, 
 		email).Scan(&seller) //update required#1  also look  above
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &seller, nil
@@ -42,7 +42,7 @@ func (repo *SellerRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 		email).Scan(&emptyStruct)
 
 	if query.Error != nil {
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
+		return false, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {

@@ -20,7 +20,7 @@ func (uc *ProductsUC) AddDimensionalVariant(req *request.AddDimensionalVariantRe
 		return err
 	}
 	if doDimensionalVariantExists {
-		return &e.Error{Err: errors.New("dimensionalVariant already exists"), StatusCode: 400}
+		return e.TextError("dimensionalVariant already exists", 400)
 	}
 
 	//add dimensionalVariant and its product combinations

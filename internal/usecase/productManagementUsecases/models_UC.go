@@ -31,7 +31,7 @@ func (uc *ModelsUC) AddModel(req *request.AddModelReq) *e.Error {
 		return err
 	}
 	if doModelExists {
-		return &e.Error{Err: errors.New("model already exists"), StatusCode: 400}
+		return e.TextError("model already exists", 400)
 	}
 
 	//add model
@@ -39,14 +39,6 @@ func (uc *ModelsUC) AddModel(req *request.AddModelReq) *e.Error {
 }
 
 func (uc *ModelsUC) EditModelName(req *request.EditModelReq) *e.Error {
-	//check if the model exists
-	if doModelExists, err := uc.ModelsRepo.DoModelExistsByID(req.ID); err != nil {
-		return err
-	} else if !doModelExists {
-		return &e.Error{Err: errors.New("model doesn't exist"), StatusCode: 400}
-	}
-
-	//edit model name
 	return uc.ModelsRepo.EditModel(req)
 }
 

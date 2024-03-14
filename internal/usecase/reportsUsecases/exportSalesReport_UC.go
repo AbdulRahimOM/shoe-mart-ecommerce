@@ -6,7 +6,6 @@ import (
 	"MyShoo/internal/domain/entities"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -106,12 +105,12 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 	filePath := filepath.Join(config.ExecutableDir, "internal/templates/TemplateExcel.xlsx")
 	file, errr := excelize.OpenFile(filePath)
 	if errr != nil {
-		return nil, &e.Error{Err: errors.New("Error opening template:" + errr.Error()), StatusCode: 500}
+		return nil, e.TextCumError("Error opening template:", errr, 500)
 	}
 
 	_, errr = file.NewSheet("All Orders")
 	if errr != nil {
-		return nil, &e.Error{Err: errors.New("Error creating new sheet:" + errr.Error()), StatusCode: 500}
+		return nil, e.TextCumError("Error creating new sheet:", errr, 500)
 	}
 
 	// Set value of title cells
@@ -200,7 +199,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 			},
 		},
 	}); err != nil {
-		return nil, &e.Error{Err: errors.New("error occured while creating chart:" + err.Error()), StatusCode: 500}
+		return nil, e.TextCumError("error occured while creating chart:", err, 500)
 	}
 
 	for i, revenueData := range *revenueGraph {
@@ -214,7 +213,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 	errr = file.SaveAs(tempFilePath)
 	defer os.Remove(tempFilePath)
 	if errr != nil {
-		return nil, &e.Error{Err: errors.New("error saving excel file:" + errr.Error()), StatusCode: 500}
+		return nil, e.TextCumError("error saving excel file:", errr, 500)
 	}
 
 	if config.ShouldUploadExcel {
@@ -223,7 +222,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 		// Saving the Excel file locally (for dev/testing purposes)
 		localUrl := filepath.Join(config.ExecutableDir, "testKit/salesReportOutput.xlsx")
 		if errr = file.SaveAs(localUrl); errr != nil {
-			return nil, &e.Error{Err: errors.New("error saving excel file:" + errr.Error()), StatusCode: 500}
+			return nil, e.TextCumError("error saving excel file:", errr, 500)
 		} else {
 			return &localUrl, nil
 		}

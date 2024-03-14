@@ -22,7 +22,7 @@ type ICartRepo interface {
 type IWishListsRepo interface {
 	DoesWishListExistWithName(userID uint, name string) (bool, *e.Error)
 	CreateWishList(userID uint, wishList *entities.WishList) *e.Error
-	DoesThisWishListExistForUser(userID uint, wishListID uint) (bool, *e.Error)
+	GetUserIDOfWishList(wishListID uint) (uint, *e.Error)
 	IsProductInWishList(productID uint, wishListID uint) (bool, *e.Error)
 	AddToWishList(productID uint, wishListID uint) *e.Error
 	RemoveFromWishList(productID uint, wishListID uint) *e.Error
@@ -38,9 +38,7 @@ type IOrderRepo interface {
 	GetOrdersOfUser(userID uint, resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, *e.Error)
 	GetOrders(resultOffset int, resultLimit int) (*[]entities.DetailedOrderInfo, *e.Error)
 	GetAllOrders() (*[]entities.Order, *e.Error)
-	// GetOrderItemsByOrderID(orderID uint) (*[]entities.OrderItem, *e.Error)
 	GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS, *e.Error)
-	DoOrderExistByID(orderID uint) (bool, *e.Error)
 	GetUserIDByOrderID(orderID uint) (uint, *e.Error)
 	GetOrderStatusByID(orderID uint) (string, *e.Error)
 	GetOrderSummaryByID(orderID uint) (*entities.Order, *e.Error)
@@ -57,7 +55,7 @@ type IOrderRepo interface {
 	GetPaymentStatusByID(orderID uint) (string, *e.Error)
 
 	//coupon related_______________________________________________________
-	DoCouponExistByCode(code string) (bool, *e.Error)
+	IsCouponCodeTaken(code string) (bool, *e.Error)
 	CreateNewCoupon(coupon *entities.Coupon) *e.Error
 	BlockCoupon(couponID uint) *e.Error
 	UnblockCoupon(couponID uint) *e.Error

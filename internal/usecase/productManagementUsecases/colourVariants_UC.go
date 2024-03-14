@@ -19,24 +19,21 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVari
 	}
 
 	//check if the colourVariant already exists
-	doColourVariantExists, err := uc.ProductsRepo.DoColourVariantExists(&colourVariant)
+	doColourVariantExists, err := uc.ProductsRepo.DoColourVariantExistByAttributes(&colourVariant)
 	if err != nil {
 		return err
 	}
 	if doColourVariantExists {
-		return &e.Error{Err: errors.New("colourVariant already exists"), StatusCode: 400}
+		return e.TextError("colourVariant already exists", 400)
 	}
 
-	//check if modelID exists and belongs to the seller
-	doModelExists, doModelBelongsToSeller, err := uc.ModelsRepo.DoModelExistByIDAndBelongsToUser(req.ModelID, sellerID)
+	//check if modelID belongs to the seller
+	sellerIDFromModel, err := uc.ModelsRepo.GetSellerIdOfModel(req.ModelID)
 	if err != nil {
 		return err
 	}
-	if !doModelExists {
-		return &e.Error{Err: errors.New("model doesn't exist with this id"), StatusCode: 400}
-	}
-	if !doModelBelongsToSeller {
-		return &e.Error{Err: errors.New("model doesn't belong to this seller"), StatusCode: 401}
+	if sellerIDFromModel != sellerID {
+		return e.TextError("modelID does not belong to the seller", 401)
 	}
 
 	//round off MRP and SalePrice to 2 decimal places
@@ -50,26 +47,17 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVari
 // EditColourVariant
 func (uc *ProductsUC) EditColourVariant(req *request.EditColourVariantReq) *e.Error {
 
-	//check if the colourVariant really exists
-	doColourVariantExists, err := uc.ProductsRepo.DoColourVariantExistByID(req.ID)
-	if err != nil {
-		return err
-	}
-	if !doColourVariantExists {
-		return &e.Error{Err: errors.New("colourVariant doesn't exist with this id"), StatusCode: 400}
-	}
-
 	var colourVariant entities.ColourVariant
 	if err := copier.Copy(&colourVariant, &req); err != nil {
 		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to colourVariant entity"), StatusCode: 500}
 	}
 	//check if the coulourVariant already exists by attributes
-	doColourVariantExists, err = uc.ProductsRepo.DoColourVariantExists(&colourVariant)
+	doColourVariantExists, err := uc.ProductsRepo.DoColourVariantExistByAttributes(&colourVariant)
 	if err != nil {
 		return err
 	}
 	if doColourVariantExists {
-		return &e.Error{Err: errors.New("colourVariant already exists with these attributes"), StatusCode: 400}
+		return e.TextError("colourVariant already exists with these attributes", 400)
 	}
 
 	//round off MRP and SalePrice to 2 decimal places

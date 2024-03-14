@@ -3,7 +3,6 @@ package reportsrepo
 import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
-	"fmt"
 	"time"
 )
 
@@ -24,7 +23,6 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
 		WHERE order_date_and_time BETWEEN ? AND ?`,
 		start, end, start, end).Scan(&dashBoardData).Error
 	if err != nil {
-		fmt.Println("-------\nquery error happened. couldn't get dashboard data. query.Error= ", err, "\n----")
 		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
@@ -35,7 +33,6 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
     GROUP BY TO_CHAR(order_date_and_time, 'YYYY-MM-DD')`,
 		start, end).Scan(&salePerDay).Error
 	if err != nil {
-		fmt.Println("-------\nquery error happened. couldn't get sales per day graph data. query.Error= ", err, "\n----")
 		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
@@ -58,7 +55,6 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
 		FROM orders`,
 	).Scan(&dashBoardData).Error
 	if err != nil {
-		fmt.Println("-------\nquery error happened. couldn't get dashboard data. query.Error= ", err, "\n----")
 		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 
@@ -68,7 +64,6 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
     GROUP BY TO_CHAR(order_date_and_time, 'YYYY-MM-DD')`,
 	).Scan(&salePerDay).Error
 	if err != nil {
-		fmt.Println("-------\nquery error happened. couldn't get sales per day graph data. query.Error= ", err, "\n----")
 		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
 	}
 

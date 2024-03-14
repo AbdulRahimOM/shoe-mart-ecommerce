@@ -8,7 +8,6 @@ import (
 	repo "MyShoo/internal/repository/interface"
 	"MyShoo/internal/services"
 	usecase "MyShoo/internal/usecase/interface"
-	"errors"
 )
 
 type PaymentUC struct {
@@ -54,8 +53,7 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 		return nil, err
 	} else {
 		if userIDOfOrder != userID {
-			// return nil,  e.ErrOrderNotOfUser
-			return nil, &e.Error{Err: errors.New("OrderNotOfUser"), StatusCode: 400}
+			return nil, e.TextError("OrderNotOfUser", 400)
 		}
 	}
 
@@ -67,11 +65,11 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 
 	//check if payment method is online and order is not paid
 	if order.Status != "payment pending" {
-		return nil, &e.Error{Err: errors.New("order payment status is not 'payment pending'"), StatusCode: 400}
+		return nil, e.TextError("order payment status is not 'payment pending'", 400)
 	} else {
 		var errr error
 		if order.TransactionID, errr = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo); errr != nil {
-			return nil, &e.Error{Err: errors.New("Service error at creating razorpay order:" + errr.Error()), StatusCode: 500}
+			return nil, e.TextCumError("Service error at creating razorpay order:", errr, 500)
 		}
 
 		//update order with transactionID

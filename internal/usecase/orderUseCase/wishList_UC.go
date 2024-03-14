@@ -7,8 +7,6 @@ import (
 	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
-	"errors"
-	"fmt"
 
 	"github.com/jinzhu/copier"
 )
@@ -33,7 +31,7 @@ func (uc *WishListsUseCase) CreateWishList(userID uint, req *request.CreateWishL
 		return err
 	}
 	if wishListExists {
-		return &e.Error{Err: errors.New("wishlist with same name exists"), StatusCode: 400}
+		return e.TextError("wishlist with same name exists", 400)
 	}
 
 	var wishList entities.WishList
@@ -41,24 +39,18 @@ func (uc *WishListsUseCase) CreateWishList(userID uint, req *request.CreateWishL
 	wishList.Name = req.Name
 
 	//create wishlist
-	err = uc.wishListsRepo.CreateWishList(userID, &wishList)
-	if err != nil {
-		fmt.Println("Error occured while creating wishlist")
-		return err
-	}
-
-	return nil
+	return uc.wishListsRepo.CreateWishList(userID, &wishList)
 }
 
 // AddToWishList
 func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishListReq) *e.Error {
-	//check if wishlist exists and for the user
-	thisWishListExistForUser, err := uc.wishListsRepo.DoesThisWishListExistForUser(userID, req.WishListID)
+	//check if wishlist belongs to the user
+	userIDFromWishList, err := uc.wishListsRepo.GetUserIDOfWishList(req.WishListID)
 	if err != nil {
 		return err
 	}
-	if !thisWishListExistForUser {
-		return &e.Error{Err: errors.New("no such wishlist for this user"), StatusCode: 400}
+	if userIDFromWishList != userID {
+		return e.TextError("no such wishlist for this user", 400)
 	}
 
 	//check if product exists
@@ -67,7 +59,7 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishLis
 		return err
 	}
 	if !productExists {
-		return &e.Error{Err: errors.New("product does not exist"), StatusCode: 400}
+		return e.TextError("product does not exist", 400)
 	}
 
 	//check if product is already in wishlist
@@ -76,7 +68,7 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishLis
 		return err
 	}
 	if productInWishList {
-		return &e.Error{Err: errors.New("product is already in wishlist"), StatusCode: 400}
+		return e.TextError("product is already in wishlist", 400)
 	}
 
 	//add product to wishlist
@@ -85,13 +77,13 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishLis
 
 // RemoveFromWishList
 func (uc *WishListsUseCase) RemoveFromWishList(userID uint, req *request.RemoveFromWishListReq) *e.Error {
-	//check if wishlist exists and for the user
-	thisWishListExistForUser, err := uc.wishListsRepo.DoesThisWishListExistForUser(userID, req.WishListID)
+	//check if wishlist belongs to the user
+	userIDFromWishList, err := uc.wishListsRepo.GetUserIDOfWishList(req.WishListID)
 	if err != nil {
 		return err
 	}
-	if !thisWishListExistForUser {
-		return &e.Error{Err: errors.New("no such wishlist for this user"), StatusCode: 400}
+	if userIDFromWishList != userID {
+		return e.TextError("no such wishlist for this user", 400)
 	}
 
 	//check if product is in wishlist
@@ -100,7 +92,7 @@ func (uc *WishListsUseCase) RemoveFromWishList(userID uint, req *request.RemoveF
 		return err
 	}
 	if !productInWishList {
-		return &e.Error{Err: errors.New("product is not in wishlist"), StatusCode: 400}
+		return e.TextError("product is not in wishlist", 400)
 	}
 
 	//remove product from wishlist
@@ -122,13 +114,13 @@ func (uc *WishListsUseCase) GetWishListByID(userID uint, wishListID uint) (*stri
 	var responseProducts []response.ResponseProduct2
 	wishListName, products, err := uc.wishListsRepo.GetWishListByID(userID, wishListID)
 	if err != nil {
-		return nil,nil, 0, err
+		return nil, nil, 0, err
 	}
-	
+
 	responseProducts = make([]response.ResponseProduct2, len(*products))
 	errr := copier.Copy(&responseProducts, &products)
 	if errr != nil {
-		return nil, nil, 0,&e.Error{Err: errors.New("error occured while copying products to responseProducts"+errr.Error()), StatusCode: 500}
+		return nil, nil, 0, e.TextCumError("error occured while copying products to responseProducts", errr, 500)
 	}
 
 	for i, product := range *products {

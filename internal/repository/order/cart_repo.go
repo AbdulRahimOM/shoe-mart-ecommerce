@@ -5,8 +5,6 @@ import (
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	repo "MyShoo/internal/repository/interface"
-	"errors"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -22,8 +20,7 @@ func NewCartRepository(db *gorm.DB) repo.ICartRepo {
 func (repo *CartRepo) AddToCart(cart *entities.Cart) *e.Error {
 	result := repo.DB.Create(&cart)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't add to cart. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
@@ -33,12 +30,11 @@ func (repo *CartRepo) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 	//check by productID and userID
 	result := repo.DB.Where("\"productId\" = ? AND user_id = ?", req.ProductID, req.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't delete from cart. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return &e.Error{Err: errors.New("nothing deleted. no such item in cart"), StatusCode: 400}
+		return e.TextError("nothing deleted. no such item in cart", 400)
 	}
 
 	return nil
@@ -53,8 +49,7 @@ func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, *e
 		cart.ProductID, cart.UserID).Scan(&temp)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-product is existing or not. query.Error= ", query.Error, "\n----")
-		return false, 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return false, 0, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -74,7 +69,7 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, *e.Error)
 		Where("user_id = ?", userID).Find(&cart)
 
 	if query.Error != nil {
-		return nil, 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, 0, e.DBQueryError(&query.Error)
 	}
 	var totalValue float32 = 0
 	for i := range cart {
@@ -87,8 +82,7 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, *e.Error)
 func (repo *CartRepo) UpdateCartItemQuantity(cart *entities.Cart) *e.Error {
 	result := repo.DB.Model(&entities.Cart{}).Where("\"productId\" = ? AND user_id = ?", cart.ProductID, cart.UserID).Update("quantity", cart.Quantity)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't update cart. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
@@ -104,8 +98,7 @@ func (repo *CartRepo) IsCartEmpty(userID uint) (bool, *e.Error) {
 		userID).Scan(&temp)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-cart is empty or not. query.Error= ", query.Error, "\n----")
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
+		return false, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -119,8 +112,7 @@ func (repo *CartRepo) ClearCartOfUser(userID uint) *e.Error {
 	//delete all cart items of user where user_id = userID
 	result := repo.DB.Where("user_id = ?", userID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	return nil
@@ -145,10 +137,9 @@ func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, *e.
 		userID).Scan(&queryData)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't get quantity and price of cart. query.Error= ", query.Error, "\n----")
-		return 0, 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return 0, 0, e.DBQueryError(&query.Error)
 	} else if queryData.TotalQuantity == 0 {
-		return 0, 0, &e.Error{Err: errors.New("cart is empty"), StatusCode: 400}
+		return 0, 0, e.TextError("cart is empty", 400)
 	}
 	return queryData.TotalQuantity, queryData.TotalValue, nil
 }

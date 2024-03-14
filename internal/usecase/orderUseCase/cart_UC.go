@@ -31,7 +31,7 @@ func (uc *CartUseCase) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 		return err
 	}
 	if !DoProductExists {
-		return &e.Error{Err: errors.New("product doesn't exist in cart"), StatusCode: 400}
+		return e.TextError("product doesn't exist in cart", 400)
 	}
 	if quantityIfExist == 1 {
 		//delete product from cart

@@ -9,8 +9,6 @@ import (
 	usecase "MyShoo/internal/usecase/interface"
 	hashpassword "MyShoo/pkg/hashPassword"
 	jwttoken "MyShoo/pkg/jwt"
-	"errors"
-	"fmt"
 	"time"
 )
 
@@ -33,7 +31,7 @@ func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
+		return e.TextError("email not registered", 401)
 	}
 	return uc.adminRepo.UpdateUserStatus(req.Email, "blocked")
 }
@@ -45,7 +43,7 @@ func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
+		return e.TextError("email not registered", 401)
 	}
 	return uc.adminRepo.UpdateUserStatus(req.Email, "verified")
 }
@@ -57,8 +55,7 @@ func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		fmt.Println("\n-- No such seller (This email is not registered as a seller)\n.")
-		return &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
+		return e.TextError("email not registered", 401)
 	}
 	return uc.adminRepo.UpdateSellerStatus(req.Email, "blocked")
 }
@@ -70,7 +67,7 @@ func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
+		return e.TextError("email not registered", 401)
 	}
 
 	return uc.adminRepo.UpdateSellerStatus(req.Email, "verified")
@@ -86,7 +83,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 		return nil, err
 	}
 	if !(isEmailRegistered) {
-		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 200}
+		return nil, e.TextError("email not registered", 401)
 	}
 
 	//get adminpassword from database
@@ -97,7 +94,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 
 	//check for password
 	if hashpassword.CompareHashedPassword(hashedPassword, req.Password) != nil {
-		return nil, &e.Error{Err: e.ErrInvalidPassword, StatusCode: 200}
+		return nil, &e.Error{Err: e.ErrInvalidPassword_401, StatusCode: 200}
 	}
 
 	//generate token
@@ -111,7 +108,6 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 func (uc *AdminUseCase) RestartConfig() *e.Error { //err pro
 	err := config.RestartDeliveryConfig()
 	if err != nil {
-		fmt.Println("Error occured while reloading config")
 		return &e.Error{Err: err, StatusCode: 500}
 	}
 	return nil
@@ -122,12 +118,10 @@ func (uc *AdminUseCase) VerifySeller(req *request.VerifySellerReq) *e.Error {
 	//check if status is not verified
 	isVerified, err := uc.adminRepo.IsSellerVerified(req.SellerID)
 	if err != nil {
-		fmt.Println("Error occured while getting seller status")
 		return err
 	}
 	if isVerified {
-		fmt.Println("\n-- seller is already verified\n.")
-		return &e.Error{Err: errors.New("seller is already verified"), StatusCode: 400}
+		return e.TextError("seller is already verified", 400)
 	}
 
 	return uc.adminRepo.VerifySeller(req.SellerID)

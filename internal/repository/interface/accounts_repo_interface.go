@@ -43,19 +43,16 @@ type IUserRepo interface {
 
 	AddUserAddress(newAddress *entities.UserAddress) *e.Error
 	DoAddressNameExists(name string) (bool, *e.Error)
-	DoAddressExistsByID(id uint) (bool, *e.Error)
-	DoAddressExistsByIDForUser(id uint, userID uint) (bool, *e.Error)
 	EditUserAddress(newaddress *entities.UserAddress) *e.Error
 	GetAddressNameByID(id uint) (string, *e.Error)
 	DeleteUserAddress(id uint) *e.Error
 	GetUserIDFromAddressID(id uint) (uint, *e.Error)
 
-	DoUserExistsByID(userId uint) (bool, *e.Error)
 	GetUserAddresses(userId uint) (*[]entities.UserAddress, *e.Error)
 	GetUserAddress(addressID uint) (*entities.UserAddress, *e.Error)
 
 	GetProfile(userID uint) (*entities.UserDetails, *e.Error)
-	GetEmailByID(userID uint) (string, *e.Error)
+	GetEmailByUserID(userID uint) (string, *e.Error)
 	EditProfile(userID uint, req *request.EditProfileReq) *e.Error
 
 	GetWalletBalance(userID uint) (float32, *e.Error)

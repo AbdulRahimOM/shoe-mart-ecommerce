@@ -5,7 +5,6 @@ import (
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
-	"fmt"
 
 	"gorm.io/gorm"
 )
@@ -21,7 +20,6 @@ func NewCategoryRepository(db *gorm.DB) repoInterface.ICategoryRepo {
 func (repo *CategoryRepo) AddCategory(req *entities.Categories) *e.Error {
 	result := repo.DB.Create(&req)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't add category. query.Error= ", result.Error, "\n----")
 		return &e.Error{Err: result.Error,StatusCode: 500}
 	}
 
@@ -38,7 +36,6 @@ func (repo *CategoryRepo) DoCategoryExistsByName(name string) (bool, *e.Error) {
 		name).Scan(&temp)
 
 	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-category is existing or not. query.Error= ", query.Error, "\n----")
 		return false, &e.Error{Err: query.Error,StatusCode: 500}
 	}
 
@@ -68,7 +65,6 @@ func (repo *CategoryRepo) GetCategories() (*[]entities.Categories, *e.Error) {
 func (repo *CategoryRepo) EditCategory(req *request.EditCategoryReq) *e.Error {
 	result := repo.DB.Model(&entities.Categories{}).Where("name = ?", req.OldName).Update("name", req.NewName)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't edit category. query.Error= ", result.Error, "\n----")
 		return &e.Error{Err: result.Error,StatusCode: 500}
 	}
 

@@ -9,7 +9,6 @@ import (
 	hashpassword "MyShoo/pkg/hashPassword"
 	jwttoken "MyShoo/pkg/jwt"
 
-	"fmt"
 	"time"
 )
 
@@ -28,20 +27,18 @@ func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, *e.Error
 		return nil, err
 	}
 	if !(isEmailRegistered) {
-		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
+		return nil, e.TextError("email not registered",401)
 	}
 
 	//get sellerpassword from database
 	sellerForToken, err := uc.sellerRepo.GetSellerWithPwByEmail(req.Email)
 	if err != nil {
-		fmt.Println("Error occured while getting password from record")
 		return nil, err
 	}
 
 	//check for password
 	if hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password) != nil {
-		fmt.Println("Password Mismatch")
-		return nil, &e.Error{Err: e.ErrInvalidPassword,StatusCode: 400}
+		return nil, &e.Error{Err: e.ErrInvalidPassword_401, StatusCode: 400}
 	}
 
 	//generate token
@@ -57,17 +54,14 @@ func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, *e.Error
 	// fmt.Println("-----\nreq.email:", req.Email, "\n------")
 	emailAlreadyUsed, err := uc.sellerRepo.IsEmailRegistered(req.Email)
 	if err != nil {
-		fmt.Println("Error occured while searching email, error:", err)
 		return nil, err
 	}
 	if emailAlreadyUsed {
-		fmt.Println("\n email is already used!!\n.")
-		return nil, &e.Error{Err: e.ErrEmailNotRegistered, StatusCode: 400}
+		return nil, e.TextError("email not registered",401)
 	}
 
 	hashedPwd, errr := hashpassword.Hashpassword(req.Password)
 	if errr != nil {
-		fmt.Println("\n error while hashing pw. Error:)", err, "\n.")
 		return nil, err
 	}
 
@@ -82,7 +76,6 @@ func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, *e.Error
 
 	err = uc.sellerRepo.CreateSeller(&signingSeller)
 	if err != nil {
-		fmt.Println("\nUC: error recieved from ~repo.createseller()")
 		return nil, err
 	}
 

@@ -3,7 +3,6 @@ package reportsrepo
 import (
 	e "MyShoo/internal/domain/customErrors"
 	response "MyShoo/internal/models/responseModels"
-	"fmt"
 )
 
 // GetTopModels implements repo.IReportsRepo.
@@ -34,8 +33,7 @@ func (repo *DashboardDataRepo) GetTopModels(limit int) (*[]response.TopModels, *
 		LIMIT ?
 	`, limit).Scan(&topModels)
 	if query.Error != nil {
-		fmt.Println("Error occured while getting top models. err= ", query.Error)
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &topModels, nil
@@ -71,8 +69,7 @@ func (repo *DashboardDataRepo) GetTopProducts(limit int) (*[]response.TopProduct
 		LIMIT ?
 	`, limit).Scan(&topProducts)
 	if query.Error != nil {
-		fmt.Println("Error occured while getting top products. err= ", query.Error)
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &topProducts, nil
@@ -105,8 +102,7 @@ func (repo *DashboardDataRepo) GetTopBrands(limit int) (*[]response.TopBrands, *
 		LIMIT ?
 	`, limit).Scan(&topBrands)
 	if query.Error != nil {
-		fmt.Println("Error occured while getting top brands. err= ", query.Error)
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &topBrands, nil
@@ -139,8 +135,7 @@ func (repo *DashboardDataRepo) GetTopSellers(limit int) (*[]response.TopSellers,
 		LIMIT ?
 	`, limit).Scan(&topSellers)
 	if query.Error != nil {
-		fmt.Println("Error occured while getting top sellers. err= ", query.Error)
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &topSellers, nil

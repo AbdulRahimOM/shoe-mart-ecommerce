@@ -2,47 +2,49 @@ package e
 
 import "errors"
 
-// type AppError struct {
-//     Err        error
-//     StatusCode int
-// }
-
-type Error struct{
-	Err error
+type Error struct {
+	Err        error
 	StatusCode int
 }
+
 func (e Error) Error() string {
-    if e.Err != nil {
-        return e.Err.Error()
-    }
-    return ""
+	if e.Err != nil {
+		return e.Err.Error()
+	}
+	return ""
 }
-// func (e Error) Error() string {
-//     if e.Err != nil {
-//         return e.Err.Error()
-//     }
-//     return ""
-// }
 
 var (
-	ErrEmailAlreadyUsed   = errors.New("conflict: email already registered")
-	ErrEmailNotRegistered = errors.New("this email is not registered")
-	ErrInvalidPassword    = errors.New("password mismatch")
+	ErrEmailNodtRegistered_401 = Error{Err: errors.New("this email is not registered"), StatusCode: 401}
 
-	ErrPhoneNumberAlreadyUsed = errors.New("conflict: phone number already used")
+	ErrInvalidPassword_401 = Error{Err: errors.New("password mismatch"), StatusCode: 401}
 
 
-	// errors.New("orderID doesn't exist in records")
-	ErrOrderIDDoesNotExist = errors.New("orderID doesn't exist in records")
-	// errors.New("order does not belong to user")
-	ErrOrderNotOfUser = errors.New("order does not belong to user")
+// ErrOnBindingReq  = errors.New("error binding request")
+// ErrOnValidation   = errors.New("error validating the request")
 
-	// errors.New("order amount exceeds maximum amount for COD")
-	ErrOrderExceedsMaxAmountForCOD = errors.New("order amount exceeds maximum amount for COD")
+// 	ErrPhoneNumberAlreadyUsed = errors.New("conflict: phone number already used")
 
-	ErrCODNotAvailable = errors.New("COD not available")
-	ErrEmptyCart       = errors.New("cart is empty")
-	ErrOnBindingReq  = errors.New("error binding request")
-	ErrOnValidation   = errors.New("error validating the request")
+// 	// errors.New("orderID doesn't exist in records")
+// 	ErrOrderIDDoesNotExist = errors.New("orderID doesn't exist in records")
+// 	// errors.New("order does not belong to user")
+// 	ErrOrderNotOfUser = errors.New("order does not belong to user")
+
+// // errors.New("order amount exceeds maximum amount for COD")
 )
 
+
+func DBQueryError(err *error) *Error {
+	return &Error{Err: errors.New("db querry err:" + (*err).Error()), StatusCode: 500}
+}
+
+func TextError(text string, statusCode int) *Error {
+	return &Error{Err: errors.New(text), StatusCode: statusCode}
+}
+func TextCumError(text string, err error, statusCode int) *Error {
+	return &Error{Err: errors.New(text+err.Error()), StatusCode: statusCode}
+}
+func GetError(error Error) *Error {
+	err:=error
+	return &err
+}

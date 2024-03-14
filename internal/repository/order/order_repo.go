@@ -6,8 +6,6 @@ import (
 	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/cloudinary/cloudinary-go"
 	"github.com/cloudinary/cloudinary-go/api/uploader"
@@ -35,7 +33,6 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -43,9 +40,8 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 	//add order
 	result = tx.Create(&order)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't add order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return 0, &e.Error{Err: result.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&result.Error)
 	}
 
 	//create order items
@@ -56,18 +52,16 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 		//add order item to db
 		result = tx.Create(&item)
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't add order item. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return 0, &e.Error{Err: result.Error, StatusCode: 500}
+			return 0, e.DBQueryError(&result.Error)
 		}
 	}
 
 	//clear cart
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return 0, &e.Error{Err: result.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&result.Error)
 	}
 
 	//commit transaction
@@ -88,7 +82,7 @@ func (repo *OrderRepo) GetOrdersOfUser(userID uint, resultOffset int, resultLimi
 		Find(&orders)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	var orderInfos []entities.DetailedOrderInfo
@@ -102,7 +96,7 @@ func (repo *OrderRepo) GetOrdersOfUser(userID uint, resultOffset int, resultLimi
 			Find(&orderItems)
 
 		if query.Error != nil {
-			return nil, &e.Error{Err: query.Error, StatusCode: 500}
+			return nil, e.DBQueryError(&query.Error)
 		}
 
 		var orderInfo entities.DetailedOrderInfo
@@ -125,7 +119,7 @@ func (repo *OrderRepo) GetOrders(resultOffset int, resultLimit int) (*[]entities
 		Find(&orders)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	var orderInfos []entities.DetailedOrderInfo
@@ -139,7 +133,7 @@ func (repo *OrderRepo) GetOrders(resultOffset int, resultLimit int) (*[]entities
 			Find(&orderItems)
 
 		if query.Error != nil {
-			return nil, &e.Error{Err: query.Error, StatusCode: 500}
+			return nil, e.DBQueryError(&query.Error)
 		}
 
 		var orderInfo entities.DetailedOrderInfo
@@ -160,7 +154,6 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -168,9 +161,8 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 	//update order status
 	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "cancelled")
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't cancel order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//get order items
@@ -181,16 +173,15 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return &e.Error{Err: query.Error, StatusCode: 500}
+		return e.DBQueryError(&query.Error)
 	}
 
 	//update stock
 	for _, item := range orderItems {
 		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock + ?", item.Quantity))
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return &e.Error{Err: result.Error, StatusCode: 500}
+			return e.DBQueryError(&result.Error)
 		}
 	}
 
@@ -203,23 +194,21 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return &e.Error{Err: query.Error, StatusCode: 500}
+		return e.DBQueryError(&query.Error)
 	}
 	if order.PaymentStatus == "paid" {
 		//update wallet , update payment status to refunded
 		result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return &e.Error{Err: result.Error, StatusCode: 500}
+			return e.DBQueryError(&result.Error)
 		}
 
 		//update payment status to refunded
 		result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("payment_status", "refunded")
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't update payment status. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return &e.Error{Err: result.Error, StatusCode: 500}
+			return e.DBQueryError(&result.Error)
 		}
 	}
 
@@ -227,26 +216,6 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 	tx.Commit()
 
 	return nil
-}
-
-func (repo *OrderRepo) DoOrderExistByID(orderID uint) (bool, *e.Error) {
-	var temp entities.Order
-	query := repo.DB.Raw(`
-		SELECT *
-		FROM orders
-		WHERE id = ?`,
-		orderID).Scan(&temp)
-
-	if query.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't check if-order is existing or not. query.Error= ", query.Error, "\n----")
-		return false, &e.Error{Err: query.Error, StatusCode: 500}
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	} else {
-		return true, nil
-	}
 }
 
 func (repo *OrderRepo) GetOrderStatusByID(orderID uint) (string, *e.Error) {
@@ -257,7 +226,10 @@ func (repo *OrderRepo) GetOrderStatusByID(orderID uint) (string, *e.Error) {
 		Find(&order)
 
 	if query.Error != nil {
-		return "", &e.Error{Err: query.Error, StatusCode: 500}
+		return "", e.DBQueryError(&query.Error)
+	}
+	if query.RowsAffected == 0 {
+		return "", e.TextError("no such order exists by id", 400)
 	}
 
 	return order.Status, nil
@@ -271,11 +243,11 @@ func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, *e.Error) {
 		Find(&order)
 
 	if query.Error != nil {
-		return 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
-		return 0, &e.Error{Err: errors.New("record not found"), StatusCode: 400}
+		return 0, e.TextError("record not found with this orderID", 400)
 	}
 
 	return order.UserID, nil
@@ -289,7 +261,6 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -297,9 +268,8 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	//add order
 	result = tx.Create(&order)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't add order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return 0, &e.Error{Err: result.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&result.Error)
 	}
 
 	//create order items
@@ -310,26 +280,23 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 		//add order item to db
 		result := tx.Create(&item)
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't add order item. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return 0, &e.Error{Err: result.Error, StatusCode: 500}
+			return 0, e.DBQueryError(&result.Error)
 		}
 
 		//update stock
 		result = tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return 0, &e.Error{Err: result.Error, StatusCode: 500}
+			return 0, e.DBQueryError(&result.Error)
 		}
 	}
 
 	//clear cart
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return 0, &e.Error{Err: result.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&result.Error)
 	}
 
 	//commit transaction
@@ -347,7 +314,6 @@ func (repo *OrderRepo) ReturnOrderRequest(orderID uint) *e.Error {
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -355,9 +321,8 @@ func (repo *OrderRepo) ReturnOrderRequest(orderID uint) *e.Error {
 	//update order status
 	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "return requested")
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//commit transaction
@@ -375,7 +340,6 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -383,9 +347,8 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 	//update order status
 	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "returned")
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//get order items
@@ -396,16 +359,15 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//update stock
 	for _, item := range orderItems {
 		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock + ?", item.Quantity))
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return &e.Error{Err: result.Error, StatusCode: 500}
+			return e.DBQueryError(&result.Error)
 		}
 	}
 
@@ -417,15 +379,14 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//update wallet
 	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't update wallet. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//commit transaction
@@ -443,7 +404,6 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) *e.Error {
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't return order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -453,9 +413,8 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) *e.Error {
 		Where("id = ?", orderID).
 		Updates(map[string]interface{}{"status": "delivered", "delivered_date": gorm.Expr("CURRENT_TIMESTAMP"), "payment_status": "paid"})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't return order. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	}
 
 	//commit transaction
@@ -471,7 +430,7 @@ func (repo *OrderRepo) GetAllOrders() (*[]entities.Order, *e.Error) {
 		Find(&orders)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &orders, nil
@@ -485,11 +444,11 @@ func (repo *OrderRepo) GetOrderSummaryByID(orderID uint) (*entities.Order, *e.Er
 		Find(&order)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
-		return nil, &e.Error{Err: errors.New("record not found"), StatusCode: 400}
+		return nil, e.TextError("record not found", 400)
 	}
 
 	return &order, nil
@@ -503,7 +462,6 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 	//defer rollback if error happened
 	defer func() {
 		if r := recover(); r != nil || result.Error != nil {
-			fmt.Println("-------\npanic happened. couldn't cancel order. r= ", r, "query.Error= ", result.Error, "\n----")
 			tx.Rollback()
 		}
 	}()
@@ -513,9 +471,8 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 		Where("id = ?", orderID).
 		Updates(map[string]interface{}{"status": "placed", "payment_status": "paid"})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't update order status. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return nil, &e.Error{Err: result.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&result.Error)
 	}
 
 	//get order
@@ -527,7 +484,7 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 
 	if query.Error != nil {
 		tx.Rollback()
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	//get order items
@@ -538,25 +495,23 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 
 	if query.Error != nil {
 		tx.Rollback()
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	//update stock
 	for _, item := range *orderItems {
 		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		if result.Error != nil {
-			fmt.Println("-------\nquery error happened. couldn't update stock. query.Error= ", result.Error, "\n----")
 			tx.Rollback()
-			return nil, &e.Error{Err: result.Error, StatusCode: 500}
+			return nil, e.DBQueryError(&result.Error)
 		}
 	}
 
 	//clear cart
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't clear cart. query.Error= ", result.Error, "\n----")
 		tx.Rollback()
-		return nil, &e.Error{Err: result.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&result.Error)
 	}
 
 	//commit transaction
@@ -572,7 +527,7 @@ func (repo *OrderRepo) GetOrderByTransactionID(transactionID string) (uint, *e.E
 		Find(&order)
 
 	if query.Error != nil {
-		return 0, &e.Error{Err: query.Error, StatusCode: 500}
+		return 0, e.DBQueryError(&query.Error)
 	}
 
 	return order.ID, nil
@@ -581,10 +536,9 @@ func (repo *OrderRepo) GetOrderByTransactionID(transactionID string) (uint, *e.E
 func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID string) *e.Error {
 	result := repo.DB.Model(&entities.Order{}).Where("id = ?", orderID).Update("transaction_id", transactionID)
 	if result.Error != nil {
-		fmt.Println("-------\nquery error happened. couldn't update transactionID. query.Error= ", result.Error, "\n----")
-		return &e.Error{Err: result.Error, StatusCode: 500}
+		return e.DBQueryError(&result.Error)
 	} else if result.RowsAffected == 0 {
-		return &e.Error{Err: errors.New("no such order exists"), StatusCode: 400}
+		return e.TextError("no such order exists", 400)
 	}
 
 	return nil
@@ -599,9 +553,9 @@ func (repo *OrderRepo) GetPaymentStatusByID(orderID uint) (string, *e.Error) {
 		Find(&order)
 
 	if query.Error != nil {
-		return "", &e.Error{Err: query.Error, StatusCode: 500}
+		return "", e.DBQueryError(&query.Error)
 	} else if query.RowsAffected == 0 {
-		return "", &e.Error{Err: errors.New("no such order exists"), StatusCode: 400}
+		return "", e.TextError("no such order exists", 400)
 	}
 
 	return order.PaymentStatus, nil
@@ -625,7 +579,7 @@ func (repo *OrderRepo) GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS
 		orderID).Scan(&orderItems)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError(&query.Error)
 	}
 
 	return &orderItems, nil
@@ -638,11 +592,11 @@ func (repo *OrderRepo) UploadInvoice(file string, fileName string) (string, *e.E
 		Overwrite: true,
 	})
 	if err != nil {
-		return "", &e.Error{Err: errors.New("error while uploading file to cloudinary. err: " + err.Error()), StatusCode: 500}
+		return "", e.TextCumError("error while uploading file to cloudinary. err: ", err, 500)
 	}
 
 	if result.Error.Message != "" {
-		return "", &e.Error{Err: errors.New("error while uploading file to cloudinary. result.Error: " + result.Error.Message), StatusCode: 500}
+		return "", e.TextError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, 500)
 	}
 
 	return result.SecureURL, nil
