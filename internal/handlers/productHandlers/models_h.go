@@ -84,7 +84,7 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 		brandExists = true
 		brandIDs, errr = requestValidation.ValidateAndParseIDs(brandIDParam)
 		if errr != nil {
-			c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing brand id (param):", errr))
+			c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing brand id (param):", errr))
 			return
 		}
 	}
@@ -93,7 +93,7 @@ func (h *ModelHandler) GetModelsByBrandsAndCategories(c *gin.Context) {
 		categoryExists = true
 		categoryIDs, errr = requestValidation.ValidateAndParseIDs(categoryIDParam)
 		if errr != nil {
-			c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing category id (param):", errr))
+			c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing category id (param):", errr))
 			return
 		}
 	}

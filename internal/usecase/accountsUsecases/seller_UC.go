@@ -27,7 +27,7 @@ func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, *e.Error
 		return nil, err
 	}
 	if !(isEmailRegistered) {
-		return nil, e.TextError("email not registered",401)
+		return nil, errEmailNotRegistered_401
 	}
 
 	//get sellerpassword from database
@@ -57,7 +57,7 @@ func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, *e.Error
 		return nil, err
 	}
 	if emailAlreadyUsed {
-		return nil, e.TextError("email not registered",401)
+		return nil, errEmailNotRegistered_401
 	}
 
 	hashedPwd, errr := hashpassword.Hashpassword(req.Password)

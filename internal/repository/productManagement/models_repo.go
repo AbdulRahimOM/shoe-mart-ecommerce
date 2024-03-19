@@ -21,10 +21,10 @@ func NewModelRepository(db *gorm.DB) repoInterface.IModelsRepo {
 func (repo *ModelsRepo) EditModel(req *request.EditModelReq) *e.Error {
 	result := repo.DB.Model(&entities.Models{}).Where("id = ?", req.ID).Update("name", req.Name) //need update
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return e.TextError("model doesn't exist", 400)
+		return e.SetError("model doesn't exist", nil, 400)
 	}
 
 	return nil
@@ -40,7 +40,7 @@ func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, *e.Error) {
 		name).Scan(&temp)
 
 	if query.Error != nil {
-		return false, e.DBQueryError(&query.Error)
+		return false, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -54,7 +54,7 @@ func (repo *ModelsRepo) DoModelExistsbyName(name string) (bool, *e.Error) {
 func (repo *ModelsRepo) AddModel(req *entities.Models) *e.Error {
 	result := repo.DB.Create(&req)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil
@@ -81,7 +81,7 @@ func (repo *ModelsRepo) GetModelsByBrandsAndCategories(brandExists bool, brandID
 	}
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &modelsList, nil
@@ -94,11 +94,11 @@ func (repo *ModelsRepo) GetSellerIdOfModel(id uint) (uint, *e.Error) {
 	query := repo.DB.Preload("FkBrand").
 		Where("id = ?", id).Find(&temp)
 	if query.Error != nil {
-		return 0, e.DBQueryError(&query.Error)
+		return 0, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
-		return 0, e.TextError("model doesn't exist by this ID", 400)
+		return 0, e.SetError("model doesn't exist by this ID", nil, 400)
 	}
 
 	return temp.FkBrand.SellerID, nil

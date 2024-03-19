@@ -17,7 +17,7 @@ func (repo *ProductsRepo) DoDimensionalVariantExistsByAttributes(req *entities.D
 		req.ColourVariantID, req.DVIndex).Scan(&temp)
 
 	if query.Error != nil {
-		return false, e.DBQueryError(&query.Error)
+		return false, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -43,13 +43,13 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 	//add dimensionalVariant
 	result = tx.Create(&dimensionalVariant)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//preload dimensionalVariant
 	result = tx.Preload("FkColourVariant.FkModel.FkBrand").First(&dimensionalVariant, dimensionalVariant.ID)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//add productCombinations
@@ -65,7 +65,7 @@ func (repo *ProductsRepo) AddDimensionalVariantAndProductCombinations(dimensiona
 		//add productCombination
 		result := tx.Create(&productCombinations)
 		if result.Error != nil {
-			return e.DBQueryError(&result.Error)
+			return e.DBQueryError_500(&result.Error)
 		}
 	}
 

@@ -67,5 +67,5 @@ type IOrderRepo interface {
 	GetCouponUsageCount(userID uint, couponID uint) (uint, *e.Error)
 
 	//upload related_______________________________________________________
-	UploadInvoice(file string, fileName string) (string, *e.Error)
+	UploadInvoice(file string, fileName string) (*string, *e.Error)
 }

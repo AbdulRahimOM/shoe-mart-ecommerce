@@ -41,7 +41,7 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 	result = tx.Create(&order)
 	if result.Error != nil {
 		tx.Rollback()
-		return 0, e.DBQueryError(&result.Error)
+		return 0, e.DBQueryError_500(&result.Error)
 	}
 
 	//create order items
@@ -53,7 +53,7 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 		result = tx.Create(&item)
 		if result.Error != nil {
 			tx.Rollback()
-			return 0, e.DBQueryError(&result.Error)
+			return 0, e.DBQueryError_500(&result.Error)
 		}
 	}
 
@@ -61,7 +61,7 @@ func (repo *OrderRepo) MakeOrder(order *entities.Order, orderItems *[]entities.O
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
 		tx.Rollback()
-		return 0, e.DBQueryError(&result.Error)
+		return 0, e.DBQueryError_500(&result.Error)
 	}
 
 	//commit transaction
@@ -82,7 +82,7 @@ func (repo *OrderRepo) GetOrdersOfUser(userID uint, resultOffset int, resultLimi
 		Find(&orders)
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	var orderInfos []entities.DetailedOrderInfo
@@ -96,7 +96,7 @@ func (repo *OrderRepo) GetOrdersOfUser(userID uint, resultOffset int, resultLimi
 			Find(&orderItems)
 
 		if query.Error != nil {
-			return nil, e.DBQueryError(&query.Error)
+			return nil, e.DBQueryError_500(&query.Error)
 		}
 
 		var orderInfo entities.DetailedOrderInfo
@@ -119,7 +119,7 @@ func (repo *OrderRepo) GetOrders(resultOffset int, resultLimit int) (*[]entities
 		Find(&orders)
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	var orderInfos []entities.DetailedOrderInfo
@@ -133,7 +133,7 @@ func (repo *OrderRepo) GetOrders(resultOffset int, resultLimit int) (*[]entities
 			Find(&orderItems)
 
 		if query.Error != nil {
-			return nil, e.DBQueryError(&query.Error)
+			return nil, e.DBQueryError_500(&query.Error)
 		}
 
 		var orderInfo entities.DetailedOrderInfo
@@ -162,7 +162,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "cancelled")
 	if result.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//get order items
@@ -173,7 +173,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&query.Error)
+		return e.DBQueryError_500(&query.Error)
 	}
 
 	//update stock
@@ -181,7 +181,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock + ?", item.Quantity))
 		if result.Error != nil {
 			tx.Rollback()
-			return e.DBQueryError(&result.Error)
+			return e.DBQueryError_500(&result.Error)
 		}
 	}
 
@@ -194,21 +194,21 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&query.Error)
+		return e.DBQueryError_500(&query.Error)
 	}
 	if order.PaymentStatus == "paid" {
 		//update wallet , update payment status to refunded
 		result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 		if result.Error != nil {
 			tx.Rollback()
-			return e.DBQueryError(&result.Error)
+			return e.DBQueryError_500(&result.Error)
 		}
 
 		//update payment status to refunded
 		result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("payment_status", "refunded")
 		if result.Error != nil {
 			tx.Rollback()
-			return e.DBQueryError(&result.Error)
+			return e.DBQueryError_500(&result.Error)
 		}
 	}
 
@@ -226,10 +226,10 @@ func (repo *OrderRepo) GetOrderStatusByID(orderID uint) (string, *e.Error) {
 		Find(&order)
 
 	if query.Error != nil {
-		return "", e.DBQueryError(&query.Error)
+		return "", e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return "", e.TextError("no such order exists by id", 400)
+		return "", e.SetError("no such order exists by id", nil, 400)
 	}
 
 	return order.Status, nil
@@ -243,11 +243,11 @@ func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, *e.Error) {
 		Find(&order)
 
 	if query.Error != nil {
-		return 0, e.DBQueryError(&query.Error)
+		return 0, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
-		return 0, e.TextError("record not found with this orderID", 400)
+		return 0, e.SetError("record not found with this orderID", nil, 400)
 	}
 
 	return order.UserID, nil
@@ -269,7 +269,7 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	result = tx.Create(&order)
 	if result.Error != nil {
 		tx.Rollback()
-		return 0, e.DBQueryError(&result.Error)
+		return 0, e.DBQueryError_500(&result.Error)
 	}
 
 	//create order items
@@ -281,14 +281,14 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 		result := tx.Create(&item)
 		if result.Error != nil {
 			tx.Rollback()
-			return 0, e.DBQueryError(&result.Error)
+			return 0, e.DBQueryError_500(&result.Error)
 		}
 
 		//update stock
 		result = tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		if result.Error != nil {
 			tx.Rollback()
-			return 0, e.DBQueryError(&result.Error)
+			return 0, e.DBQueryError_500(&result.Error)
 		}
 	}
 
@@ -296,7 +296,7 @@ func (repo *OrderRepo) MakeOrder_UpdateStock_ClearCart(order *entities.Order, or
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
 		tx.Rollback()
-		return 0, e.DBQueryError(&result.Error)
+		return 0, e.DBQueryError_500(&result.Error)
 	}
 
 	//commit transaction
@@ -322,7 +322,7 @@ func (repo *OrderRepo) ReturnOrderRequest(orderID uint) *e.Error {
 	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "return requested")
 	if result.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//commit transaction
@@ -348,7 +348,7 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 	result = tx.Model(&entities.Order{}).Where("id = ?", orderID).Update("status", "returned")
 	if result.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//get order items
@@ -359,7 +359,7 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//update stock
@@ -367,7 +367,7 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock + ?", item.Quantity))
 		if result.Error != nil {
 			tx.Rollback()
-			return e.DBQueryError(&result.Error)
+			return e.DBQueryError_500(&result.Error)
 		}
 	}
 
@@ -379,14 +379,14 @@ func (repo *OrderRepo) MarkOrderAsReturned(orderID uint) *e.Error {
 
 	if query.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//update wallet
 	result = tx.Model(&entities.User{}).Where("id = ?", order.UserID).Update("wallet_balance", gorm.Expr("wallet_balance + ?", order.FinalAmount))
 	if result.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//commit transaction
@@ -414,7 +414,7 @@ func (repo *OrderRepo) MarkOrderAsDelivered(orderID uint) *e.Error {
 		Updates(map[string]interface{}{"status": "delivered", "delivered_date": gorm.Expr("CURRENT_TIMESTAMP"), "payment_status": "paid"})
 	if result.Error != nil {
 		tx.Rollback()
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	//commit transaction
@@ -430,7 +430,7 @@ func (repo *OrderRepo) GetAllOrders() (*[]entities.Order, *e.Error) {
 		Find(&orders)
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &orders, nil
@@ -444,11 +444,11 @@ func (repo *OrderRepo) GetOrderSummaryByID(orderID uint) (*entities.Order, *e.Er
 		Find(&order)
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
-		return nil, e.TextError("record not found", 400)
+		return nil, e.SetError("record not found", nil, 400)
 	}
 
 	return &order, nil
@@ -472,7 +472,7 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 		Updates(map[string]interface{}{"status": "placed", "payment_status": "paid"})
 	if result.Error != nil {
 		tx.Rollback()
-		return nil, e.DBQueryError(&result.Error)
+		return nil, e.DBQueryError_500(&result.Error)
 	}
 
 	//get order
@@ -484,7 +484,7 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 
 	if query.Error != nil {
 		tx.Rollback()
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	//get order items
@@ -495,7 +495,7 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 
 	if query.Error != nil {
 		tx.Rollback()
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	//update stock
@@ -503,7 +503,7 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 		result := tx.Model(&entities.Product{}).Where("id = ?", item.ProductID).Update("stock", gorm.Expr("stock - ?", item.Quantity))
 		if result.Error != nil {
 			tx.Rollback()
-			return nil, e.DBQueryError(&result.Error)
+			return nil, e.DBQueryError_500(&result.Error)
 		}
 	}
 
@@ -511,7 +511,7 @@ func (repo *OrderRepo) UpdateOrderToPaid_UpdateStock_ClearCart(orderID uint) (*e
 	result = tx.Where("user_id = ?", order.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
 		tx.Rollback()
-		return nil, e.DBQueryError(&result.Error)
+		return nil, e.DBQueryError_500(&result.Error)
 	}
 
 	//commit transaction
@@ -527,7 +527,7 @@ func (repo *OrderRepo) GetOrderByTransactionID(transactionID string) (uint, *e.E
 		Find(&order)
 
 	if query.Error != nil {
-		return 0, e.DBQueryError(&query.Error)
+		return 0, e.DBQueryError_500(&query.Error)
 	}
 
 	return order.ID, nil
@@ -536,9 +536,9 @@ func (repo *OrderRepo) GetOrderByTransactionID(transactionID string) (uint, *e.E
 func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID string) *e.Error {
 	result := repo.DB.Model(&entities.Order{}).Where("id = ?", orderID).Update("transaction_id", transactionID)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	} else if result.RowsAffected == 0 {
-		return e.TextError("no such order exists", 400)
+		return e.SetError("no such order exists", nil, 400)
 	}
 
 	return nil
@@ -553,9 +553,9 @@ func (repo *OrderRepo) GetPaymentStatusByID(orderID uint) (string, *e.Error) {
 		Find(&order)
 
 	if query.Error != nil {
-		return "", e.DBQueryError(&query.Error)
+		return "", e.DBQueryError_500(&query.Error)
 	} else if query.RowsAffected == 0 {
-		return "", e.TextError("no such order exists", 400)
+		return "", e.SetError("no such order exists", nil, 400)
 	}
 
 	return order.PaymentStatus, nil
@@ -579,25 +579,25 @@ func (repo *OrderRepo) GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS
 		orderID).Scan(&orderItems)
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &orderItems, nil
 }
 
-func (repo *OrderRepo) UploadInvoice(file string, fileName string) (string, *e.Error) {
+func (repo *OrderRepo) UploadInvoice(file string, fileName string) (*string, *e.Error) {
 	result, err := repo.Cld.Upload.Upload(context.Background(), file, uploader.UploadParams{
 		Folder:    "MyShoo/invoices",
 		PublicID:  fileName,
 		Overwrite: true,
 	})
 	if err != nil {
-		return "", e.TextCumError("error while uploading file to cloudinary. err: ", err, 500)
+		return nil, e.SetError("error while uploading file to cloudinary. err: ", err, 500)
 	}
 
 	if result.Error.Message != "" {
-		return "", e.TextError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, 500)
+		return nil, e.SetError("error while uploading file to cloudinary. result.Error: "+result.Error.Message,nil, 500)
 	}
 
-	return result.SecureURL, nil
+	return &result.SecureURL, nil
 }

@@ -53,7 +53,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 	//validate payment method
 	paymentValid := tools.IsValidPaymentMethod(req.PaymentMethod)
 	if !paymentValid {
-		return nil, nil, e.TextError("invalid payment method", 400)
+		return nil, nil, e.SetError("invalid payment method", nil, 400)
 	}
 
 	//get user address
@@ -68,7 +68,7 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 		return nil, nil, err
 	}
 	if cartEmpty {
-		return nil, nil, e.TextError("cart is empty", 400)
+		return nil, nil, e.SetError("cart is empty", nil, 400)
 	}
 	//get cart
 	var cart *[]entities.Cart
@@ -123,10 +123,10 @@ func (uc *OrderUseCase) MakeOrder(req *request.MakeOrderReq) (*entities.OrderInf
 
 	if strings.ToUpper(req.PaymentMethod) == "COD" {
 		if !config.DeliveryConfig.CashOnDeliveryAvailable {
-			return nil, nil, e.TextError("COD not available", 400)
+			return nil, nil, e.SetError("COD not available", nil, 400)
 		}
 		if totalProductValue > config.DeliveryConfig.MaxOrderAmountForCOD {
-			return nil, nil, e.TextError("exceeds COD max amount", 400)
+			return nil, nil, e.SetError("exceeds COD max amount", nil, 400)
 		}
 		status = "placed"
 	} else {
@@ -199,7 +199,7 @@ func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]re
 
 	if errr := copier.Copy(&responseOrders, &orders); errr != nil {
 		// return &responseOrders,  errr
-		return nil, e.TextCumError("Error occured while copying orders to responseOrders", errr, 500)
+		return nil, e.SetError("Error occured while copying orders to responseOrders", errr, 500)
 
 	}
 
@@ -219,7 +219,7 @@ func (uc *OrderUseCase) GetOrders(page int, limit int) (*[]response.ResponseOrde
 	var responseOrders []response.ResponseOrderInfo
 	var errr error
 	if errr = copier.Copy(&responseOrders, &orders); errr != nil {
-		return nil, e.TextCumError("Error occured while copying orders to responseOrders", errr, 500)
+		return nil, e.SetError("Error occured while copying orders to responseOrders", errr, 500)
 	}
 	return &responseOrders, nil
 }
@@ -233,7 +233,7 @@ func (uc *OrderUseCase) CancelOrderByUser(orderID uint, userID uint) *e.Error {
 		return err
 	}
 	if userID != userIDFromOrder {
-		return e.TextError("order doesn't belong to user", 401)
+		return e.SetError("order doesn't belong to user", nil, 401)
 	}
 
 	//check if order is already cancelled
@@ -286,7 +286,7 @@ func (uc *OrderUseCase) ReturnOrderRequestByUser(orderID, userID uint) *e.Error 
 		return err
 	}
 	if userID != userIDFromOrder {
-		return e.TextError("order doesn't belong to user", 401)
+		return e.SetError("order doesn't belong to user", nil, 401)
 	}
 
 	//check if order is in "delivered" status
@@ -391,15 +391,15 @@ func getCouponDiscount(coupon *entities.Coupon, orderValue float32, usageCount u
 	var discount float32
 	switch {
 	case coupon.Blocked:
-		return 0, e.TextError("coupon is blocked", 403)
+		return 0, e.SetError("coupon is blocked", nil, 403)
 	case coupon.StartDate.After(time.Now()):
-		return 0, e.TextError("coupon is not active yet", 403)
+		return 0, e.SetError("coupon is not active yet", nil, 403)
 	case coupon.EndDate.Before(time.Now()):
-		return 0, e.TextError("coupon is expired", 403)
+		return 0, e.SetError("coupon is expired", nil, 403)
 	case coupon.MinOrderValue > orderValue:
-		return 0, e.TextError("order amount is less than required for coupon", 403)
+		return 0, e.SetError("order amount is less than required for coupon", nil, 403)
 	case usageCount >= coupon.UsageLimit:
-		return 0, e.TextError("coupon usage limit exceeded", 403)
+		return 0, e.SetError("coupon usage limit exceeded", nil, 403)
 	default:
 		if coupon.Type == "fixed" {
 			discount = myMath.RoundFloat32(coupon.MaxDiscount, 2)
@@ -434,7 +434,7 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 		return nil, err
 	}
 	if address.UserID != userID {
-		return nil, e.TextError("address doesn't belong to user", 401)
+		return nil, e.SetError("address doesn't belong to user", nil, 401)
 	}
 
 	totalQuantiy, totalProductsValue, err := uc.cartRepo.GetQuantityAndPriceOfCart(userID)
@@ -452,7 +452,7 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 	}
 	var respCoupons []response.ResponseCoupon
 	if errr := copier.Copy(&respCoupons, &coupons); errr != nil {
-		return nil, e.TextCumError("error occured while copying coupons to responseCoupons", errr, 500)
+		return nil, e.SetError("error occured while copying coupons to responseCoupons", errr, 500)
 	}
 
 	response := response.SetAddrGetCouponsResponse{
@@ -475,7 +475,7 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 	if err != nil {
 		return nil, err
 	} else if address.UserID != userID {
-		return nil, e.TextError("address doesn't belong to user", 401)
+		return nil, e.SetError("address doesn't belong to user", nil, 401)
 	}
 
 	//get coupon by id
@@ -512,7 +512,7 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 
 	var respCoupon response.ResponseCoupon
 	if errr := copier.Copy(&respCoupon, &coupon); errr != nil {
-		return nil, e.TextCumError("Error occured while copying coupon to responseCoupon", errr, 500)
+		return nil, e.SetError("Error occured while copying coupon to responseCoupon", errr, 500)
 	}
 
 	resp := response.GetPaymentMethodsForCheckoutResponse{
@@ -544,7 +544,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *
 	}
 
 	if userID != userIDFromOrder {
-		return nil, e.TextError("order doesn't belong to user", 401)
+		return nil, e.SetError("order doesn't belong to user", nil, 401)
 	}
 
 	//check if payment status is "paid"
@@ -586,27 +586,27 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *
 		// Output the PDF to a file
 		outputPath := filepath.Join(config.ExecutableDir, "testKit/invoiceOutput.pdf")
 		if errr := pdf.OutputFileAndClose(outputPath); errr != nil {
-			return nil, e.TextCumError("error saving pdf:", errr, 500)
+			return nil, e.SetError("error saving pdf:", errr, 500)
 		} else {
 			return &outputPath, nil
 		}
 	} else {
 		tempFileName, err := tools.MakeRandomUUID()
 		if err != nil {
-			return nil, e.TextCumError("error occured while generating random UUID:", err, 500)
+			return nil, e.SetError("error occured while generating random UUID:", err, 500)
 		}
 		tempFilePath := filepath.Join(os.TempDir(), tempFileName+"invoice.pdf")
 		defer os.Remove(tempFilePath)
 		if errr := pdf.OutputFileAndClose(tempFilePath); errr != nil {
-			return nil, e.TextCumError("error saving pdf:", errr, 500)
+			return nil, e.SetError("error saving pdf:", errr, 500)
 		}
 		url, errr := uc.orderRepo.UploadInvoice(tempFilePath, fmt.Sprint("invoice", orderID))
 		if errr != nil {
-			return nil, e.TextCumError("error uploading pdf:", errr, 500)
+			return nil, e.SetError("error uploading pdf:", errr, 500)
 		}
 
-		fmt.Println("url: ", url)
-		return &url, nil
+		fmt.Println("url: ", *url)
+		return url, nil
 	}
 
 }

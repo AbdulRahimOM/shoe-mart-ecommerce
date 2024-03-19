@@ -51,7 +51,10 @@ func SuccessSM(message string) SM {
 func FromError(err error) gin.H {
 	switch err := err.(type) {
 	case *e.Error:
-		return gin.H{"error": err.Err.Error()}
+		return gin.H{
+			"msg": err.Msg, 
+			"error": err.Err.Error(),
+		}
 	default:
 		return gin.H{"error": err.Error()}
 	}
@@ -59,7 +62,7 @@ func FromError(err error) gin.H {
 func FromErrByText(text string) gin.H {
 	return gin.H{"error": text}
 }
-func FromErrByTextCumError(txt string, err error) gin.H {
+func MsgAndError(txt string, err error) gin.H {
 	return gin.H{"error": txt + err.Error()}
 }
 func ErrOnBindingReq(err error) gin.H {

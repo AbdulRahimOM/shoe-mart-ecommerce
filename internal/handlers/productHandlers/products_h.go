@@ -75,7 +75,7 @@ func (h *ProductHandler) AddStock(c *gin.Context) {
 	//check if sellerID in token and request body match
 	sellerID, errr := tools.GetSellerID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting sellerID from token:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting sellerID from token:", errr))
 		return
 	}
 	if sellerID != req.SellerID {
@@ -126,7 +126,7 @@ func (h *ProductHandler) EditStock(c *gin.Context) {
 	//check if sellerID in token and request body match
 	sellerID, errr := tools.GetSellerID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting sellerID from token:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting sellerID from token:", errr))
 		return
 	}
 	if sellerID != req.SellerID {

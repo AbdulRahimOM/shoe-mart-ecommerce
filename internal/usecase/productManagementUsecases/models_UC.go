@@ -31,7 +31,7 @@ func (uc *ModelsUC) AddModel(req *request.AddModelReq) *e.Error {
 		return err
 	}
 	if doModelExists {
-		return e.TextError("model already exists", 400)
+		return e.SetError("model already exists", nil, 400)
 	}
 
 	//add model

@@ -24,7 +24,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVari
 		return err
 	}
 	if doColourVariantExists {
-		return e.TextError("colourVariant already exists", 400)
+		return e.SetError("colourVariant already exists", nil, 400)
 	}
 
 	//check if modelID belongs to the seller
@@ -33,7 +33,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVari
 		return err
 	}
 	if sellerIDFromModel != sellerID {
-		return e.TextError("modelID does not belong to the seller", 401)
+		return e.SetError("modelID does not belong to the seller", nil, 401)
 	}
 
 	//round off MRP and SalePrice to 2 decimal places
@@ -57,7 +57,7 @@ func (uc *ProductsUC) EditColourVariant(req *request.EditColourVariantReq) *e.Er
 		return err
 	}
 	if doColourVariantExists {
-		return e.TextError("colourVariant already exists with these attributes", 400)
+		return e.SetError("colourVariant already exists with these attributes", nil, 400)
 	}
 
 	//round off MRP and SalePrice to 2 decimal places

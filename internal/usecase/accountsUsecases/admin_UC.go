@@ -11,7 +11,9 @@ import (
 	jwttoken "MyShoo/pkg/jwt"
 	"time"
 )
-
+var(
+	errEmailNotRegistered_401=e.ErrEmailNotRegistered_401
+)
 type AdminUseCase struct {
 	adminRepo repoInterface.IAdminRepo
 }
@@ -31,7 +33,7 @@ func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return e.TextError("email not registered", 401)
+		return e.ErrEmailNotRegistered_401
 	}
 	return uc.adminRepo.UpdateUserStatus(req.Email, "blocked")
 }
@@ -43,7 +45,7 @@ func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return e.TextError("email not registered", 401)
+		return errEmailNotRegistered_401
 	}
 	return uc.adminRepo.UpdateUserStatus(req.Email, "verified")
 }
@@ -55,7 +57,7 @@ func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return e.TextError("email not registered", 401)
+		return errEmailNotRegistered_401
 	}
 	return uc.adminRepo.UpdateSellerStatus(req.Email, "blocked")
 }
@@ -67,7 +69,7 @@ func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) *e.Error {
 		return err
 	}
 	if !(isEmailRegistered) {
-		return e.TextError("email not registered", 401)
+		return errEmailNotRegistered_401
 	}
 
 	return uc.adminRepo.UpdateSellerStatus(req.Email, "verified")
@@ -83,7 +85,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 		return nil, err
 	}
 	if !(isEmailRegistered) {
-		return nil, e.TextError("email not registered", 401)
+		return nil, errEmailNotRegistered_401
 	}
 
 	//get adminpassword from database
@@ -93,7 +95,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 	}
 
 	//check for password
-	if hashpassword.CompareHashedPassword(hashedPassword, req.Password) != nil {
+	if hashpassword.CompareHashedPassword(*hashedPassword, req.Password) != nil {
 		return nil, &e.Error{Err: e.ErrInvalidPassword_401, StatusCode: 200}
 	}
 
@@ -121,7 +123,7 @@ func (uc *AdminUseCase) VerifySeller(req *request.VerifySellerReq) *e.Error {
 		return err
 	}
 	if isVerified {
-		return e.TextError("seller is already verified", 400)
+		return e.SetError("seller is already verified", nil,400)
 	}
 
 	return uc.adminRepo.VerifySeller(req.SellerID)

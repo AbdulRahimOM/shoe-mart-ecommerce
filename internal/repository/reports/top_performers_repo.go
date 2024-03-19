@@ -33,7 +33,7 @@ func (repo *DashboardDataRepo) GetTopModels(limit int) (*[]response.TopModels, *
 		LIMIT ?
 	`, limit).Scan(&topModels)
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &topModels, nil
@@ -69,7 +69,7 @@ func (repo *DashboardDataRepo) GetTopProducts(limit int) (*[]response.TopProduct
 		LIMIT ?
 	`, limit).Scan(&topProducts)
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &topProducts, nil
@@ -102,7 +102,7 @@ func (repo *DashboardDataRepo) GetTopBrands(limit int) (*[]response.TopBrands, *
 		LIMIT ?
 	`, limit).Scan(&topBrands)
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &topBrands, nil
@@ -135,7 +135,7 @@ func (repo *DashboardDataRepo) GetTopSellers(limit int) (*[]response.TopSellers,
 		LIMIT ?
 	`, limit).Scan(&topSellers)
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &topSellers, nil

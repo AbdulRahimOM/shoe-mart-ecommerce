@@ -41,26 +41,26 @@ func (cvh *ProductHandler) AddColourVariant(c *gin.Context) {
 	//get sellerID from token
 	sellerID, errr := tools.GetSellerID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting sellerID from token:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting sellerID from token:", errr))
 		return
 	}
 
 	//image upload handling
 	formFile, errr := c.FormFile("imageUrl")
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error getting image file from request:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error getting image file from request:", errr))
 		return
 	}
 
 	path := filepath.Join(os.TempDir(), formFile.Filename)
 	if errr := c.SaveUploadedFile(formFile, path); errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error saving image file to temp dir:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error saving image file to temp dir:", errr))
 		return
 	}
 
 	file, errr := os.Open(path)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error opening image file:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error opening image file:", errr))
 		return
 	}
 	defer file.Close()
@@ -125,7 +125,7 @@ func (cvh *ProductHandler) GetColourVariantsUnderModel(c *gin.Context) {
 	modelIDParam := c.Param("modelID")
 	modelIDstring, errr := strconv.ParseUint(modelIDParam, 10, 64)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing modelID:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing modelID:", errr))
 		return
 	}
 

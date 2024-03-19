@@ -9,7 +9,7 @@ import (
 
 type IAdminRepo interface {
 	IsEmailRegisteredAsAdmin(email string) (bool, *e.Error)
-	GetPasswordAndAdminDetailsByEmail(email string) (string, entities.AdminDetails, *e.Error)
+	GetPasswordAndAdminDetailsByEmail(email string) (*string, *entities.AdminDetails, *e.Error)
 	GetUsersList() (*[]entities.UserDetails, *e.Error)
 	UpdateUserStatus(email string, newStatus string) *e.Error
 	GetSellersList() (*[]entities.PwMaskedSeller, *e.Error)

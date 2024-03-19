@@ -32,11 +32,11 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 
 	result, err := repo.Cld.Upload.Upload(context.Background(), file, uploadParams)
 	if err != nil {
-		return e.TextCumError("error while uploading file to cloudinary. err: ", err, 500)
+		return e.SetError("error while uploading file to cloudinary. err: ", err, 500)
 	}
 
 	if result.Error.Message != "" {
-		return e.TextError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, 500)
+		return e.SetError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, nil,500)
 	}
 
 	fmt.Println("req.ImageURL: ", req.ImageURL) //url printing,.. may be required for checking purposes
@@ -64,11 +64,11 @@ func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) *e.Erro
 		req.ID).Scan(&temp)
 
 	if query.Error != nil {
-		return e.DBQueryError(&query.Error)
+		return e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
-		return e.TextError("colourVariant doesn't exist", 400)
+		return e.SetError("colourVariant doesn't exist", nil, 400)
 	}
 
 	//update colourVariant
@@ -77,7 +77,7 @@ func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) *e.Erro
 	})
 
 	if query.Error != nil {
-		return e.DBQueryError(&query.Error)
+		return e.DBQueryError_500(&query.Error)
 	}
 
 	return nil
@@ -93,7 +93,7 @@ func (repo *ProductsRepo) DoColourVariantExistByAttributes(req *entities.ColourV
 		req.Colour, req.ModelID).Scan(&temp)
 
 	if query.Error != nil {
-		return false, e.DBQueryError(&query.Error)
+		return false, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -111,7 +111,7 @@ func (repo *ProductsRepo) GetColourVariantsUnderModel(modelID uint) (*[]entities
 		Where("\"modelId\" = ?", modelID).Find(&colourVariants)
 
 	if query.Error != nil {
-		return nil, e.DBQueryError(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &colourVariants, nil

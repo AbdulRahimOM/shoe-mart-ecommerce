@@ -43,7 +43,7 @@ func (h *OrderHandler) MakeOrder(c *gin.Context) {
 
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 	req.UserID = userID
@@ -105,20 +105,20 @@ func (h *OrderHandler) GetOrdersOfUser(c *gin.Context) {
 	// Validate and convert the string parameters to integers
 	pageInt, errr := requestValidation.ValidateAndParseInt(page)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing page(p) parameter. error:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing page(p) parameter. error:", errr))
 		return
 	}
 
 	limitInt, errr := requestValidation.ValidateAndParseInt(limit)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing limit(l) parameter. error:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing limit(l) parameter. error:", errr))
 		return
 	}
 
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -160,13 +160,13 @@ func (h *OrderHandler) GetOrders(c *gin.Context) {
 	// Validate and convert the string parameters to integers
 	pageInt, errr := requestValidation.ValidateAndParseInt(page)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing page(p) parameter. error:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing page(p) parameter. error:", errr))
 		return
 	}
 
 	limitInt, errr := requestValidation.ValidateAndParseInt(limit)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error parsing limit(l) parameter. error:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing limit(l) parameter. error:", errr))
 		return
 	}
 
@@ -211,7 +211,7 @@ func (h *OrderHandler) CancelMyOrder(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -291,7 +291,7 @@ func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -391,14 +391,14 @@ func (h *OrderHandler) GetInvoiceOfOrder(c *gin.Context) {
 
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
 	orderIdParam := c.Query("orderID")
 	orderId, errr := strconv.Atoi(orderIdParam)
 	if errr != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("invalid order ID in query param", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("invalid order ID in query param", errr))
 		return
 	}
 
@@ -430,7 +430,7 @@ func (h *OrderHandler) GetAddressForCheckout(c *gin.Context) {
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
 		// c.JSON(http.StatusInternalServerError, response.FailedSME("Error getting address for checkout. Try Again", err))
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -478,7 +478,7 @@ func (h *OrderHandler) SetAddressGetCoupons(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -522,7 +522,7 @@ func (h *OrderHandler) SetCouponGetPaymentMethods(c *gin.Context) {
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
 		// c.JSON(http.StatusInternalServerError, response.FailedSME("Error setting coupon. Try Again", err))
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 

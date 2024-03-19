@@ -61,12 +61,12 @@ func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
 			// validate date params, and recieve time
 			startTime, errr := requestValidation.ValidateAndParseDate(startDate)
 			if errr != nil {
-				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing start date", errr))
+				c.JSON(http.StatusBadRequest, response.MsgAndError("error occured in validating and parsing start date", errr))
 				return
 			}
 			endTime, errr := requestValidation.ValidateAndParseDate(endDate)
 			if errr != nil {
-				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing end date", errr))
+				c.JSON(http.StatusBadRequest, response.MsgAndError("error occured in validating and parsing end date", errr))
 				return
 			}
 

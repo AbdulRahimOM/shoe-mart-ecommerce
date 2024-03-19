@@ -26,7 +26,7 @@ func NewUserUseCase(repo repoInterface.IUserRepo) usecase.IUserUC {
 func (uc *UserUseCase) SendOtp(phone string) *e.Error {
 	err := otpManager.SendOtp(phone)
 	if err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "Error occured while sending otp"), StatusCode: 500}
+		return e.SetError("Error occured while sending otp", err, 500)
 	}
 	return nil
 }
@@ -48,7 +48,7 @@ func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, *e.Error) {
 		return nil, err
 	}
 	if !(isEmailRegistered) {
-		return nil, e.TextError("email not registered", 401)
+		return nil, errEmailNotRegistered_401
 	}
 
 	//get userpassword from database
@@ -59,7 +59,7 @@ func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, *e.Error) {
 
 	//check for password
 	if hashpassword.CompareHashedPassword(userForToken.Password, req.Password) != nil {
-		return nil, e.GetError(e.ErrInvalidPassword_401)
+		return nil, e.ErrInvalidPassword_401
 	}
 
 	//generate token
@@ -73,13 +73,12 @@ func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, *e.Error) {
 }
 
 func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, *e.Error) {
-	// fmt.Println("-----\nreq.email:", req.Email, "\n------")
 	emailAlreadyUsed, err := uc.userRepo.IsEmailRegistered(req.Email)
 	if err != nil {
 		return nil, err
 	}
 	if emailAlreadyUsed {
-		return nil, e.TextError("email not registered", 401)
+		return nil, errEmailNotRegistered_401
 	}
 
 	hashedPwd, errr := hashpassword.Hashpassword(req.Password)
@@ -125,7 +124,7 @@ func (uc *UserUseCase) AddUserAddress(req *request.AddUserAddress) *e.Error {
 		return err
 	}
 	if doAddressNameAlreadyExists {
-		return e.TextError("address name already exists", 400) //P-update
+		return e.SetError("address name already exists",nil, 400) //P-update
 	}
 	var address entities.UserAddress
 	if err := copier.Copy(&address, &req); err != nil {
@@ -143,7 +142,7 @@ func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) *e.Error {
 		return err
 	}
 	if userID != req.UserID {
-		return e.TextError("UserID is not same, Corrupt request", 401)
+		return e.SetError("UserID is not same, Corrupt request",nil, 401)
 	}
 
 	//get old address name
@@ -158,7 +157,7 @@ func (uc *UserUseCase) EditUserAddress(req *request.EditUserAddress) *e.Error {
 			return err
 		}
 		if doAddressNameAlreadyExists {
-			return e.TextError("address name already exists for user's another address", 400)
+			return e.SetError("address name already exists for user's another address",nil, 400)
 		}
 	}
 
@@ -178,7 +177,7 @@ func (uc *UserUseCase) DeleteUserAddress(req *request.DeleteUserAddress) *e.Erro
 		return err
 	}
 	if userID != req.UserID {
-		return e.TextError("UserID is not same, Corrupt request", 401)
+		return e.SetError("UserID is not same, Corrupt request",nil, 401)
 	}
 
 	//delete address
@@ -209,7 +208,7 @@ func (uc *UserUseCase) EditProfile(userID uint, req *request.EditProfileReq) *e.
 			return err
 		}
 		if doEmailAlreadyExists {
-			return e.TextError("email already exists for another user", 400)
+			return e.SetError("email already exists for another user",nil, 400)
 		}
 	}
 
@@ -225,7 +224,7 @@ func (uc *UserUseCase) GetUserByEmail(email string) (*entities.User, *e.Error) {
 		return nil, err
 	}
 	if !doEmailExist {
-		return nil, e.TextError("email doesn't exist", 400)
+		return nil, errEmailNotRegistered_401
 	}
 
 	//get user

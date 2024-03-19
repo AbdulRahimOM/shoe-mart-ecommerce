@@ -47,7 +47,7 @@ func (h *CartHandler) AddToCart(c *gin.Context) {
 	//check if userID in token and request body match
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 
 		return
 	}
@@ -88,7 +88,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 		// 	Error:   err.Error(),
 		// })
 		// c.JSON(http.StatusInternalServerError, response.FromError(errr))
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -164,7 +164,7 @@ func (h *CartHandler) ClearCart(c *gin.Context) {
 
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 

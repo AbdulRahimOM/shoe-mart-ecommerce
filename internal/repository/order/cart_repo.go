@@ -20,7 +20,7 @@ func NewCartRepository(db *gorm.DB) repo.ICartRepo {
 func (repo *CartRepo) AddToCart(cart *entities.Cart) *e.Error {
 	result := repo.DB.Create(&cart)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil
@@ -30,11 +30,11 @@ func (repo *CartRepo) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 	//check by productID and userID
 	result := repo.DB.Where("\"productId\" = ? AND user_id = ?", req.ProductID, req.UserID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	if result.RowsAffected == 0 {
-		return e.TextError("nothing deleted. no such item in cart", 400)
+		return e.SetError("nothing deleted. no such item in cart", nil, 400)
 	}
 
 	return nil
@@ -49,7 +49,7 @@ func (repo *CartRepo) DoProductExistAlready(cart *entities.Cart) (bool, uint, *e
 		cart.ProductID, cart.UserID).Scan(&temp)
 
 	if query.Error != nil {
-		return false, 0, e.DBQueryError(&query.Error)
+		return false, 0, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -69,7 +69,7 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, *e.Error)
 		Where("user_id = ?", userID).Find(&cart)
 
 	if query.Error != nil {
-		return nil, 0, e.DBQueryError(&query.Error)
+		return nil, 0, e.DBQueryError_500(&query.Error)
 	}
 	var totalValue float32 = 0
 	for i := range cart {
@@ -82,7 +82,7 @@ func (repo *CartRepo) GetCart(userID uint) (*[]entities.Cart, float32, *e.Error)
 func (repo *CartRepo) UpdateCartItemQuantity(cart *entities.Cart) *e.Error {
 	result := repo.DB.Model(&entities.Cart{}).Where("\"productId\" = ? AND user_id = ?", cart.ProductID, cart.UserID).Update("quantity", cart.Quantity)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil
@@ -98,7 +98,7 @@ func (repo *CartRepo) IsCartEmpty(userID uint) (bool, *e.Error) {
 		userID).Scan(&temp)
 
 	if query.Error != nil {
-		return false, e.DBQueryError(&query.Error)
+		return false, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -112,7 +112,7 @@ func (repo *CartRepo) ClearCartOfUser(userID uint) *e.Error {
 	//delete all cart items of user where user_id = userID
 	result := repo.DB.Where("user_id = ?", userID).Delete(&entities.Cart{})
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil
@@ -137,9 +137,9 @@ func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, *e.
 		userID).Scan(&queryData)
 
 	if query.Error != nil {
-		return 0, 0, e.DBQueryError(&query.Error)
+		return 0, 0, e.DBQueryError_500(&query.Error)
 	} else if queryData.TotalQuantity == 0 {
-		return 0, 0, e.TextError("cart is empty", 400)
+		return 0, 0, e.SetError("cart is empty", nil, 400)
 	}
 	return queryData.TotalQuantity, queryData.TotalValue, nil
 }

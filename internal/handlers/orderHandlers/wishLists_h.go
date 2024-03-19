@@ -49,7 +49,7 @@ func (h *WishListHandler) CreateWishList(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -91,7 +91,7 @@ func (h *WishListHandler) AddToWishList(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -133,7 +133,7 @@ func (h *WishListHandler) RemoveFromWishList(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -162,7 +162,7 @@ func (h *WishListHandler) GetAllWishLists(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -206,14 +206,14 @@ func (h *WishListHandler) GetWishListByID(c *gin.Context) {
 	wishListIDUint, errr := strconv.ParseUint(wishListID, 10, 64)
 	if errr != nil {
 		// c.JSON(http.StatusBadRequest, response.FailedSME("Error converting wishlist id to uint. Try Again", err))
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error converting wishlist id (param) to uint. error:", errr))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error converting wishlist id (param) to uint. error:", errr))
 		return
 	}
 
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 

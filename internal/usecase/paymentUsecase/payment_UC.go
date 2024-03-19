@@ -53,7 +53,7 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 		return nil, err
 	} else {
 		if userIDOfOrder != userID {
-			return nil, e.TextError("OrderNotOfUser", 400)
+			return nil, e.SetError("OrderNotOfUser", nil, 400)
 		}
 	}
 
@@ -65,11 +65,11 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 
 	//check if payment method is online and order is not paid
 	if order.Status != "payment pending" {
-		return nil, e.TextError("order payment status is not 'payment pending'", 400)
+		return nil, e.SetError("order payment status is not 'payment pending'", nil, 400)
 	} else {
 		var errr error
 		if order.TransactionID, errr = services.CreateRazorpayOrder(order.FinalAmount, order.ReferenceNo); errr != nil {
-			return nil, e.TextCumError("Service error at creating razorpay order:", errr, 500)
+			return nil, e.SetError("Service error at creating razorpay order:", errr, 500)
 		}
 
 		//update order with transactionID

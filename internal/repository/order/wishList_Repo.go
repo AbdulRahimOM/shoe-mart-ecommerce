@@ -66,7 +66,7 @@ func (repo *WishListRepo) GetUserIDOfWishList(wishListID uint) (uint, *e.Error) 
 	err := repo.DB.Model(&entities.WishList{}).Where("id = ?", wishListID).Pluck("user_id", &userID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return 0, e.TextError("no such wishlist", 400)
+			return 0, e.SetError("no such wishlist", nil, 400)
 		} else {
 			return 0, &e.Error{Err: err, StatusCode: 500}
 		}

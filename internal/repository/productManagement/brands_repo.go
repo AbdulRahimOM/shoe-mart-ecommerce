@@ -22,7 +22,7 @@ func NewBrandRepository(db *gorm.DB) repoInterface.IBrandsRepo {
 func (repo *BrandsRepo) EditBrand(req *request.EditBrandReq) *e.Error {
 	result := repo.DB.Model(&entities.Brands{}).Where("name = ?", req.OldName).Update("name", req.NewName)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 	return nil
 }
@@ -30,7 +30,7 @@ func (repo *BrandsRepo) EditBrand(req *request.EditBrandReq) *e.Error {
 func (repo *BrandsRepo) AddBrand(req *entities.Brands) *e.Error {
 	result := repo.DB.Create(&req)
 	if result.Error != nil {
-		return e.DBQueryError(&result.Error)
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil
@@ -46,7 +46,7 @@ func (repo *BrandsRepo) DoBrandExistsByName(name string) (bool, *e.Error) {
 		name).Scan(&temp)
 
 	if query.Error != nil {
-		return false, e.DBQueryError(&query.Error)
+		return false, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -67,7 +67,7 @@ func (repo *BrandsRepo) GetBrands() (*[26]entities.BrandsByAlphabet, *e.Error) {
 			brands[i].Alphabet+"%", strings.ToLower(brands[i].Alphabet)+"%").Scan(&brands[i].Brands)
 
 		if query.Error != nil {
-			return nil, e.DBQueryError(&query.Error)
+			return nil, e.DBQueryError_500(&query.Error)
 		}
 	}
 

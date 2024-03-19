@@ -220,7 +220,7 @@ func (h *UserHandler) AddUserAddress(c *gin.Context) {
 	//check if userID in token and request body match
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 	if userID != req.UserID {
@@ -265,7 +265,7 @@ func (h *UserHandler) EditUserAddress(c *gin.Context) {
 	//check if userID in token and request body match
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -310,7 +310,7 @@ func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 	//check if userID in token and request body match
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -341,7 +341,7 @@ func (h *UserHandler) GetUserAddresses(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -370,7 +370,7 @@ func (h *UserHandler) GetProfile(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -426,7 +426,7 @@ func (h *UserHandler) EditProfile(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusInternalServerError, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
@@ -608,7 +608,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 	//change password
 	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
 	if err := h.UserUseCase.ResetPassword(id, &req.NewPassword); err != nil {
-		c.JSON(http.StatusUnauthorized, response.FromErrByTextCumError("error getting id from token. error:", err))
+		c.JSON(http.StatusUnauthorized, response.MsgAndError("error getting id from token. error:", err))
 		return
 	}
 

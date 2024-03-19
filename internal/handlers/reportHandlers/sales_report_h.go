@@ -53,12 +53,12 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			// validate date params, and recieve time
 			startTime, errr := requestValidation.ValidateAndParseDate(startDate)
 			if errr != nil {
-				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing start date", errr))
+				c.JSON(http.StatusBadRequest, response.MsgAndError("error occured in validating and parsing start date", errr))
 				return
 			}
 			endTime, errr := requestValidation.ValidateAndParseDate(endDate)
 			if errr != nil {
-				c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("error occured in validating and parsing end date", errr))
+				c.JSON(http.StatusBadRequest, response.MsgAndError("error occured in validating and parsing end date", errr))
 			}
 
 			fileURL, err := h.reportsUC.ExportSalesReportBetweenDates(startTime, endTime)
@@ -78,7 +78,7 @@ func (h *ReportsHandler) ExportSalesReport(c *gin.Context) {
 			c.Header("Content-Disposition", "attachment; filename=SalesReportThisMonthForAdmin.xlsx")
 			c.File(*fileURL)
 		}
-		
+
 	case "last-month":
 		fmt.Println("last month entered")
 		fileURL, err := h.reportsUC.ExportSalesReportLastMonth()

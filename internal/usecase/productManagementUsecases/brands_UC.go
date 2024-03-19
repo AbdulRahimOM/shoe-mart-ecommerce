@@ -26,7 +26,7 @@ func (uc *BrandsUC) AddBrand(req *request.AddBrandReq) *e.Error {
 		return err
 	}
 	if doBrandExistsByName {
-		return e.TextError("brand already exists", 400)
+		return e.SetError("brand already exists", nil, 400)
 	}
 
 	var brand entities.Brands
@@ -47,14 +47,14 @@ func (uc *BrandsUC) EditBrand(req *request.EditBrandReq) *e.Error {
 		return err
 	}
 	if !DoBrandExistsByName {
-		return e.TextError("brand doesn't exist", 400)
+		return e.SetError("brand doesn't exist", nil, 400)
 	}
 
 	//check if the new name already exists for another brand
 	if DoBrandExistsByName, err := uc.BrandsRepo.DoBrandExistsByName(req.NewName); err != nil {
 		return err
 	} else if DoBrandExistsByName {
-		return e.TextError("brand already exists with the sugested new name", 400)
+		return e.SetError("brand already exists with the sugested new name", nil, 400)
 	}
 
 	//edit brand

@@ -24,7 +24,7 @@ func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) *e.Error {
 
 	var category entities.Categories
 	if err := copier.Copy(&category, &req); err != nil {
-		return e.TextCumError("error occured while copying request to category entity", err, 500)
+		return e.SetError("error occured while copying request to category entity", err, 500)
 	}
 
 	//check if the category already exists
@@ -34,7 +34,7 @@ func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) *e.Error {
 		return err
 	}
 	if DoCategoryExistsByName {
-		return e.TextError("category already exists", 400)
+		return e.SetError("category already exists", nil, 400)
 	}
 
 	//add category
@@ -53,14 +53,14 @@ func (uc *CategoryUC) EditCategory(req *request.EditCategoryReq) *e.Error {
 		return err
 	}
 	if !DoCategoryExistsByName {
-		return e.TextError("category doesn't exist", 400)
+		return e.SetError("category doesn't exist", nil, 400)
 	}
 
 	//check if the new name already exists for another category
 	if DoCategoryExistsByName, err := uc.CategoryRepo.DoCategoryExistsByName(req.NewName); err != nil {
 		return err
 	} else if DoCategoryExistsByName {
-		return e.TextError("category already exists with the sugested new name", 400)
+		return e.SetError("category already exists with the sugested new name", nil, 400)
 	}
 
 	//edit category

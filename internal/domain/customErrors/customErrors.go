@@ -3,6 +3,7 @@ package e
 import "errors"
 
 type Error struct {
+	Msg        string
 	Err        error
 	StatusCode int
 }
@@ -15,10 +16,11 @@ func (e Error) Error() string {
 }
 
 var (
-	ErrEmailNodtRegistered_401 = Error{Err: errors.New("this email is not registered"), StatusCode: 401}
+	errInvalidReq=errors.New("invalid req")
+	errInvalidCredentials=errors.New("invalid credentials")
 
-	ErrInvalidPassword_401 = Error{Err: errors.New("password mismatch"), StatusCode: 401}
-
+	ErrEmailNotRegistered_401 = &Error{Msg: "this email is not registered",Err: errInvalidReq, StatusCode: 401}
+	ErrInvalidPassword_401 = &Error{Msg:"password mismatch",Err: errInvalidCredentials, StatusCode: 401}
 
 // ErrOnBindingReq  = errors.New("error binding request")
 // ErrOnValidation   = errors.New("error validating the request")
@@ -33,18 +35,19 @@ var (
 // // errors.New("order amount exceeds maximum amount for COD")
 )
 
-
-func DBQueryError(err *error) *Error {
-	return &Error{Err: errors.New("db querry err:" + (*err).Error()), StatusCode: 500}
+func DBQueryError_500(err *error) *Error {
+	return &Error{Msg: "db query err",Err: *err, StatusCode: 500}
 }
 
-func TextError(text string, statusCode int) *Error {
-	return &Error{Err: errors.New(text), StatusCode: statusCode}
-}
-func TextCumError(text string, err error, statusCode int) *Error {
-	return &Error{Err: errors.New(text+err.Error()), StatusCode: statusCode}
+// func TextError(text string, statusCode int) *Error {
+// 	return &Error{Err: errors.New(text), StatusCode: statusCode}
+// }
+
+
+func SetError(msg string, err error, statusCode int) *Error {
+	return &Error{Msg:msg,Err: err, StatusCode: statusCode}
 }
 func GetError(error Error) *Error {
-	err:=error
+	err := error
 	return &err
 }

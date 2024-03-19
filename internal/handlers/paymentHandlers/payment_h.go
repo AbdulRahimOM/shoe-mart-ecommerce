@@ -77,7 +77,7 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 func (h *PaymentHandler) VerifyPayment(c *gin.Context) {
 
 	if err := c.Request.ParseForm(); err != nil {
-		c.JSON(http.StatusBadRequest, response.FromErrByTextCumError("Error parsing form:", err))
+		c.JSON(http.StatusBadRequest, response.MsgAndError("Error parsing form:", err))
 		return
 	}
 
@@ -132,7 +132,7 @@ func (h *PaymentHandler) RetryPayment(c *gin.Context) {
 	//get userID from token
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		c.JSON(http.StatusForbidden, response.FromErrByTextCumError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusForbidden, response.MsgAndError("error getting user ID from token. error:", errr))
 		return
 	}
 
