@@ -17,10 +17,11 @@ type WishListsUseCase struct {
 }
 
 var (
-	errWishListNameExists         = &e.Error{Msg: "wishlist with same name exists", StatusCode: 400}
-	errWishListIdBelongsToAnother = &e.Error{Msg: "no such wishlist for this user", StatusCode: 400}
-	errProductIdNotExisting       = &e.Error{Msg: "product does not exist", StatusCode: 400}
-	errProductAlreadyInWishList   = &e.Error{Msg: "product is already in wishlist", Err: nil, StatusCode: 400}
+	errWishListNameExists_400         = &e.Error{Msg: "same-named-wishlist exists", StatusCode: 400}
+	errWishListIdBelongsToAnother_400 = &e.Error{Msg: "wishlist not of this user", StatusCode: 400}
+	errProductIdNotExisting_400       = &e.Error{Msg: "product does not exist", StatusCode: 400}
+	errProductAlreadyInWishList_400   = &e.Error{Msg: "product already in wishlist", StatusCode: 400}
+	errProductNotInWishList_400   = &e.Error{Msg: "product not in wishlist", StatusCode: 400}
 	// err=&e.Error{Msg:"", StatusCode:  400}
 	// err=&e.Error{Msg:"", StatusCode:  400}
 	// err=&e.Error{Msg:"", StatusCode:  400}
@@ -46,7 +47,7 @@ func (uc *WishListsUseCase) CreateWishList(userID uint, req *request.CreateWishL
 		return err
 	}
 	if wishListExists {
-		return errWishListNameExists
+		return errWishListNameExists_400
 	}
 
 	var wishList entities.WishList
@@ -65,7 +66,7 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishLis
 		return err
 	}
 	if userIDFromWishList != userID {
-		return errWishListIdBelongsToAnother
+		return errWishListIdBelongsToAnother_400
 	}
 
 	//check if product exists
@@ -74,7 +75,7 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishLis
 		return err
 	}
 	if !productExists {
-		return errProductIdNotExisting
+		return errProductIdNotExisting_400
 	}
 
 	//check if product is already in wishlist
@@ -83,7 +84,7 @@ func (uc *WishListsUseCase) AddToWishList(userID uint, req *request.AddToWishLis
 		return err
 	}
 	if productInWishList {
-		return errProductAlreadyInWishList
+		return errProductAlreadyInWishList_400
 	}
 
 	//add product to wishlist
@@ -98,7 +99,7 @@ func (uc *WishListsUseCase) RemoveFromWishList(userID uint, req *request.RemoveF
 		return err
 	}
 	if userIDFromWishList != userID {
-		return e.SetError("no such wishlist for this user", nil, 400)
+		return errWishListIdBelongsToAnother_400
 	}
 
 	//check if product is in wishlist
@@ -107,7 +108,7 @@ func (uc *WishListsUseCase) RemoveFromWishList(userID uint, req *request.RemoveF
 		return err
 	}
 	if !productInWishList {
-		return e.SetError("product is not in wishlist", nil, 400)
+		return errProductNotInWishList_400
 	}
 
 	//remove product from wishlist
@@ -126,13 +127,13 @@ func (uc *WishListsUseCase) GetAllWishLists(userID uint) (*[]entities.WishList, 
 
 func (uc *WishListsUseCase) GetWishListByID(userID uint, wishListID uint) (*string, *[]response.ResponseProduct2, int, *e.Error) {
 	var wishListName *string
-	var responseProducts []response.ResponseProduct2
 	wishListName, products, err := uc.wishListsRepo.GetWishListByID(userID, wishListID)
 	if err != nil {
 		return nil, nil, 0, err
 	}
 
-	responseProducts = make([]response.ResponseProduct2, len(*products))
+
+	responseProducts := make([]response.ResponseProduct2, len(*products))
 	errr := copier.Copy(&responseProducts, &products)
 	if errr != nil {
 		return nil, nil, 0, e.SetError("error occured while copying products to responseProducts", errr, 500)

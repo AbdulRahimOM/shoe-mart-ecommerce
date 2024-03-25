@@ -13,6 +13,7 @@ import (
 )
 var(
 	errEmailNotRegistered_401=e.ErrEmailNotRegistered_401
+	errSellerIsAlreadyVerified_400=&e.Error{Msg:"Seller is already verified", Err:nil,StatusCode:  400}
 )
 type AdminUseCase struct {
 	adminRepo repoInterface.IAdminRepo
@@ -123,7 +124,7 @@ func (uc *AdminUseCase) VerifySeller(req *request.VerifySellerReq) *e.Error {
 		return err
 	}
 	if isVerified {
-		return e.SetError("seller is already verified", nil,400)
+		return errSellerIsAlreadyVerified_400
 	}
 
 	return uc.adminRepo.VerifySeller(req.SellerID)

@@ -124,7 +124,7 @@ func (uc *UserUseCase) AddUserAddress(req *request.AddUserAddress) *e.Error {
 		return err
 	}
 	if doAddressNameAlreadyExists {
-		return e.SetError("address name already exists",nil, 400) //P-update
+		return e.SetError("address name already exists",nil, 400) 
 	}
 	var address entities.UserAddress
 	if err := copier.Copy(&address, &req); err != nil {
