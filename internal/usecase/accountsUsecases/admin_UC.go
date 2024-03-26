@@ -11,10 +11,13 @@ import (
 	jwttoken "MyShoo/pkg/jwt"
 	"time"
 )
-var(
-	errEmailNotRegistered_401=e.ErrEmailNotRegistered_401
-	errSellerIsAlreadyVerified_400=&e.Error{Msg:"Seller is already verified", Err:nil,StatusCode:  400}
+
+var (
+	errEmailNotRegistered_401      = e.ErrEmailNotRegistered_401
+	errEmailAlreadyUsed_401        = e.ErrEmailAlreadyUsed_401
+	errSellerIsAlreadyVerified_400 = &e.Error{Msg: "Seller is already verified", Err: nil, StatusCode: 400}
 )
+
 type AdminUseCase struct {
 	adminRepo repoInterface.IAdminRepo
 }

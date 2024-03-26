@@ -78,7 +78,7 @@ func (uc *UserUseCase) SignUp(req *request.UserSignUpReq) (*string, *e.Error) {
 		return nil, err
 	}
 	if emailAlreadyUsed {
-		return nil, errEmailNotRegistered_401
+		return nil, errEmailAlreadyUsed_401
 	}
 
 	hashedPwd, errr := hashpassword.Hashpassword(req.Password)

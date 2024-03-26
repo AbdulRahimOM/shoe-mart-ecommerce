@@ -19,6 +19,7 @@ var (
 	errInvalidReq=errors.New("invalid req")
 	errInvalidCredentials=errors.New("invalid credentials")
 
+	ErrEmailAlreadyUsed_401        = &Error{Msg: "email already used", Err: errors.New("invalid req"), StatusCode: 401}
 	ErrEmailNotRegistered_401 = &Error{Msg: "this email is not registered",Err: errInvalidReq, StatusCode: 401}
 	ErrInvalidPassword_401 = &Error{Msg:"password mismatch",Err: errInvalidCredentials, StatusCode: 401}
 
