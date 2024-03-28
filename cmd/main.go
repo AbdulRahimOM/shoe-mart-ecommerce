@@ -16,7 +16,7 @@ import (
 // @in							header
 // @name						Authorization
 func main() {
-	fmt.Println("Program initializing..........")
+	fmt.Println("Program initializing............")
 
 	//for dev purpose
 	myshoo.Test()
