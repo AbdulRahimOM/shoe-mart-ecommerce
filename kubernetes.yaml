@@ -1,0 +1,126 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: myshoo-web-service
+  labels:
+    name: myshoo-web-service
+    app: myshoo-app
+spec:
+  type: NodePort
+  selector:
+    class: web-pods
+    app: myshoo-app
+  ports:
+  - port: 4000
+    targetPort: 4000
+    nodePort: 30005
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgresdb
+  labels:
+    name: postgres-service
+    app: myshoo-app
+spec:
+  type: ClusterIP
+  selector:
+    class: psql-pods
+    app: myshoo-app
+  ports:
+  - port: 5432
+    targetPort: 5432
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgresdb-deployment
+  labels:
+    app: myshoo-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      class: psql-pods
+      app: myshoo-app
+  template:
+    metadata:
+      name: postgresdb
+      labels:
+        class: psql-pods
+        app: myshoo-app
+    spec:
+      containers:
+      - name: postgresdb
+        image: postgres:14.11-alpine3.18
+        ports:
+        - containerPort: 5432
+        env:
+        - name: POSTGRES_USER
+          value: "postgres"
+        - name: POSTGRES_PASSWORD
+          value: "1234"
+        - name: POSTGRES_DB
+          value: "myshoo"
+        resources:
+          limits:
+            memory: "128Mi"
+            cpu: "500m"
+        volumeMounts:
+        - name: postgres-data
+          mountPath: /var/lib/postgresql/data
+      volumes:
+      - name: postgres-data
+        persistentVolumeClaim:
+          claimName: postgres-pvc
+  
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 128Mi
+  selector:
+    matchLabels:
+      app: postgres
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mws-d
+  labels:
+    app: myshoo-app
+spec:
+  template:
+    metadata:
+      name: myshoo-web-pod
+      labels:
+        class: web-pods
+        app: myshoo-app
+    spec:
+      containers:
+        - name: myshoo-web-container
+          image: abdulrahimom/shoe-mart:1.0
+          ports:
+          - containerPort: 4000
+          resources:
+            limits:
+              memory: "128Mi"
+              cpu: "500m"
+  replicas: 3
+  selector:
+    matchLabels:
+      class: web-pods
+      app: myshoo-app
+
