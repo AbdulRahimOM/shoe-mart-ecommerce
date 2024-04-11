@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:14.11-alpine3.18
+    restart: always
+    container_name: postgres
+    ports:
+      - 5432:5432
+    environment:
+      - POSTGRES_PASSWORD=<enter_password_here>
+      - POSTGRES_DB=myshoo
+    networks:
+    - project-net
+    volumes:
+      - project-volume:/var/lib/postgresql/data
+    hostname: postgresdb
+  
+  shoe-mart:
+    image: abdulrahimom/shoe-mart:1.0
+    build: .
+    restart: on-failure
+    container_name: shoe-mart
+    depends_on:
+      - postgres
+    ports:
+      - 4000:4000
+    networks:
+    - project-net
+    volumes:
+      - database-postgres:/var/lib/postgresql/data
+
+volumes:
+  database-postgres:
+
+networks:
+  project-net:
+    driver : bridge
