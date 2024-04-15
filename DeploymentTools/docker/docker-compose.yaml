@@ -4,23 +4,22 @@ services:
   postgres:
     image: postgres:14.11-alpine3.18
     restart: always
-    container_name: postgres
+    container_name: postgres4
     ports:
       - 5432:5432
-    environment:
-      - POSTGRES_PASSWORD=<enter_password_here>
-      - POSTGRES_DB=myshoo
+    env_file:
+    - DeploymentTools/docker/docker.env
     networks:
     - project-net
     volumes:
-      - project-volume:/var/lib/postgresql/data
+      - myshoo-volume:/var/lib/postgresql/data
     hostname: postgresdb
   
   shoe-mart:
-    image: abdulrahimom/shoe-mart:1.0
+    image:  abdulrahimom/shoe-mart:1.2
     build: .
-    restart: on-failure
-    container_name: shoe-mart
+    restart: always
+    container_name: shoe-mart4
     depends_on:
       - postgres
     ports:
@@ -28,10 +27,10 @@ services:
     networks:
     - project-net
     volumes:
-      - database-postgres:/var/lib/postgresql/data
+      - myshoo-volume:/var/lib/postgresql/data
 
 volumes:
-  database-postgres:
+  myshoo-volume:
 
 networks:
   project-net:

@@ -1,3 +1,5 @@
+#use this command from project's root directory: kubectl create -f DeploymentTools/kubernetes/.
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -58,13 +60,9 @@ spec:
         image: postgres:14.11-alpine3.18
         ports:
         - containerPort: 5432
-        env:
-        - name: POSTGRES_USER
-          value: "postgres"
-        - name: POSTGRES_PASSWORD
-          value: "1234"
-        - name: POSTGRES_DB
-          value: "myshoo"
+        envFrom:
+        - secretRef:
+            name: postgres-credentials
         resources:
           limits:
             memory: "128Mi"

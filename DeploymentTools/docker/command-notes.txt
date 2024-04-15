@@ -1,0 +1,9 @@
+Execute from project's root directory:
+
+
+Docker compose:
+
+❯ docker-compose --project-directory . -f DeploymentTools/docker/docker-compose.yaml  up
+
+OR, for printing compose building progress:
+❯ docker-compose --progress plain --project-directory . -f DeploymentTools/docker/docker-compose.yaml  up
