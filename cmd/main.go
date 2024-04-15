@@ -7,6 +7,7 @@ import (
 	"MyShoo/internal/di"
 	infra "MyShoo/internal/infrastructure"
 	"fmt"
+	"os"
 )
 
 // @title MyShoo API
@@ -26,20 +27,20 @@ func main() {
 
 	if err := config.LoadEnvVariables(); err != nil {
 		fmt.Println("Couldn't load env variables. Err: ", err)
-		return
+		os.Exit(1)
 	}
 
 	if err := infra.ConnectToDB(); err != nil {
 		fmt.Println("Couldn't connect to DB. Error: ", err)
-		return
+		os.Exit(1)
 	}
 	if err := infra.ConnectToCloud(); err != nil {
 		fmt.Println("Couldn't connect to Cloud. Error: ", err)
-		return
+		os.Exit(1)
 	}
 	if err := config.LoadDeliveryConfig(); err != nil {
 		fmt.Println("Couldn't load config. Error: ", err)
-		return
+		os.Exit(1)
 	}
 
 	di.InitializeAndStartAPI()
