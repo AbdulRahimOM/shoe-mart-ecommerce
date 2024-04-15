@@ -36,6 +36,8 @@ var ShouldUploadExcel bool
 var ShouldRenderPaymentPage bool
 var ShouldUploadInvoice bool
 
+var relativeEnvPath  string ="config/envs/.env"
+
 func init() {
 
 }
@@ -49,7 +51,7 @@ func LoadEnvVariables() error {
 	}
 
 	//try to load .env file in 'execution of binary' mode
-	errBinaryExecMode := godotenv.Load(filepath.Join(ExecutableDir, ".env")) //env file is presumed to be alongside the executable
+	errBinaryExecMode := godotenv.Load(filepath.Join(ExecutableDir, relativeEnvPath)) //env file is presumed to be alongside the executable
 	if errBinaryExecMode != nil {
 		goto retryWithGoRunMode
 	}else{
@@ -59,7 +61,7 @@ func LoadEnvVariables() error {
 
 retryWithGoRunMode:
 	//try to load .env file in 'go run' mode
-	if errGoRunMode := godotenv.Load(".env"); errGoRunMode != nil {
+	if errGoRunMode := godotenv.Load(relativeEnvPath); errGoRunMode != nil {
 		return fmt.Errorf("error loading .env file by either modes. \nerr from binary mode: %v\n, err from go run mode: %v", errBinaryExecMode, errGoRunMode)
 	} else {
 		ExecutableDir = ""
