@@ -71,7 +71,7 @@ func (cvh *ProductHandler) AddColourVariant(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("colour variant added"))
 }
 
 // edit colour variant handler
@@ -105,7 +105,7 @@ func (cvh *ProductHandler) EditColourVariant(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("colour variant edited"))
 }
 
 // get colour variants under model handler

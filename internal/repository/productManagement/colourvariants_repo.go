@@ -11,6 +11,10 @@ import (
 	"github.com/google/uuid"
 )
 
+var (	
+	errNoColourVariantByThisID_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "colourVariant doesn't exist by this ID", Err: nil}
+)
+
 func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os.File) *e.Error {
 
 	//initiate transaction
@@ -45,7 +49,7 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 	resultGorm := tx.Create(&req)
 	if resultGorm.Error != nil {
 		tx.Rollback()
-		return &e.Error{Err: resultGorm.Error, StatusCode: 500}
+		return e.DBQueryError_500(&resultGorm.Error)
 	}
 
 	tx.Commit()
@@ -68,7 +72,7 @@ func (repo *ProductsRepo) EditColourVariant(req *entities.ColourVariant) *e.Erro
 	}
 
 	if query.RowsAffected == 0 {
-		return e.SetError("colourVariant doesn't exist", nil, 400)
+		return &errNoColourVariantByThisID_400
 	}
 
 	//update colourVariant

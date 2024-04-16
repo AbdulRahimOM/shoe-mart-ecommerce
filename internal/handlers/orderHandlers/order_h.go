@@ -222,8 +222,7 @@ func (h *OrderHandler) CancelMyOrder(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
-
+	c.JSON(http.StatusOK, response.SuccessSM("Order Cancelled"))
 }
 
 // cancel order of any user with userID by admin
@@ -259,7 +258,7 @@ func (h *OrderHandler) CancelOrderByAdmin(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Order Cancelled"))
 }
 
 // return order of user
@@ -302,7 +301,7 @@ func (h *OrderHandler) ReturnMyOrder(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Order Return Requested"))
 }
 
 // mark order as returned by admin
@@ -338,7 +337,7 @@ func (h *OrderHandler) MarkOrderAsReturned(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Order Marked as Returned"))
 }
 
 // MarkOrderAsDelivered by admin
@@ -374,7 +373,7 @@ func (h *OrderHandler) MarkOrderAsDelivered(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Order Marked as Delivered"))
 }
 
 // get invoice

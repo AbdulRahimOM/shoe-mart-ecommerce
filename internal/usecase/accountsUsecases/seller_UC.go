@@ -37,14 +37,14 @@ func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, *e.Error
 	}
 
 	//check for password
-	if hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password) != nil {
-		return nil, &e.Error{Err: e.ErrInvalidPassword_401, StatusCode: 400}
+	if err:=hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password) ;err!= nil {
+		return nil, e.SetError("wrong password", err, 401)
 	}
 
 	//generate token
 	tokenString, errr := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*24*30)
 	if errr != nil {
-		return nil, &e.Error{Err: errr, StatusCode: 500}
+		return nil, e.SetError("error generating token", errr, 500)
 	}
 	// fmt.Println("token created + 'BNo error' is sending to handler layer")
 	return &tokenString, nil
@@ -96,7 +96,7 @@ func (uc *SellerUseCase) SignUp(req *request.SellerSignUpReq) (*string, *e.Error
 	//generate token
 	tokenString, errr := jwttoken.GenerateToken("seller", sellerForToken, time.Hour*5)
 	if errr != nil {
-		return nil, &e.Error{Err: errr, StatusCode: 500}
+		return nil, e.SetError("error generating token", errr, 500)
 	}
 	// fmt.Println("token created + 'BNo error' is sending to handler layer")
 	return &tokenString, nil

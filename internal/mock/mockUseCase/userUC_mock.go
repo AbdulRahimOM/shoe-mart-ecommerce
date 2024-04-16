@@ -51,17 +51,17 @@ func (mr *MockIUserUCMockRecorder) AddUserAddress(req interface{}) *gomock.Call 
 }
 
 // DeleteUserAddress mocks base method.
-func (m *MockIUserUC) DeleteUserAddress(req *request.DeleteUserAddress) *e.Error {
+func (m *MockIUserUC) DeleteUserAddress(userID uint, req *request.DeleteUserAddress) *e.Error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "DeleteUserAddress", req)
+	ret := m.ctrl.Call(m, "DeleteUserAddress", userID, req)
 	ret0, _ := ret[0].(*e.Error)
 	return ret0
 }
 
 // DeleteUserAddress indicates an expected call of DeleteUserAddress.
-func (mr *MockIUserUCMockRecorder) DeleteUserAddress(req interface{}) *gomock.Call {
+func (mr *MockIUserUCMockRecorder) DeleteUserAddress(userID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserAddress", reflect.TypeOf((*MockIUserUC)(nil).DeleteUserAddress), req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteUserAddress", reflect.TypeOf((*MockIUserUC)(nil).DeleteUserAddress), userID, req)
 }
 
 // EditProfile mocks base method.
@@ -79,17 +79,17 @@ func (mr *MockIUserUCMockRecorder) EditProfile(userID, req interface{}) *gomock.
 }
 
 // EditUserAddress mocks base method.
-func (m *MockIUserUC) EditUserAddress(req *request.EditUserAddress) *e.Error {
+func (m *MockIUserUC) EditUserAddress(userID uint, req *request.EditUserAddress) *e.Error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "EditUserAddress", req)
+	ret := m.ctrl.Call(m, "EditUserAddress", userID, req)
 	ret0, _ := ret[0].(*e.Error)
 	return ret0
 }
 
 // EditUserAddress indicates an expected call of EditUserAddress.
-func (mr *MockIUserUCMockRecorder) EditUserAddress(req interface{}) *gomock.Call {
+func (mr *MockIUserUCMockRecorder) EditUserAddress(userID, req interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditUserAddress", reflect.TypeOf((*MockIUserUC)(nil).EditUserAddress), req)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "EditUserAddress", reflect.TypeOf((*MockIUserUC)(nil).EditUserAddress), userID, req)
 }
 
 // GetProfile mocks base method.

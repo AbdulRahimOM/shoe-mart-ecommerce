@@ -20,7 +20,7 @@ func NewCategoryRepository(db *gorm.DB) repoInterface.ICategoryRepo {
 func (repo *CategoryRepo) AddCategory(req *entities.Categories) *e.Error {
 	result := repo.DB.Create(&req)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error,StatusCode: 500}
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil
@@ -36,7 +36,7 @@ func (repo *CategoryRepo) DoCategoryExistsByName(name string) (bool, *e.Error) {
 		name).Scan(&temp)
 
 	if query.Error != nil {
-		return false, &e.Error{Err: query.Error,StatusCode: 500}
+		return false, e.DBQueryError_500(&query.Error)
 	}
 
 	if query.RowsAffected == 0 {
@@ -56,7 +56,7 @@ func (repo *CategoryRepo) GetCategories() (*[]entities.Categories, *e.Error) {
 	).Scan(&categories)
 
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error,StatusCode: 500}
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &categories, nil
@@ -65,7 +65,7 @@ func (repo *CategoryRepo) GetCategories() (*[]entities.Categories, *e.Error) {
 func (repo *CategoryRepo) EditCategory(req *request.EditCategoryReq) *e.Error {
 	result := repo.DB.Model(&entities.Categories{}).Where("name = ?", req.OldName).Update("name", req.NewName)
 	if result.Error != nil {
-		return &e.Error{Err: result.Error,StatusCode: 500}
+		return e.DBQueryError_500(&result.Error)
 	}
 
 	return nil

@@ -123,10 +123,10 @@ func (mr *MockIUserRepoMockRecorder) EditUserAddress(newaddress interface{}) *go
 }
 
 // GetAddressNameByID mocks base method.
-func (m *MockIUserRepo) GetAddressNameByID(id uint) (string, *e.Error) {
+func (m *MockIUserRepo) GetAddressNameByID(id uint) (*string, *e.Error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetAddressNameByID", id)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*string)
 	ret1, _ := ret[1].(*e.Error)
 	return ret0, ret1
 }
@@ -138,10 +138,10 @@ func (mr *MockIUserRepoMockRecorder) GetAddressNameByID(id interface{}) *gomock.
 }
 
 // GetEmailByUserID mocks base method.
-func (m *MockIUserRepo) GetEmailByUserID(userID uint) (string, *e.Error) {
+func (m *MockIUserRepo) GetEmailByUserID(userID uint) (*string, *e.Error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "GetEmailByUserID", userID)
-	ret0, _ := ret[0].(string)
+	ret0, _ := ret[0].(*string)
 	ret1, _ := ret[1].(*e.Error)
 	return ret0, ret1
 }

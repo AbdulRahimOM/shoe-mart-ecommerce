@@ -49,12 +49,6 @@ func (h *ReportsHandler) GetDashBoardData(c *gin.Context) {
 		startDate := c.Query("sd")
 		endDate := c.Query("ed")
 		if startDate == "" && endDate == "" {
-			// fmt.Println("No date range provided")
-			// c.JSON(400, response.SME{
-			// 	Status:  "failed",
-			// 	Message: "No date range provided. Please recheck URL and try again",
-			// 	Error:   "No date range provided in url.",
-			// })
 			c.JSON(http.StatusBadRequest, response.FromErrByText("no date range provided inURL"))
 			return
 		} else {

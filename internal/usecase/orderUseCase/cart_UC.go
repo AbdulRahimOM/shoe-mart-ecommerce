@@ -7,9 +7,12 @@ import (
 	response "MyShoo/internal/models/responseModels"
 	repo "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
-	"errors"
 
 	"github.com/jinzhu/copier"
+)
+
+var (
+	errProductDoesNotExistInCart_404 = &e.Error{Status: "failed", Msg: "product doesn't exist in cart", Err: nil, StatusCode: 404}
 )
 
 type CartUseCase struct {
@@ -23,7 +26,7 @@ func NewCartUseCase(cartRepo repo.ICartRepo) usecase.ICartUC {
 func (uc *CartUseCase) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 	var cart entities.Cart
 	if err := copier.Copy(&cart, &req); err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
+		return e.SetError("Error while copying request to cart entity", err, 500)
 	}
 	//check if the product exists
 	DoProductExists, quantityIfExist, err := uc.cartRepo.DoProductExistAlready(&cart)
@@ -31,7 +34,7 @@ func (uc *CartUseCase) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 		return err
 	}
 	if !DoProductExists {
-		return e.SetError("product doesn't exist in cart",nil, 400)
+		return errProductDoesNotExistInCart_404
 	}
 	if quantityIfExist == 1 {
 		//delete product from cart
@@ -52,7 +55,7 @@ func (uc *CartUseCase) GetCart(userID uint) (*[]response.ResponseCartItems, floa
 	}
 
 	if err := copier.Copy(&responseCart, &cart); err != nil {
-		return nil, totalValue, &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
+		return nil, totalValue, e.SetError("Error while copying request to cart entity", err, 500)
 	}
 
 	return &responseCart, totalValue, nil
@@ -61,7 +64,7 @@ func (uc *CartUseCase) GetCart(userID uint) (*[]response.ResponseCartItems, floa
 func (c *CartUseCase) AddToCart(req *request.AddToCartReq) *e.Error {
 	var cart entities.Cart
 	if err := copier.Copy(&cart, &req); err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to cart entity"), StatusCode: 500}
+		return e.SetError("Error while copying request to cart entity", err, 500)
 	}
 
 	//check if the product already exists

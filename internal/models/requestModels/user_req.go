@@ -26,7 +26,6 @@ type AddUserAddress struct {
 }
 type EditUserAddress struct {
 	ID          uint   `json:"id" validate:"required,number"`
-	UserID      uint   `json:"userId" validate:"required,number"`
 	AddressName string `json:"addressName" validate:"required,gte=3"`
 	FirstName   string `json:"firstName" validate:"required,gte=3"`
 	LastName    string `json:"lastName" validate:"required,gte=3"`
@@ -40,7 +39,6 @@ type EditUserAddress struct {
 }
 type DeleteUserAddress struct {
 	ID     uint `json:"id" validate:"required,number"`
-	UserID uint `json:"userId" validate:"required,number"`
 }
 
 type GetUserAddresses struct {

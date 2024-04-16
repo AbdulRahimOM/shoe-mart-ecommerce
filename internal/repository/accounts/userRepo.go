@@ -10,6 +10,22 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	errNoSuchAddressId_400 = e.Error{
+		Status:     "failed",
+		Msg:        "no address found with this id",
+		Err:        nil,
+		StatusCode: 400,
+	}
+
+	errNoSuchUserId_400 = e.Error{
+		Status:     "failed",
+		Msg:        "no user found with this id",
+		Err:        nil,
+		StatusCode: 400,
+	}
+)
+
 type UserRepo struct {
 	DB *gorm.DB
 }
@@ -18,7 +34,7 @@ func NewUserRepository(db *gorm.DB) repoInterface.IUserRepo {
 	return &UserRepo{DB: db}
 }
 
-func (repo *UserRepo) GetAddressNameByID(id uint) (string, *e.Error) {
+func (repo *UserRepo) GetAddressNameByID(id uint) (*string, *e.Error) {
 	var name string
 	query := repo.DB.Raw(`
 		SELECT "addressName"
@@ -27,10 +43,10 @@ func (repo *UserRepo) GetAddressNameByID(id uint) (string, *e.Error) {
 		id).Scan(&name)
 
 	if query.Error != nil {
-		return "", e.DBQueryError_500(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 
-	return name, nil
+	return &name, nil
 }
 
 func (repo *UserRepo) EditUserAddress(newAddress *entities.UserAddress) *e.Error {
@@ -74,7 +90,7 @@ func (repo *UserRepo) UpdateUserStatus(email string, newStatus string) *e.Error 
 	var user entities.User
 	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
 	if err != nil {
-		return &e.Error{Err: err, StatusCode: 500}
+		return e.DBQueryError_500(&err)
 	}
 
 	return nil
@@ -115,9 +131,9 @@ func (repo *UserRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 }
 
 func (repo *UserRepo) CreateUser(user *entities.User) *e.Error {
-	userCreation := repo.DB.Create(&user)
-	if userCreation.Error != nil {
-		return &e.Error{Err: userCreation.Error, StatusCode: 500}
+	result := repo.DB.Create(&user)
+	if result.Error != nil {
+		return e.DBQueryError_500(&result.Error)
 	}
 	return nil
 }
@@ -145,7 +161,7 @@ func (repo *UserRepo) GetUserIDFromAddressID(id uint) (uint, *e.Error) {
 		return 0, e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return 0, e.SetError("no address found with this id", nil, 400)
+		return 0, &errNoSuchAddressId_400
 	}
 
 	return userID, nil
@@ -183,7 +199,7 @@ func (repo *UserRepo) GetProfile(userID uint) (*entities.UserDetails, *e.Error) 
 		return nil, e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return nil, e.SetError("no user found with this id", nil,  400)
+		return nil, &errNoSuchUserId_400
 	}
 
 	return userDetails, nil
@@ -201,7 +217,7 @@ func (repo *UserRepo) EditProfile(userID uint, req *request.EditProfileReq) *e.E
 }
 
 // GetEmailByUserID implements repository_interface.IUserRepo.
-func (repo *UserRepo) GetEmailByUserID(userID uint) (string, *e.Error) {
+func (repo *UserRepo) GetEmailByUserID(userID uint) (*string, *e.Error) {
 	var email string
 	query := repo.DB.Raw(`
 		SELECT email
@@ -210,13 +226,13 @@ func (repo *UserRepo) GetEmailByUserID(userID uint) (string, *e.Error) {
 		userID).Scan(&email)
 
 	if query.Error != nil {
-		return "", e.DBQueryError_500(&query.Error)
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return "", e.SetError("no user found with this id", nil, 400)
+		return nil, &errNoSuchUserId_400
 	}
 
-	return email, nil
+	return &email, nil
 }
 
 func (repo *UserRepo) GetUserByEmail(email string) (*entities.User, *e.Error) {
@@ -252,10 +268,10 @@ func (repo *UserRepo) GetUserAddress(addressID uint) (*entities.UserAddress, *e.
 		WHERE id = ?`,
 		addressID).Scan(&address)
 	if query.Error != nil {
-		return nil, &e.Error{Err: query.Error, StatusCode: 500}
+		return nil, e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return nil, e.SetError("no address found with this id", nil, 400)
+		return nil, &errNoSuchAddressId_400
 	}
 
 	return &address, nil

@@ -52,9 +52,9 @@ func (repo *SellerRepo) IsEmailRegistered(email string) (bool, *e.Error) {
 }
 
 func (repo *SellerRepo) CreateSeller(seller *entities.Seller) *e.Error {
-	sellerCreation := repo.DB.Create(&seller)
-	if sellerCreation.Error != nil {
-		return &e.Error{Err: sellerCreation.Error, StatusCode: 500}
+	result := repo.DB.Create(&seller)
+	if result.Error != nil {
+		return e.DBQueryError_500(&result.Error)
 	}
 	return nil
 }

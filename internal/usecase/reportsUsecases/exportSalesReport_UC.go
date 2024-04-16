@@ -199,7 +199,7 @@ func (uc *ReportsUseCase) processAdminExcelReport(
 			},
 		},
 	}); err != nil {
-		return nil, e.SetError("error occured while creating chart:", err, 500)
+		return nil, e.SetError("Error while creating chart:", err, 500)
 	}
 
 	for i, revenueData := range *revenueGraph {

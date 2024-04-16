@@ -155,8 +155,8 @@ func renderPaymentPageInTestkit(req interface{}) { //(#dev mode)
 	renderOutputPath := filepath.Join(config.ExecutableDir, "testKit/paymentOutput.html")
 	err := htmlRender.RenderHTMLFromTemplate(templatePath, req, renderOutputPath)
 	if err != nil {
-		fmt.Println("Page loaded successfully. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
+		fmt.Println("Page loaded. But, Coulnot produce testKit/paymentOutput.html file as rendered version. Go for alternative ways")
 	} else {
-		fmt.Println("Page loaded successfully. testKit/paymentOutput.html file produced as rendered version.")
+		fmt.Println("Page loaded. testKit/paymentOutput.html file produced as rendered version.")
 	}
 }

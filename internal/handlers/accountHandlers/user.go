@@ -65,9 +65,7 @@ func (h *UserHandler) PostSignUp(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMT{
-			Token: *token,
-		})
+		c.JSON(http.StatusOK, response.TokenReturn(token))
 	}
 }
 
@@ -100,9 +98,7 @@ func (h *UserHandler) PostLogIn(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, response.SMT{
-			Token: *token,
-		})
+		c.JSON(http.StatusOK, response.TokenReturn(token))
 	}
 }
 
@@ -175,20 +171,16 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 		// fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		// c.JSON(http.StatusBadRequest, response.SME{
 		// 	Status:  "failed",
-		// 	Message: "error occured while verifying otp. Please try again",
+		// 	Message: "Error while verifying otp. Please try again",
 		// 	Error:   err.Error(),
 		// })
 		c.JSON(http.StatusBadRequest, response.FromError(err))
 		return
 	}
 	if isVerified {
-		c.JSON(http.StatusOK, response.NewSM{
-			Message: "OTP verified successfully",
-		})
+		c.JSON(http.StatusOK, response.SuccessSM("OTP verified"))
 	} else {
-		c.JSON(http.StatusUnauthorized, response.NewSM{
-			Message: "OTP verification failed. Please try again",
-		})
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("OTP verification failed. Please try again"))
 	}
 }
 
@@ -233,8 +225,7 @@ func (h *UserHandler) AddUserAddress(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
-
+	c.JSON(http.StatusOK, response.SuccessSM("Address added"))
 }
 
 // Edit address
@@ -269,17 +260,12 @@ func (h *UserHandler) EditUserAddress(c *gin.Context) {
 		return
 	}
 
-	if userID != req.UserID {
-		c.JSON(http.StatusBadRequest, response.FromErrByText("user ID in token and request body do not match"))
-		return
-	}
-
-	if err := h.UserUseCase.EditUserAddress(&req); err != nil {
+	if err := h.UserUseCase.EditUserAddress(userID, &req); err != nil {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Address edited"))
 }
 
 // DeleteUserAddress
@@ -314,17 +300,12 @@ func (h *UserHandler) DeleteUserAddress(c *gin.Context) {
 		return
 	}
 
-	if userID != req.UserID {
-		c.JSON(http.StatusBadRequest, response.FromErrByText("user ID in token and request body do not match"))
-		return
-	}
-
-	if err := h.UserUseCase.DeleteUserAddress(&req); err != nil {
+	if err := h.UserUseCase.DeleteUserAddress(userID, &req); err != nil {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Address deleted"))
 }
 
 // Get user addresses
@@ -435,7 +416,7 @@ func (h *UserHandler) EditProfile(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Profile edited"))
 }
 
 // GetResetPassword
@@ -501,13 +482,13 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 
 	isTokenValid, tokenClaims := jwttoken.IsTokenValid(tokenString, config.SecretKey)
 	if !isTokenValid {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "token is invalid"})
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("token is invalid"))
 		return
 	}
 	//getting claims
 	claims, ok := tokenClaims.(*jwttoken.CustomClaims)
 	if !ok {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "error getting claims"})
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("error getting claims"))
 		return
 	}
 
@@ -518,7 +499,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 	}
 	status := claims.Model.(map[string]interface{})["Status"].(string)
 	if status != "PW change requested, otp not verified" {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "status is not PW change requested, otp not verified"})
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("status is not PW change requested, otp not verified"))
 		return
 	}
 
@@ -547,9 +528,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 			Token: *newtoken,
 		})
 	} else {
-		c.JSON(http.StatusBadRequest, response.NewSM{
-			Message: "OTP verification failed. Please try again",
-		})
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("OTP verification failed. Please try again")) //need to change this
 	}
 }
 
@@ -612,5 +591,5 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Password reset successfully"))
 }

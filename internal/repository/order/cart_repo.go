@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var(
+	errNoSuchItemInCart_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "No such item in cart", Err: nil}
+	errCartIsEmpty_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "Cart is empty", Err: nil}
+)
+
 type CartRepo struct {
 	DB *gorm.DB
 }
@@ -34,7 +39,7 @@ func (repo *CartRepo) DeleteFromCart(req *request.DeleteFromCartReq) *e.Error {
 	}
 
 	if result.RowsAffected == 0 {
-		return e.SetError("nothing deleted. no such item in cart", nil, 400)
+		return &errNoSuchItemInCart_400
 	}
 
 	return nil
@@ -139,7 +144,7 @@ func (repo *CartRepo) GetQuantityAndPriceOfCart(userID uint) (uint, float32, *e.
 	if query.Error != nil {
 		return 0, 0, e.DBQueryError_500(&query.Error)
 	} else if queryData.TotalQuantity == 0 {
-		return 0, 0, e.SetError("cart is empty", nil, 400)
+		return 0, 0, &errCartIsEmpty_400
 	}
 	return queryData.TotalQuantity, queryData.TotalValue, nil
 }

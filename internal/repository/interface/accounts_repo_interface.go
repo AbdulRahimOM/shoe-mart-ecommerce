@@ -9,11 +9,9 @@ type IAdminRepo interface {
 	IsEmailRegisteredAsAdmin(email string) (bool, *e.Error)
 	GetPasswordAndAdminDetailsByEmail(email string) (*string, *entities.AdminDetails, *e.Error)
 	GetUsersList() (*[]entities.UserDetails, *e.Error)
-	UpdateUserStatus(email string, newStatus string) *e.Error
+	UpdateUserStatus(userID uint, newStatus string) *e.Error
 	GetSellersList() (*[]entities.PwMaskedSeller, *e.Error)
-	IsEmailRegisteredAsUser(email string) (bool, *e.Error)
-	IsEmailRegisteredAsSeller(email string) (bool, *e.Error)
-	UpdateSellerStatus(email string, newStatus string) *e.Error
+	UpdateSellerStatus(sellerID uint, newStatus string) *e.Error
 	IsSellerVerified(sellerID uint) (bool, *e.Error)
 	VerifySeller(sellerID uint) *e.Error
 }

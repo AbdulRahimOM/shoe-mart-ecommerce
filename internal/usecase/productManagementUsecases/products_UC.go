@@ -6,7 +6,6 @@ import (
 	response "MyShoo/internal/models/responseModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
-	"errors"
 
 	"github.com/jinzhu/copier"
 )
@@ -32,7 +31,7 @@ func (uc *ProductsUC) GetProducts() (*[]response.ResponseProduct, *e.Error) {
 	}
 
 	if err := copier.Copy(&responseProducts, &products); err != nil {
-		return nil, &e.Error{Err: errors.New(err.Error() + "Error occured while copying products to responseProducts"), StatusCode: 500}
+		return nil, e.SetError("Error while copying products to responseProducts", err, 500)
 	}
 
 	return &responseProducts, nil

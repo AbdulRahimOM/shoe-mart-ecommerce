@@ -9,6 +9,11 @@ import (
 	"gorm.io/gorm"
 )
 
+var(
+	errNoModelByThisID_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "model doesn't exist by this ID", Err: nil}
+
+)
+
 type ModelsRepo struct {
 	DB *gorm.DB
 }
@@ -24,7 +29,7 @@ func (repo *ModelsRepo) EditModel(req *request.EditModelReq) *e.Error {
 		return e.DBQueryError_500(&result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return e.SetError("model doesn't exist", nil, 400)
+		return &errNoModelByThisID_400
 	}
 
 	return nil
@@ -98,7 +103,7 @@ func (repo *ModelsRepo) GetSellerIdOfModel(id uint) (uint, *e.Error) {
 	}
 
 	if query.RowsAffected == 0 {
-		return 0, e.SetError("model doesn't exist by this ID", nil, 400)
+		return 0, &errNoModelByThisID_400
 	}
 
 	return temp.FkBrand.SellerID, nil

@@ -199,7 +199,7 @@ func (uc *OrderUseCase) GetOrdersOfUser(userID uint, page int, limit int) (*[]re
 
 	if errr := copier.Copy(&responseOrders, &orders); errr != nil {
 		// return &responseOrders,  errr
-		return nil, e.SetError("Error occured while copying orders to responseOrders", errr, 500)
+		return nil, e.SetError("Error while copying orders to responseOrders", errr, 500)
 
 	}
 
@@ -219,7 +219,7 @@ func (uc *OrderUseCase) GetOrders(page int, limit int) (*[]response.ResponseOrde
 	var responseOrders []response.ResponseOrderInfo
 	var errr error
 	if errr = copier.Copy(&responseOrders, &orders); errr != nil {
-		return nil, e.SetError("Error occured while copying orders to responseOrders", errr, 500)
+		return nil, e.SetError("Error while copying orders to responseOrders", errr, 500)
 	}
 	return &responseOrders, nil
 }
@@ -452,7 +452,7 @@ func (uc *OrderUseCase) SetAddressGetCoupons(userID uint, req *request.SetAddres
 	}
 	var respCoupons []response.ResponseCoupon
 	if errr := copier.Copy(&respCoupons, &coupons); errr != nil {
-		return nil, e.SetError("error occured while copying coupons to responseCoupons", errr, 500)
+		return nil, e.SetError("Error while copying coupons to responseCoupons", errr, 500)
 	}
 
 	response := response.SetAddrGetCouponsResponse{
@@ -512,7 +512,7 @@ func (uc *OrderUseCase) SetCouponGetPaymentMethods(userID uint, req *request.Set
 
 	var respCoupon response.ResponseCoupon
 	if errr := copier.Copy(&respCoupon, &coupon); errr != nil {
-		return nil, e.SetError("Error occured while copying coupon to responseCoupon", errr, 500)
+		return nil, e.SetError("Error while copying coupon to responseCoupon", errr, 500)
 	}
 
 	resp := response.GetPaymentMethodsForCheckoutResponse{
@@ -554,7 +554,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *
 	}
 	if paymentStatus != "paid" {
 		message := "Cannot generate invoice. Payment status is '" + paymentStatus + "'"
-		return nil, &e.Error{Err: errors.New(message), StatusCode: 400}
+		return nil, e.SetError(message, nil, 409)
 	}
 
 	//get orderInfo
@@ -593,7 +593,7 @@ func (uc *OrderUseCase) GetInvoiceOfOrder(userID uint, orderID uint) (*string, *
 	} else {
 		tempFileName, err := tools.MakeRandomUUID()
 		if err != nil {
-			return nil, e.SetError("error occured while generating random UUID:", err, 500)
+			return nil, e.SetError("Error while generating random UUID:", err, 500)
 		}
 		tempFilePath := filepath.Join(os.TempDir(), tempFileName+"invoice.pdf")
 		defer os.Remove(tempFilePath)

@@ -55,7 +55,7 @@ func IsTokenValid(tokenString string, secretKey string) (bool, interface{}) {
 
 		return true, claims
 	} else {
-		fmt.Println("Error occured while decoding token")
+		fmt.Println("Error while decoding token")
 		return false, nil
 	}
 }

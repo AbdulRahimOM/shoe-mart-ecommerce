@@ -17,19 +17,11 @@ type WishListsUseCase struct {
 }
 
 var (
-	errWishListNameExists_400         = &e.Error{Msg: "same-named-wishlist exists", StatusCode: 400}
-	errWishListIdBelongsToAnother_400 = &e.Error{Msg: "wishlist not of this user", StatusCode: 400}
-	errProductIdNotExisting_400       = &e.Error{Msg: "product does not exist", StatusCode: 400}
-	errProductAlreadyInWishList_400   = &e.Error{Msg: "product already in wishlist", StatusCode: 400}
-	errProductNotInWishList_400   = &e.Error{Msg: "product not in wishlist", StatusCode: 400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-	// err=&e.Error{Msg:"", StatusCode:  400}
-
+	errWishListNameAlreadyUsed_409    = &e.Error{Status: "failed", Msg: "same-named-wishlist exists", StatusCode: 409}
+	errWishListIdBelongsToAnother_400 = &e.Error{Status: "failed", Msg: "wishlist not of this user", StatusCode: 400}
+	errProductIdNotExisting_400       = &e.Error{Status: "failed", Msg: "product does not exist", StatusCode: 400}
+	errProductAlreadyInWishList_400   = &e.Error{Status: "failed", Msg: "product already in wishlist", StatusCode: 400}
+	errProductNotInWishList_400       = &e.Error{Status: "failed", Msg: "product not in wishlist", StatusCode: 400}
 )
 
 func NewWishListUseCase(wishListsRepo repoInterface.IWishListsRepo, productRepo repoInterface.IProductsRepo) usecase.IWishListsUC {
@@ -47,7 +39,7 @@ func (uc *WishListsUseCase) CreateWishList(userID uint, req *request.CreateWishL
 		return err
 	}
 	if wishListExists {
-		return errWishListNameExists_400
+		return errWishListNameAlreadyUsed_409
 	}
 
 	var wishList entities.WishList
@@ -132,11 +124,10 @@ func (uc *WishListsUseCase) GetWishListByID(userID uint, wishListID uint) (*stri
 		return nil, nil, 0, err
 	}
 
-
 	responseProducts := make([]response.ResponseProduct2, len(*products))
 	errr := copier.Copy(&responseProducts, &products)
 	if errr != nil {
-		return nil, nil, 0, e.SetError("error occured while copying products to responseProducts", errr, 500)
+		return nil, nil, 0, e.SetError("Error while copying products to responseProducts", errr, 500)
 	}
 
 	for i, product := range *products {

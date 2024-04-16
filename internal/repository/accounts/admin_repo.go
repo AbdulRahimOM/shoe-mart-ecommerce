@@ -12,46 +12,13 @@ type AdminRepo struct {
 	DB *gorm.DB
 }
 
+var(
+	errUserIDNotExisting_404=e.Error{Status: "failed", Msg: "User ID not existing", Err: nil, StatusCode: 404}
+	errSellerIDNotExisting_404=e.Error{Status: "failed", Msg: "Seller ID not existing", Err: nil, StatusCode: 404}
+)
+
 func NewAdminRepository(db *gorm.DB) repoInterface.IAdminRepo {
 	return &AdminRepo{DB: db}
-}
-
-func (repo *AdminRepo) IsEmailRegisteredAsSeller(email string) (bool, *e.Error) {
-	var emptyStruct struct{}
-	query := repo.DB.Raw(`
-	SELECT *
-	FROM sellers
-	WHERE email = ?`,
-		email).Scan(&emptyStruct)
-
-	if query.Error != nil {
-		return false, e.DBQueryError_500(&query.Error)
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func (repo *AdminRepo) IsEmailRegisteredAsUser(email string) (bool, *e.Error) {
-	var emptyStruct struct{}
-	query := repo.DB.Raw(`
-	SELECT *
-	FROM users
-	WHERE email = ?`,
-		email).Scan(&emptyStruct)
-
-	if query.Error != nil {
-		return false, e.DBQueryError_500(&query.Error)
-	}
-
-	if query.RowsAffected == 0 {
-		return false, nil
-	}
-
-	return true, nil
 }
 
 func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) {
@@ -68,21 +35,30 @@ func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) {
 	return &sellersList, nil
 }
 
-func (repo *AdminRepo) UpdateUserStatus(email string, newStatus string) *e.Error {
+func (repo *AdminRepo) UpdateUserStatus(userID uint, newStatus string) *e.Error {
 	var user entities.User
-	err := repo.DB.Model(&user).Where("email = ?", email).Update("status", newStatus).Error
+	err := repo.DB.Model(&user).Where("id = ?", userID).Update("status", newStatus).Error
 	if err != nil {
 		return e.DBQueryError_500(&err)
+	}
+
+	if repo.DB.RowsAffected == 0 {
+		return &errUserIDNotExisting_404
 	}
 
 	return nil
 }
 
-func (repo *AdminRepo) UpdateSellerStatus(email string, newStatus string) *e.Error {
+func (repo *AdminRepo) UpdateSellerStatus(sellerID uint, newStatus string) *e.Error {
 	var seller entities.Seller
-	err := repo.DB.Model(&seller).Where("email = ?", email).Update("status", newStatus).Error
+	err := repo.DB.Model(&seller).Where("id = ?", sellerID).Update("status", newStatus).Error
 	if err != nil {
-		return &e.Error{Err: err, StatusCode: 500}
+		// return &e.Error{Status:"failed",Msg:"db query err",Err: err, StatusCode: 500}
+		return e.DBQueryError_500(&err)
+	}
+
+	if repo.DB.RowsAffected == 0 {
+		return &errSellerIDNotExisting_404
 	}
 
 	return nil

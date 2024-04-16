@@ -12,10 +12,16 @@ import (
 	"github.com/jinzhu/copier"
 )
 
+var (
+	errColourVariantAlreadyExistsByAttributes_409 = &e.Error{Status: "failed", Msg: "colourVariant already exists with these attributes", Err: nil, StatusCode: 409}
+	errModelIDDoesNotBelongToSeller_401 = &e.Error{Status: "failed", Msg: "corrupt request", Err: errors.New("modelID does not belong to the seller"), StatusCode: 401}
+	errColourVariantAlreadyExists_409 = &e.Error{Status: "failed", Msg: "colourVariant already exists with these attributes", Err: nil, StatusCode: 409}
+)
+
 func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVariantReq, file *os.File) *e.Error {
 	var colourVariant entities.ColourVariant
 	if err := copier.Copy(&colourVariant, &req); err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to colourVariant entity"), StatusCode: 500}
+		return e.SetError("Error while copying request to colourVariant entity", err, 500)
 	}
 
 	//check if the colourVariant already exists
@@ -24,7 +30,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVari
 		return err
 	}
 	if doColourVariantExists {
-		return e.SetError("colourVariant already exists", nil, 400)
+		return errColourVariantAlreadyExistsByAttributes_409
 	}
 
 	//check if modelID belongs to the seller
@@ -33,7 +39,7 @@ func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVari
 		return err
 	}
 	if sellerIDFromModel != sellerID {
-		return e.SetError("modelID does not belong to the seller", nil, 401)
+		return errModelIDDoesNotBelongToSeller_401
 	}
 
 	//round off MRP and SalePrice to 2 decimal places
@@ -49,7 +55,7 @@ func (uc *ProductsUC) EditColourVariant(req *request.EditColourVariantReq) *e.Er
 
 	var colourVariant entities.ColourVariant
 	if err := copier.Copy(&colourVariant, &req); err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to colourVariant entity"), StatusCode: 500}
+		return e.SetError("Error while copying request to colourVariant entity", err, 500)
 	}
 	//check if the coulourVariant already exists by attributes
 	doColourVariantExists, err := uc.ProductsRepo.DoColourVariantExistByAttributes(&colourVariant)
@@ -57,7 +63,7 @@ func (uc *ProductsUC) EditColourVariant(req *request.EditColourVariantReq) *e.Er
 		return err
 	}
 	if doColourVariantExists {
-		return e.SetError("colourVariant already exists with these attributes", nil, 400)
+		return errColourVariantAlreadyExists_409
 	}
 
 	//round off MRP and SalePrice to 2 decimal places
@@ -77,7 +83,7 @@ func (uc *ProductsUC) GetColourVariantsUnderModel(modelID uint) (*[]response.Res
 	//convert to response model
 	var colourVariantsInResponse []response.ResponseColourVarient
 	if err := copier.Copy(&colourVariantsInResponse, &colourVariants); err != nil {
-		return nil, &e.Error{Err: errors.New(err.Error() + "Error occured while copying colourVariants to response model"), StatusCode: 500}
+		return nil, e.SetError("Error while copying colourVariants to response model", err, 500)
 	}
 
 	return &colourVariantsInResponse, nil

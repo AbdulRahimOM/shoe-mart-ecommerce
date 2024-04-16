@@ -4,15 +4,17 @@ import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	request "MyShoo/internal/models/requestModels"
-	"errors"
 
 	"github.com/jinzhu/copier"
+)
+var (
+	errDimensionalVariantAlreadyExists_409 = &e.Error{Status: "failed", Msg: "dimensionalVariant already exists", Err: nil, StatusCode: 409}
 )
 
 func (uc *ProductsUC) AddDimensionalVariant(req *request.AddDimensionalVariantReq) *e.Error {
 	var dimensionalVariant entities.DimensionalVariant
 	if err := copier.Copy(&dimensionalVariant, &req); err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "Error occured while copying request to dimensionalVariant entity"), StatusCode: 500}
+		return e.SetError("Error while copying request to dimensionalVariant entity", err, 500)
 	}
 	//check if the dimensionalVariant already exists
 	doDimensionalVariantExists, err := uc.ProductsRepo.DoDimensionalVariantExistsByAttributes(&dimensionalVariant)
@@ -20,7 +22,7 @@ func (uc *ProductsUC) AddDimensionalVariant(req *request.AddDimensionalVariantRe
 		return err
 	}
 	if doDimensionalVariantExists {
-		return e.SetError("dimensionalVariant already exists", nil, 400)
+		return errDimensionalVariantAlreadyExists_409
 	}
 
 	//add dimensionalVariant and its product combinations

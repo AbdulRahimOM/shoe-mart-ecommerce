@@ -5,6 +5,10 @@ import (
 	"MyShoo/internal/domain/entities"
 )
 
+var (
+	errCouponDoesNotExist_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "Coupon doesn't exist", Err: nil}
+)
+
 func (repo *OrderRepo) IsCouponCodeTaken(code string) (bool, *e.Error) {
 	var temp entities.Coupon
 	query := repo.DB.Raw(`
@@ -103,7 +107,8 @@ func (repo *OrderRepo) GetCouponByID(couponID uint) (*entities.Coupon, *e.Error)
 		return nil, e.DBQueryError_500(&result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return nil, e.SetError("coupon doesn't exist", nil, 400)
+		return nil, &errCouponDoesNotExist_400
+
 	}
 
 	return &coupon, nil

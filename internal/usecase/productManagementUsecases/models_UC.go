@@ -6,9 +6,12 @@ import (
 	request "MyShoo/internal/models/requestModels"
 	repoInterface "MyShoo/internal/repository/interface"
 	usecase "MyShoo/internal/usecase/interface"
-	"errors"
 
 	"github.com/jinzhu/copier"
+)
+
+var (
+	errModelAlreadyExists_409 = &e.Error{Status: "failed", Msg: "model already exists", Err: nil, StatusCode: 409}
 )
 
 type ModelsUC struct {
@@ -22,7 +25,7 @@ func NewModelUseCase(repo repoInterface.IModelsRepo) usecase.IModelsUC {
 func (uc *ModelsUC) AddModel(req *request.AddModelReq) *e.Error {
 	var model entities.Models
 	if err := copier.Copy(&model, &req); err != nil {
-		return &e.Error{Err: errors.New(err.Error() + "error occured while copying request to model entity"), StatusCode: 500}
+		return e.SetError("Error while copying request to model entity", err, 500)
 	}
 
 	//check if the model already exists
@@ -31,7 +34,7 @@ func (uc *ModelsUC) AddModel(req *request.AddModelReq) *e.Error {
 		return err
 	}
 	if doModelExists {
-		return e.SetError("model already exists", nil, 400)
+		return errModelAlreadyExists_409
 	}
 
 	//add model

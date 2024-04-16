@@ -5,22 +5,22 @@ type AdminSignInReq struct {
 	Password string `json:"Login_password" validate:"required,gte=3"`
 }
 type BlockUserReq struct {
-	Email string `json:"email" validate:"required,email"`
+	UserID uint `json:"user_id" validate:"required,numeric"`
 }
 
 // unblock user request
 type UnblockUserReq struct {
-	Email string `json:"email" validate:"required,email"`
+	UserID uint `json:"user_id" validate:"required,numeric"`
 }
 
 // block seller request
 type BlockSellerReq struct {
-	Email string `json:"email" validate:"required,email"`
+	SellerID uint `json:"seller_id" validate:"required,numeric"`
 }
 
 // unblock seller request
 type UnblockSellerReq struct {
-	Email string `json:"email" validate:"required,email"`
+	SellerID uint `json:"seller_id" validate:"required,numeric"`
 }
 
 // VerifySellerReq

@@ -23,7 +23,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
 		WHERE order_date_and_time BETWEEN ? AND ?`,
 		start, end, start, end).Scan(&dashBoardData).Error
 	if err != nil {
-		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
+		return nil, nil, e.DBQueryError_500(&err)
 	}
 
 	err = repo.DB.Raw(`
@@ -33,7 +33,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
     GROUP BY TO_CHAR(order_date_and_time, 'YYYY-MM-DD')`,
 		start, end).Scan(&salePerDay).Error
 	if err != nil {
-		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
+		return nil, nil, e.DBQueryError_500(&err)
 	}
 
 	return &dashBoardData, &salePerDay, nil
@@ -55,7 +55,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
 		FROM orders`,
 	).Scan(&dashBoardData).Error
 	if err != nil {
-		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
+		return  nil, nil, e.DBQueryError_500(&err)
 	}
 
 	err = repo.DB.Raw(`
@@ -64,7 +64,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
     GROUP BY TO_CHAR(order_date_and_time, 'YYYY-MM-DD')`,
 	).Scan(&salePerDay).Error
 	if err != nil {
-		return &dashBoardData, &salePerDay, &e.Error{Err: err, StatusCode: 500}
+		return  nil, nil, e.DBQueryError_500(&err)
 	}
 
 	return &dashBoardData, &salePerDay, nil

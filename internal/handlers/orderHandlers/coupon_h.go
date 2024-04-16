@@ -40,9 +40,9 @@ func (h *OrderHandler) NewCouponHandler(c *gin.Context) {
 	//call usecase
 	err := h.orderUseCase.CreateNewCoupon(&req)
 	if err != nil {
-		c.JSON(err.StatusCode, response.FromError(err))
+		c.JSON(err.StatusCode, response.MsgAndError("error adding coupon", err))
 	} else {
-		c.JSON(200, nil)
+		c.JSON(200, response.SuccessSM("coupon added"))
 	}
 }
 
@@ -75,9 +75,9 @@ func (h *OrderHandler) BlockCouponHandler(c *gin.Context) {
 	//call usecase
 	err := h.orderUseCase.BlockCoupon(&req)
 	if err != nil {
-		c.JSON(err.StatusCode, response.FromError(err))
+		c.JSON(err.StatusCode, response.MsgAndError("error blocking coupon", err))
 	} else {
-		c.JSON(200, nil)
+		c.JSON(200, response.SuccessSM("coupon blocked"))
 	}
 }
 
@@ -110,9 +110,9 @@ func (h *OrderHandler) UnblockCouponHandler(c *gin.Context) {
 	//call usecase
 	err := h.orderUseCase.UnblockCoupon(&req)
 	if err != nil {
-		c.JSON(err.StatusCode, response.FromError(err))
+		c.JSON(err.StatusCode, response.MsgAndError("error unblocking coupon", err))
 	} else {
-		c.JSON(200, nil)
+		c.JSON(200, response.SuccessSM("coupon unblocked"))
 	}
 }
 
@@ -158,7 +158,7 @@ func (h *OrderHandler) GetCoupons(c *gin.Context) {
 			return
 		}
 	default:
-		c.JSON(400, gin.H{"error": "invalid url parameter"})
+		c.JSON(400, response.FailedSME("invalid url parameter", nil))
 	}
 
 	c.JSON(200, response.GetCouponRes{

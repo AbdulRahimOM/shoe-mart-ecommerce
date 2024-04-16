@@ -4,6 +4,7 @@ import (
 	e "MyShoo/internal/domain/customErrors"
 	"MyShoo/internal/domain/entities"
 	"context"
+	"errors"
 	"time"
 
 	repoInterface "MyShoo/internal/repository/interface"
@@ -33,11 +34,11 @@ func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabe
 	}
 	result, err := repo.Cld.Upload.Upload(context.Background(), filePath, uploadParams)
 	if err != nil {
-		return nil, e.SetError("error while uploading file to cloudinary. err: ", err, 500)
+		return nil, e.SetError("error while uploading file to cloudinary", err, 500)
 	}
 
 	if result.Error.Message != "" {
-		return nil, e.SetError("error while uploading file to cloudinary: "+result.Error.Message,nil, 500)
+		return nil, e.SetError("error while uploading file to cloudinary", errors.New(result.Error.Message), 500)
 	}
 
 	return &result.SecureURL, nil

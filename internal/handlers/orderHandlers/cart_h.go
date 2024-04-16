@@ -57,16 +57,11 @@ func (h *CartHandler) AddToCart(c *gin.Context) {
 	}
 
 	if err := h.cartUseCase.AddToCart(req); err != nil {
-		// c.JSON(http.StatusInternalServerError, response.SME{
-		// 	Status:  "failed",
-		// 	Message: "Error adding to cart. Try Again",
-		// 	Error:   err.Error(),
-		// })
-		c.JSON(err.StatusCode, response.FromError(err))
+		c.JSON(err.StatusCode, response.MsgAndError("error adding to cart", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("added to cart successfully"))
 }
 
 // get cart
@@ -82,13 +77,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 
 	userID, errr := tools.GetUserID(c)
 	if errr != nil {
-		// c.JSON(http.StatusInternalServerError, response.SME{
-		// 	Status:  "failed",
-		// 	Message: "Error adding to cart. Try Again",
-		// 	Error:   err.Error(),
-		// })
-		// c.JSON(http.StatusInternalServerError, response.FromError(errr))
-		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token", errr))
 		return
 	}
 
@@ -97,12 +86,7 @@ func (h *CartHandler) GetCart(c *gin.Context) {
 	var totalValue float32
 	cart, totalValue, err := h.cartUseCase.GetCart(userID)
 	if err != nil {
-		// c.JSON(http.StatusInternalServerError, response.SME{
-		// 	Status:  "failed",
-		// 	Message: "Error getting cart. Try Again",
-		// 	Error:   err.Error(),
-		// })
-		c.JSON(err.StatusCode, response.FromError(err))
+		c.JSON(err.StatusCode, response.MsgAndError("error getting cart", err))
 		return
 	}
 
@@ -139,16 +123,11 @@ func (h *CartHandler) DeleteFromCart(c *gin.Context) {
 
 	//delete from cart
 	if err := h.cartUseCase.DeleteFromCart(req); err != nil {
-		// c.JSON(http.StatusInternalServerError, response.SME{
-		// 	Status:  "failed",
-		// 	Message: "Error deleting from cart. Try Again",
-		// 	Error:   err.Error(),
-		// })
-		c.JSON(err.StatusCode, response.FromError(err))
+		c.JSON(err.StatusCode, response.MsgAndError("error deleting from cart", err))
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("deleted from cart successfully"))
 }
 
 // clear cart
@@ -174,5 +153,5 @@ func (h *CartHandler) ClearCart(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("cart cleared"))
 }

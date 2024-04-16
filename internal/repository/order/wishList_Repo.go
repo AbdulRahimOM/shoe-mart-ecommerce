@@ -8,6 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	errWishListDoesNotExist_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "WishList doesn't exist", Err: nil}
+)
+
 type WishListRepo struct {
 	DB *gorm.DB
 }
@@ -19,7 +23,7 @@ func NewWishListRepository(db *gorm.DB) repo.IWishListsRepo {
 func (repo *WishListRepo) CreateWishList(userID uint, wishList *entities.WishList) *e.Error {
 	err := repo.DB.Create(wishList).Error
 	if err != nil {
-		return &e.Error{Err: err, StatusCode: 500}
+		return e.DBQueryError_500(&err)
 	}
 
 	return nil
@@ -32,7 +36,7 @@ func (repo *WishListRepo) DoesWishListExistWithName(userID uint, name string) (b
 		if err == gorm.ErrRecordNotFound {
 			return false, nil
 		}
-		return false, &e.Error{Err: err, StatusCode: 500}
+		return false, e.DBQueryError_500(&err)
 	}
 
 	return true, nil
@@ -44,7 +48,7 @@ func (repo *WishListRepo) AddToWishList(productID uint, wishListID uint) *e.Erro
 
 	err := repo.DB.Create(&wishListItem).Error
 	if err != nil {
-		return &e.Error{Err: err, StatusCode: 500}
+		return e.DBQueryError_500(&err)
 	}
 
 	return nil
@@ -54,7 +58,7 @@ func (repo *WishListRepo) RemoveFromWishList(productID uint, wishListID uint) *e
 	//remove from wishlist
 	err := repo.DB.Where("product_id = ? AND wish_list_id = ?", productID, wishListID).Delete(&entities.WishListItems{}).Error
 	if err != nil {
-		return &e.Error{Err: err, StatusCode: 500}
+		return e.DBQueryError_500(&err)
 	}
 
 	return nil
@@ -66,9 +70,9 @@ func (repo *WishListRepo) GetUserIDOfWishList(wishListID uint) (uint, *e.Error) 
 	err := repo.DB.Model(&entities.WishList{}).Where("id = ?", wishListID).Pluck("user_id", &userID).Error
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return 0, e.SetError("no such wishlist", nil, 400)
+			return 0, &errWishListDoesNotExist_400
 		} else {
-			return 0, &e.Error{Err: err, StatusCode: 500}
+			return 0, e.DBQueryError_500(&err)
 		}
 	}
 
@@ -82,7 +86,7 @@ func (repo *WishListRepo) IsProductInWishList(productID uint, wishListID uint) (
 		if err == gorm.ErrRecordNotFound {
 			return false, nil
 		} else {
-			return false, &e.Error{Err: err, StatusCode: 500}
+			return false, e.DBQueryError_500(&err)
 		}
 	}
 
@@ -94,7 +98,7 @@ func (repo *WishListRepo) GetAllWishLists(userID uint) (*[]entities.WishList, *e
 	var wishLists []entities.WishList
 	err := repo.DB.Where("user_id = ?", userID).Find(&wishLists).Error
 	if err != nil {
-		return nil, &e.Error{Err: err, StatusCode: 500}
+		return nil, e.DBQueryError_500(&err)
 	}
 
 	return &wishLists, nil
@@ -107,14 +111,14 @@ func (repo *WishListRepo) GetWishListByID(userID uint, wishListID uint) (*string
 	//get wishlist name
 	err := repo.DB.Model(&entities.WishList{}).Where("id = ?", wishListID).Pluck("name", &wishListName).Error
 	if err != nil {
-		return &wishListName, &products, &e.Error{Err: err, StatusCode: 500}
+		return &wishListName, &products, e.DBQueryError_500(&err)
 	}
 
 	//get productIDs in wishlist
 	var productIDs []uint
 	err = repo.DB.Model(&entities.WishListItems{}).Where("wish_list_id = ?", wishListID).Pluck("product_id", &productIDs).Error
 	if err != nil {
-		return &wishListName, &products, &e.Error{Err: err, StatusCode: 500}
+		return &wishListName, &products, e.DBQueryError_500(&err)
 	}
 
 	//get products with productIDs
@@ -123,7 +127,7 @@ func (repo *WishListRepo) GetWishListByID(userID uint, wishListID uint) (*string
 		Preload("FkDimensionalVariation.FkColourVariant.FkModel.FkCategory").
 		Find(&products).Error
 	if err != nil {
-		return &wishListName, &products, &e.Error{Err: err, StatusCode: 500}
+		return &wishListName, &products, e.DBQueryError_500(&err)
 	}
 
 	return &wishListName, &products, nil

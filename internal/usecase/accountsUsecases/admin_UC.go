@@ -15,7 +15,7 @@ import (
 var (
 	errEmailNotRegistered_401      = e.ErrEmailNotRegistered_401
 	errEmailAlreadyUsed_401        = e.ErrEmailAlreadyUsed_401
-	errSellerIsAlreadyVerified_400 = &e.Error{Msg: "Seller is already verified", Err: nil, StatusCode: 400}
+	errSellerIsAlreadyVerified_400 = &e.Error{Status: "failed",Msg: "Seller is already verified", Err: nil, StatusCode: 400}
 )
 
 type AdminUseCase struct {
@@ -31,52 +31,19 @@ func (uc *AdminUseCase) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) 
 }
 
 func (uc *AdminUseCase) BlockUser(req *request.BlockUserReq) *e.Error {
-	//check if user exists
-	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
-	if err != nil {
-		return err
-	}
-	if !(isEmailRegistered) {
-		return e.ErrEmailNotRegistered_401
-	}
-	return uc.adminRepo.UpdateUserStatus(req.Email, "blocked")
+	return uc.adminRepo.UpdateUserStatus(req.UserID, "blocked")
 }
 
 func (uc *AdminUseCase) UnblockUser(req *request.UnblockUserReq) *e.Error {
-	//check if user exists
-	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsUser(req.Email)
-	if err != nil {
-		return err
-	}
-	if !(isEmailRegistered) {
-		return errEmailNotRegistered_401
-	}
-	return uc.adminRepo.UpdateUserStatus(req.Email, "verified")
+	return uc.adminRepo.UpdateUserStatus(req.UserID, "verified")
 }
 
 func (uc *AdminUseCase) BlockSeller(req *request.BlockSellerReq) *e.Error {
-	//check if seller exists
-	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsSeller(req.Email)
-	if err != nil {
-		return err
-	}
-	if !(isEmailRegistered) {
-		return errEmailNotRegistered_401
-	}
-	return uc.adminRepo.UpdateSellerStatus(req.Email, "blocked")
+	return uc.adminRepo.UpdateSellerStatus(req.SellerID, "blocked")
 }
 
 func (uc *AdminUseCase) UnblockSeller(req *request.UnblockSellerReq) *e.Error {
-	//check if seller exists
-	isEmailRegistered, err := uc.adminRepo.IsEmailRegisteredAsSeller(req.Email)
-	if err != nil {
-		return err
-	}
-	if !(isEmailRegistered) {
-		return errEmailNotRegistered_401
-	}
-
-	return uc.adminRepo.UpdateSellerStatus(req.Email, "verified")
+	return uc.adminRepo.UpdateSellerStatus(req.SellerID, "verified")
 }
 
 func (uc *AdminUseCase) GetUsersList() (*[]entities.UserDetails, *e.Error) {
@@ -99,14 +66,14 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 	}
 
 	//check for password
-	if hashpassword.CompareHashedPassword(*hashedPassword, req.Password) != nil {
-		return nil, &e.Error{Err: e.ErrInvalidPassword_401, StatusCode: 200}
+	if err:=hashpassword.CompareHashedPassword(*hashedPassword, req.Password);err != nil {
+		return nil, e.SetError("password mismatch", err, 401)
 	}
 
 	//generate token
 	tokenString, err2 := jwttoken.GenerateToken("admin", adminInToken, time.Hour*24*30)
 	if err2 != nil {
-		return nil, &e.Error{Err: err, StatusCode: 500}
+		return nil, e.SetError("error generating token", err2, 500)
 	}
 	return &tokenString, nil
 }
@@ -114,7 +81,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 func (uc *AdminUseCase) RestartConfig() *e.Error { //err pro
 	err := config.RestartDeliveryConfig()
 	if err != nil {
-		return &e.Error{Err: err, StatusCode: 500}
+		return e.SetError("error restarting config", err, 500)
 	}
 	return nil
 }

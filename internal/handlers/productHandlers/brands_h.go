@@ -46,11 +46,11 @@ func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 
 	//add brand
 	if err := bh.brandsUseCase.AddBrand(&req); err != nil {
-		c.JSON(err.StatusCode,response.FromError(err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK,  nil)
+	c.JSON(http.StatusOK, nil)
 }
 
 // get brands handler
@@ -111,5 +111,5 @@ func (bh *BrandsHandler) EditBrand(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK,  nil)
+	c.JSON(http.StatusOK, response.SuccessSM("brand edited"))
 }

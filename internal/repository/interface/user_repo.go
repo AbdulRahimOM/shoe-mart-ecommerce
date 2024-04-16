@@ -22,7 +22,7 @@ type IUserRepo interface {
 	AddUserAddress(newAddress *entities.UserAddress) *e.Error
 	DoAddressNameExists(name string) (bool, *e.Error)
 	EditUserAddress(newaddress *entities.UserAddress) *e.Error
-	GetAddressNameByID(id uint) (string, *e.Error)
+	GetAddressNameByID(id uint) (*string, *e.Error)
 	DeleteUserAddress(id uint) *e.Error
 	GetUserIDFromAddressID(id uint) (uint, *e.Error)
 
@@ -30,7 +30,7 @@ type IUserRepo interface {
 	GetUserAddress(addressID uint) (*entities.UserAddress, *e.Error)
 
 	GetProfile(userID uint) (*entities.UserDetails, *e.Error)
-	GetEmailByUserID(userID uint) (string, *e.Error)
+	GetEmailByUserID(userID uint) (*string, *e.Error)
 	EditProfile(userID uint, req *request.EditProfileReq) *e.Error
 
 	GetWalletBalance(userID uint) (float32, *e.Error)

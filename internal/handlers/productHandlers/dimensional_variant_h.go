@@ -35,9 +35,9 @@ func (h *ProductHandler) AddDimensionalVariant(c *gin.Context) {
 
 	//add dimensional variant
 	if err := h.productUseCase.AddDimensionalVariant(&req); err != nil {
-		c.JSON(err.StatusCode,response.FromError(err))
+		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
 
-	c.JSON(http.StatusOK,  nil)
+	c.JSON(http.StatusOK, response.SuccessSM("dimensional variant added"))
 }

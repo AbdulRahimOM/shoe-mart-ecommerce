@@ -12,6 +12,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var(
+	errOrderDontExist_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "No such order exists", Err: nil}	
+)
+
 type OrderRepo struct {
 	DB  *gorm.DB
 	Cld *cloudinary.Cloudinary
@@ -219,20 +223,20 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 }
 
 func (repo *OrderRepo) GetOrderStatusByID(orderID uint) (string, *e.Error) {
-	var order entities.Order
+	var status string
 	query := repo.DB.
 		Select("status").
 		Where("id = ?", orderID).
-		Find(&order)
+		Find(&status)
 
 	if query.Error != nil {
 		return "", e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return "", e.SetError("no such order exists by id", nil, 400)
+		return "", &errOrderDontExist_400
 	}
 
-	return order.Status, nil
+	return status, nil
 }
 
 func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, *e.Error) {
@@ -247,7 +251,7 @@ func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, *e.Error) {
 	}
 
 	if query.RowsAffected == 0 {
-		return 0, e.SetError("record not found with this orderID", nil, 400)
+		return 0, &errOrderDontExist_400	
 	}
 
 	return order.UserID, nil
@@ -448,7 +452,7 @@ func (repo *OrderRepo) GetOrderSummaryByID(orderID uint) (*entities.Order, *e.Er
 	}
 
 	if query.RowsAffected == 0 {
-		return nil, e.SetError("record not found", nil, 400)
+		return nil, &errOrderDontExist_400
 	}
 
 	return &order, nil
@@ -538,7 +542,7 @@ func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID stri
 	if result.Error != nil {
 		return e.DBQueryError_500(&result.Error)
 	} else if result.RowsAffected == 0 {
-		return e.SetError("no such order exists", nil, 400)
+		return &errOrderDontExist_400
 	}
 
 	return nil
@@ -546,19 +550,19 @@ func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID stri
 
 // GetPaymentStatusByID implements repo.IOrderRepo.
 func (repo *OrderRepo) GetPaymentStatusByID(orderID uint) (string, *e.Error) {
-	var order entities.Order
+	var status string
 	query := repo.DB.
 		Select("payment_status").
 		Where("id = ?", orderID).
-		Find(&order)
+		Find(&status)
 
 	if query.Error != nil {
 		return "", e.DBQueryError_500(&query.Error)
 	} else if query.RowsAffected == 0 {
-		return "", e.SetError("no such order exists", nil, 400)
+		return "", &errOrderDontExist_400
 	}
 
-	return order.PaymentStatus, nil
+	return status, nil
 }
 
 // GetOrderItemsPQRByOrderID implements repo.IOrderRepo.

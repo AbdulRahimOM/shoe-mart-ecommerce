@@ -20,8 +20,8 @@ type IUserUC interface {
 
 	//address related
 	AddUserAddress(req *request.AddUserAddress) *e.Error
-	EditUserAddress(req *request.EditUserAddress) *e.Error
-	DeleteUserAddress(req *request.DeleteUserAddress) *e.Error
+	EditUserAddress(userID uint, req *request.EditUserAddress) *e.Error
+	DeleteUserAddress(userID uint, req *request.DeleteUserAddress) *e.Error
 	GetUserAddresses(userID uint) (*[]entities.UserAddress, *e.Error)
 
 	GetProfile(userID uint) (*entities.UserDetails, *e.Error)

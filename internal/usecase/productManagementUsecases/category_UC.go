@@ -10,6 +10,12 @@ import (
 	"github.com/jinzhu/copier"
 )
 
+var (
+	errCategoryAlreadyExists_409           = &e.Error{Status: "failed", Msg: "category already exists", Err: nil, StatusCode: 409}
+	errCategoryDoesNotExist_404            = &e.Error{Status: "failed", Msg: "category doesn't exist", Err: nil, StatusCode: 404}
+	errCategoryAlreadyExistsInThisName_409 = &e.Error{Status: "failed", Msg: "category already exists with the sugested new name", Err: nil, StatusCode: 409}
+)
+
 type CategoryUC struct {
 	CategoryRepo repoInterface.ICategoryRepo
 }
@@ -24,7 +30,7 @@ func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) *e.Error {
 
 	var category entities.Categories
 	if err := copier.Copy(&category, &req); err != nil {
-		return e.SetError("error occured while copying request to category entity", err, 500)
+		return e.SetError("Error while copying request to category entity", err, 500)
 	}
 
 	//check if the category already exists
@@ -34,7 +40,7 @@ func (uc *CategoryUC) AddCategory(req *request.AddCategoryReq) *e.Error {
 		return err
 	}
 	if DoCategoryExistsByName {
-		return e.SetError("category already exists", nil, 400)
+		return errCategoryAlreadyExists_409
 	}
 
 	//add category
@@ -53,14 +59,14 @@ func (uc *CategoryUC) EditCategory(req *request.EditCategoryReq) *e.Error {
 		return err
 	}
 	if !DoCategoryExistsByName {
-		return e.SetError("category doesn't exist", nil, 400)
+		return errCategoryDoesNotExist_404
 	}
 
 	//check if the new name already exists for another category
 	if DoCategoryExistsByName, err := uc.CategoryRepo.DoCategoryExistsByName(req.NewName); err != nil {
 		return err
 	} else if DoCategoryExistsByName {
-		return e.SetError("category already exists with the sugested new name", nil, 400)
+		return errCategoryAlreadyExistsInThisName_409
 	}
 
 	//edit category

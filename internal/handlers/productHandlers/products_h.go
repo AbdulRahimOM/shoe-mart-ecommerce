@@ -95,7 +95,7 @@ func (h *ProductHandler) AddStock(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("stock added"))
 }
 
 // edit stock handler
@@ -140,5 +140,5 @@ func (h *ProductHandler) EditStock(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("stock edited"))
 }

@@ -145,7 +145,7 @@ func (h *AdminHandler) BlockUser(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, nil)
+		c.JSON(http.StatusOK, response.SuccessSM("User blocked"))
 	}
 
 }
@@ -182,7 +182,7 @@ func (h *AdminHandler) UnblockUser(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, nil)
+		c.JSON(http.StatusOK, response.SuccessSM("User unblocked"))
 	}
 
 }
@@ -219,7 +219,7 @@ func (h *AdminHandler) BlockSeller(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, nil)
+		c.JSON(http.StatusOK, response.SuccessSM("Seller blocked"))
 	}
 
 }
@@ -256,7 +256,7 @@ func (h *AdminHandler) UnblockSeller(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		c.JSON(http.StatusOK, nil)
+		c.JSON(http.StatusOK, response.SuccessSM("Seller unblocked"))
 	}
 
 }
@@ -281,7 +281,7 @@ func (h *AdminHandler) VerifySeller(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Seller verified"))
 }
 
 // ReloadConfig
@@ -291,7 +291,7 @@ func (h *AdminHandler) VerifySeller(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Security BearerTokenAuth
-// @Success 200 {object} response.SM{} @Example {"status": "success", "message": "Config reloaded successfully"}
+// @Success 200 {object} response.SM{} @Example {"status": "success", "message": "Config reloaded"}
 // @Failure 400 {object} response.SME{}
 // @Router /admin/system/restart-Configuration [get]
 func (h *AdminHandler) RestartConfig(c *gin.Context) {
@@ -300,5 +300,5 @@ func (h *AdminHandler) RestartConfig(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	}
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("Config reloaded"))
 }

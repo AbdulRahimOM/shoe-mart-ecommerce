@@ -10,6 +10,10 @@ import (
 	"gorm.io/gorm"
 )
 
+var (
+	errNoProductByThisID_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "product doesn't exist by this ID", Err: nil}
+)
+
 type ProductsRepo struct {
 	DB  *gorm.DB
 	Cld *cloudinary.Cloudinary
@@ -49,7 +53,7 @@ func (repo *ProductsRepo) AddStock(req *request.AddStockReq) *e.Error {
 		return e.DBQueryError_500(&query.Error)
 	}
 	if query.RowsAffected == 0 {
-		return e.SetError("product does not exists by this ID", nil, 400)
+		return &errNoProductByThisID_400
 	}
 
 	//adding new count to existing stock count
@@ -66,7 +70,7 @@ func (repo *ProductsRepo) EditStock(req *request.EditStockReq) *e.Error {
 		return e.DBQueryError_500(&result.Error)
 	}
 	if result.RowsAffected == 0 {
-		return e.SetError("product does not exists by this ID", nil, 400)
+		return &errNoProductByThisID_400
 	}
 	return nil
 }

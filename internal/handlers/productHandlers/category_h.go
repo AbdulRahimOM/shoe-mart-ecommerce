@@ -48,10 +48,8 @@ func (h *CategoryHandler) AddCategory(c *gin.Context) {
 	err := h.CategoryUseCase.AddCategory(&req)
 	if err != nil {
 		c.JSON(err.StatusCode, response.FromError(err))
-		return
 	} else {
-		c.JSON(http.StatusOK, nil)
-		return
+		c.JSON(http.StatusOK, response.SuccessSM("category added"))
 	}
 }
 
@@ -76,7 +74,7 @@ func (h *CategoryHandler) GetCategories(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-		fmt.Println("categories fetched successfully")
+		fmt.Println("categories fetched")
 		c.JSON(http.StatusOK, response.GetCategoriesResponse{
 			Categories: *categories,
 		})
@@ -112,9 +110,7 @@ func (h *CategoryHandler) EditCategory(c *gin.Context) {
 	err := h.CategoryUseCase.EditCategory(&req)
 	if err != nil {
 		c.JSON(err.StatusCode, response.FromError(err))
-		return
 	} else {
-		c.JSON(http.StatusOK,  nil)
-		return
+		c.JSON(http.StatusOK, response.SuccessSM("category edited"))
 	}
 }

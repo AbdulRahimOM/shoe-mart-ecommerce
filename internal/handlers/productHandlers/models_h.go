@@ -50,7 +50,7 @@ func (h *ModelHandler) AddModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("model added"))
 }
 
 // get models by brands and categories handler
@@ -143,5 +143,5 @@ func (h *ModelHandler) EditModel(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("model name edited"))
 }

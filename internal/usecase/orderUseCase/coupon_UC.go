@@ -20,7 +20,7 @@ func (uc *OrderUseCase) CreateNewCoupon(req *request.NewCouponReq) *e.Error {
 
 	var coupon entities.Coupon
 	if errr := copier.Copy(&coupon, &req); errr != nil {
-		return e.SetError("error occured while copying req to coupon", errr, 500)
+		return e.SetError("Error while copying req to coupon", errr, 500)
 	}
 
 	startDate, errr := time.Parse("2006-01-02", req.StartDate)
@@ -39,12 +39,12 @@ func (uc *OrderUseCase) CreateNewCoupon(req *request.NewCouponReq) *e.Error {
 
 	//validate and set start and end time
 	if startTime, errr := requestValidation.ValidateAndParseDate(req.StartDate); errr != nil {
-		return e.SetError("invalid start time",nil, 400)
+		return e.SetError("invalid start time", nil, 400)
 	} else {
 		coupon.StartDate = startTime
 	}
 	if endTime, err := requestValidation.ValidateAndParseDate(req.EndDate); err != nil {
-		return e.SetError("invalid end time", nil,400)
+		return e.SetError("invalid end time", nil, 400)
 	} else {
 		endTime = endTime.AddDate(0, 0, 1) //to include the end day (upto 23:59:59)
 		coupon.EndDate = endTime
@@ -57,7 +57,7 @@ func (uc *OrderUseCase) CreateNewCoupon(req *request.NewCouponReq) *e.Error {
 		return err
 	}
 	if codeAlreadyUsed {
-		return e.SetError("coupon code already exists",nil, 400)
+		return e.SetError("coupon code already exists", nil, 400)
 	}
 
 	//initialise coupon
