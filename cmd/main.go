@@ -25,22 +25,20 @@ func main() {
 	//(to avoid frequent changes in main.go file just for testing purpose)
 	//which leads to frequent git tracking and commiting
 
+	defer os.Exit(1)
+
 	if err := config.LoadEnvVariables(); err != nil {
 		fmt.Println("Couldn't load env variables. Err: ", err)
-		os.Exit(1)
 	}
 
 	if err := infra.ConnectToDB(); err != nil {
 		fmt.Println("Couldn't connect to DB. Error: ", err)
-		os.Exit(1)
 	}
 	if err := infra.ConnectToCloud(); err != nil {
 		fmt.Println("Couldn't connect to Cloud. Error: ", err)
-		os.Exit(1)
 	}
 	if err := config.LoadDeliveryConfig(); err != nil {
 		fmt.Println("Couldn't load config. Error: ", err)
-		os.Exit(1)
 	}
 
 	di.InitializeAndStartAPI()
