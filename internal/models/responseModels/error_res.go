@@ -1,17 +1,18 @@
 package response
 
 var UnauthorizedAccess = struct {
-	//Status  string `json:"status"`
+	Status  string `json:"status"`
 	Message string `json:"message"`
 }{
-	// "failed",
+	"failed",
 	"Unauthorized Access",
 }
 
 var InvalidToken = struct {
-	//Status  string `json:"status"`
+	Status  string `json:"status"`
 	Message string `json:"message"`
+
 }{
-	// "failed",
+	"unauthorized",
 	"Invalid token. Access Denied",
 }
