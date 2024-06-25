@@ -1,4 +1,4 @@
-module MyShoo
+module github.com/AbdulRahimOM/shoe-mart-ecommerce
 
 go 1.21.3
 
