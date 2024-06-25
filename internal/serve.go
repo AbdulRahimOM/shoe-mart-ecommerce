@@ -1,6 +1,7 @@
 package myhttp
 
 import (
+	"MyShoo/internal/config"
 	accHandlers "MyShoo/internal/handlers/accountHandlers"
 	orderHandlers "MyShoo/internal/handlers/orderHandlers"
 	"MyShoo/internal/handlers/paymentHandlers"
@@ -50,5 +51,5 @@ func NewServerHTTP(
 
 }
 func (serveHttp *ServerHttp) Start() {
-	serveHttp.eng.Run(":4000")
+	serveHttp.eng.Run(":"+config.Port)
 }

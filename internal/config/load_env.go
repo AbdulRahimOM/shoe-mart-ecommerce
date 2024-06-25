@@ -7,7 +7,7 @@ import (
 
 	"github.com/joho/godotenv"
 )
-
+var Port string
 var IsLocalHostMode bool = false
 var ExecutableDir string
 
@@ -75,6 +75,8 @@ func initiateEnvValues() {
 	if os.Getenv("LOCAL_HOST_MODE") == "true" {
 		IsLocalHostMode = true
 	}
+
+	Port = os.Getenv("PORT")
 
 	// Database URL.....................
 	DbURL = os.Getenv("DB_URL")

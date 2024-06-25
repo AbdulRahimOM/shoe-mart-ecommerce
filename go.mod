@@ -21,8 +21,6 @@ require (
 	gorm.io/gorm v1.25.8
 )
 
-require github.com/knz/go-libedit v1.10.1 // indirect
-
 require (
 	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/bytedance/sonic v1.11.3 // indirect
