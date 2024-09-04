@@ -5,12 +5,12 @@
 package mockusecase
 
 import (
+	reflect "reflect"
+
 	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
 	entities "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
 	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -240,6 +240,21 @@ func (m *MockIUserRepo) GetUserByEmail(email string) (*entities.User, *e.Error) 
 func (mr *MockIUserRepoMockRecorder) GetUserByEmail(email interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockIUserRepo)(nil).GetUserByEmail), email)
+}
+
+// GetUserDetailsByEmail mocks base method.
+func (m *MockIUserRepo) GetUserDetailsByEmail(email string) (*entities.UserDetails, *e.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUserDetailsByEmail", email)
+	ret0, _ := ret[0].(*entities.UserDetails)
+	ret1, _ := ret[1].(*e.Error)
+	return ret0, ret1
+}
+
+// GetUserDetailsByEmail indicates an expected call of GetUserDetailsByEmail.
+func (mr *MockIUserRepoMockRecorder) GetUserDetailsByEmail(email interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserDetailsByEmail", reflect.TypeOf((*MockIUserRepo)(nil).GetUserDetailsByEmail), email)
 }
 
 // GetUserIDFromAddressID mocks base method.

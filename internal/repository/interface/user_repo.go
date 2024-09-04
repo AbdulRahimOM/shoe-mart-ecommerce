@@ -12,8 +12,10 @@ type IUserRepo interface {
 	CreateUser(*entities.User) *e.Error
 	IsEmailRegistered(string) (bool, *e.Error)
 	GetUserByEmail(email string) (*entities.User, *e.Error)
+	GetUserDetailsByEmail(email string) (*entities.UserDetails, *e.Error)
 	GetUserBasicInfoByID(id uint) (*response.UserInfoForInvoice, *e.Error)
 	ResetPassword(id uint, newPassword *string) *e.Error
+	GetUserDetailsByID(id uint) (*entities.UserDetails, *e.Error)
 
 	//returns hashed password, user details as entities.UserDetails struct and *e.Error (if any, else nil)
 	GetPasswordAndUserDetailsByEmail(string) (*entities.User, *e.Error)

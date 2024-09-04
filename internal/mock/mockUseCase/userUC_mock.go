@@ -5,11 +5,11 @@
 package mockusecase
 
 import (
+	reflect "reflect"
+
 	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
 	entities "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 )
 
@@ -137,18 +137,18 @@ func (mr *MockIUserUCMockRecorder) GetUserByEmail(email interface{}) *gomock.Cal
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUserByEmail", reflect.TypeOf((*MockIUserUC)(nil).GetUserByEmail), email)
 }
 
-// ResetPassword mocks base method.
-func (m *MockIUserUC) ResetPassword(id uint, newPassword *string) *e.Error {
+// ResetPasswordToNewPassword mocks base method.
+func (m *MockIUserUC) ResetPasswordToNewPassword(id uint, newPassword *string) *e.Error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "ResetPassword", id, newPassword)
+	ret := m.ctrl.Call(m, "ResetPasswordToNewPassword", id, newPassword)
 	ret0, _ := ret[0].(*e.Error)
 	return ret0
 }
 
-// ResetPassword indicates an expected call of ResetPassword.
-func (mr *MockIUserUCMockRecorder) ResetPassword(id, newPassword interface{}) *gomock.Call {
+// ResetPasswordToNewPassword indicates an expected call of ResetPasswordToNewPassword.
+func (mr *MockIUserUCMockRecorder) ResetPasswordToNewPassword(id, newPassword interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPassword", reflect.TypeOf((*MockIUserUC)(nil).ResetPassword), id, newPassword)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ResetPasswordToNewPassword", reflect.TypeOf((*MockIUserUC)(nil).ResetPasswordToNewPassword), id, newPassword)
 }
 
 // SendOtp mocks base method.
@@ -178,6 +178,21 @@ func (m *MockIUserUC) SendOtpForPWChange(arg0 *entities.User) (*string, *e.Error
 func (mr *MockIUserUCMockRecorder) SendOtpForPWChange(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendOtpForPWChange", reflect.TypeOf((*MockIUserUC)(nil).SendOtpForPWChange), arg0)
+}
+
+// SetInitialPassword mocks base method.
+func (m *MockIUserUC) SetInitialPassword(id uint, newPassword *string) (string, *e.Error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SetInitialPassword", id, newPassword)
+	ret0, _ := ret[0].(string)
+	ret1, _ := ret[1].(*e.Error)
+	return ret0, ret1
+}
+
+// SetInitialPassword indicates an expected call of SetInitialPassword.
+func (mr *MockIUserUCMockRecorder) SetInitialPassword(id, newPassword interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SetInitialPassword", reflect.TypeOf((*MockIUserUC)(nil).SetInitialPassword), id, newPassword)
 }
 
 // SignIn mocks base method.
@@ -211,12 +226,13 @@ func (mr *MockIUserUCMockRecorder) SignUp(req interface{}) *gomock.Call {
 }
 
 // VerifyOtp mocks base method.
-func (m *MockIUserUC) VerifyOtp(phone, email, otp string) (bool, *e.Error) {
+func (m *MockIUserUC) VerifyOtp(phone, email, otp string) (bool, string, *e.Error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "VerifyOtp", phone, email, otp)
 	ret0, _ := ret[0].(bool)
-	ret1, _ := ret[1].(*e.Error)
-	return ret0, ret1
+	ret1, _ := ret[1].(string)
+	ret2, _ := ret[2].(*e.Error)
+	return ret0, ret1, ret2
 }
 
 // VerifyOtp indicates an expected call of VerifyOtp.

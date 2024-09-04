@@ -38,15 +38,32 @@ func (uc *UserUseCase) SendOtp(phone string) *e.Error {
 	return nil
 }
 
-func (uc *UserUseCase) VerifyOtp(phone string, email string, otp string) (bool, *e.Error) {
+func (uc *UserUseCase) VerifyOtp(phone string, email string, otp string) (bool, string, *e.Error) {
 	if matchStatus, err := otpManager.VerifyOtp(phone, otp); err != nil {
-		return false, e.SetError("Error while verifying otp", err, 500)
+		return false, "", e.SetError("Error while verifying otp", err, 500)
 	} else if !matchStatus {
-		return false, nil
-	} else {
-		//otp matched!!!, update status
-		return true, uc.userRepo.UpdateUserStatus(email, "verified")
+		return false, "", nil
 	}
+
+	//otp matched!!!, update status to verified
+	err := uc.userRepo.UpdateUserStatus(email, "verified")
+	if err != nil {
+		return true, "", err
+	}
+
+	//get new token
+	user, err := uc.userRepo.GetUserDetailsByEmail(email)
+	if err != nil {
+		return true, "", err
+	}
+
+	tokenString, errr := jwttoken.GenerateToken("password-to-be-set-user", user, time.Hour*24*30)
+	if errr != nil {
+		return true, "", e.SetError("error generating token", errr, 500)
+	}
+
+	return true, tokenString, uc.userRepo.UpdateUserStatus(email, "verified")
+
 }
 func (uc *UserUseCase) SignIn(req *request.UserSignInReq) (*string, *e.Error) {
 	isEmailRegistered, err := uc.userRepo.IsEmailRegistered(req.Email)
@@ -281,10 +298,34 @@ func (uc *UserUseCase) VerifyOtpForPWChange(id uint, phone string, otp string) (
 
 }
 
-func (uc *UserUseCase) ResetPassword(id uint, newPassword *string) *e.Error {
+func (uc *UserUseCase) ResetPasswordToNewPassword(id uint, newPassword *string) *e.Error {
 	hashedPwd, err := hashpassword.Hashpassword(*newPassword)
 	if err != nil {
 		return e.SetError("error while hashing pw", err, 500)
 	}
 	return uc.userRepo.ResetPassword(id, &hashedPwd)
+}
+
+func (uc *UserUseCase) SetInitialPassword(id uint, newPassword *string) (string, *e.Error) {
+	hashedPwd, errr:= hashpassword.Hashpassword(*newPassword)
+	if errr != nil {
+		return "", e.SetError("error while hashing pw", errr, 500)
+	}
+
+	err:= uc.userRepo.ResetPassword(id, &hashedPwd)
+	if err != nil {
+		return "", e.SetError("error while setting initial password", err, 500)
+	}
+
+	user, err := uc.userRepo.GetUserDetailsByID(id)
+	if err != nil {
+		return "", e.SetError("error while getting user details", err, 500)
+	}
+
+	newToken, errr := jwttoken.GenerateToken("user", user, time.Hour*24*30)
+	if errr != nil {
+		return "", e.SetError("error while generating token", err, 500)
+	}
+
+	return newToken, nil
 }

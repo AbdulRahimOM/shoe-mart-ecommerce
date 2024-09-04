@@ -1,6 +1,7 @@
 package accounthandler
 
 import (
+	"fmt"
 	"net/http"
 	"strings"
 
@@ -126,6 +127,13 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
+		if config.TakeAllOtpAsValid {
+			c.JSON(http.StatusOK, response.SM{
+				Status:  "success",
+				Message: "Development mode: Use dev-mod otp",
+			})
+			return
+		}
 		c.JSON(http.StatusOK, response.SuccessSM("OTP sent successfully"))
 	}
 }
@@ -167,7 +175,7 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 	}
 	phone := user.(map[string]interface{})["phone"].(string)
 	email := user.(map[string]interface{})["email"].(string)
-	isVerified, err := h.UserUseCase.VerifyOtp(phone, email, otpStruct.OTP)
+	isVerified, newToken, err := h.UserUseCase.VerifyOtp(phone, email, otpStruct.OTP)
 	if err != nil {
 		// fmt.Println("\n\nHandler: error recieved from usecase\n\n.")
 		// c.JSON(http.StatusBadRequest, response.SME{
@@ -179,7 +187,11 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 		return
 	}
 	if isVerified {
-		c.JSON(http.StatusOK, response.SuccessSM("OTP verified"))
+		c.JSON(http.StatusOK, response.SMT{
+			Status:  "success",
+			Message: "OTP verified successfully",
+			Token:   newToken,
+		})
 	} else {
 		c.JSON(http.StatusUnauthorized, response.FromErrByText("OTP verification failed. Please try again"))
 	}
@@ -458,7 +470,14 @@ func (h *UserHandler) SendOtpForPWChange(c *gin.Context) {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
 	} else {
-
+		if config.TakeAllOtpAsValid {
+			c.JSON(http.StatusOK, response.SMT{
+				Status:  "success",
+				Message: "Development mode: Use dev-mod otp",
+				Token:   *token,
+			})
+			return
+		}
 		c.JSON(http.StatusOK, response.SMT{
 			Token: *token,
 		})
@@ -498,7 +517,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "role is not user"})
 		return
 	}
-	status := claims.Model.(map[string]interface{})["Status"].(string)
+	status := claims.Model.(map[string]interface{})["status"].(string)
 	if status != "PW change requested, otp not verified" {
 		c.JSON(http.StatusUnauthorized, response.FromErrByText("status is not PW change requested, otp not verified"))
 		return
@@ -544,7 +563,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 // @Success 200 {object} response.SM{}
 // @Failure 400 {object} response.SME{}
 // @Router /resetpassword [post]
-func (h *UserHandler) ResetPassword(c *gin.Context) {
+func (h *UserHandler) ResetPasswordToNewPassword(c *gin.Context) {
 
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString)
@@ -567,7 +586,7 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 		return
 	}
 
-	status := claims.Model.(map[string]interface{})["Status"].(string)
+	status := claims.Model.(map[string]interface{})["status"].(string)
 	if status != "PW change requested, otp verified" {
 		c.JSON(http.StatusUnauthorized, response.FromErrByText("status is not PW change requested, otp verified"))
 		return
@@ -587,10 +606,57 @@ func (h *UserHandler) ResetPassword(c *gin.Context) {
 
 	//change password
 	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
-	if err := h.UserUseCase.ResetPassword(id, &req.NewPassword); err != nil {
+	if err := h.UserUseCase.ResetPasswordToNewPassword(id, &req.NewPassword); err != nil {
 		c.JSON(http.StatusUnauthorized, response.MsgAndError("error getting id from token. error:", err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.SuccessSM("Password reset successfully"))
+}
+
+// SetInitialPassword
+// @Summary Set initial password
+// @Description Set initial password
+// @Tags User/Session/SignUp
+// @Accept json
+// @Produce json
+// @Security BearerTokenAuth
+// @Param req body req.SetInitialPasswordReq{} true "Set Initial Password Request"
+// @Success 200 {object} response.SMT{}
+// @Failure 400 {object} response.SME{}
+// @Router /set-initial-password [post]
+func (h *UserHandler) SetInitialPassword(c *gin.Context) {
+	fmt.Println("entered set initial password handler")
+	//get userID from context
+	userID, errr := tools.GetUserID(c)
+	if errr != nil {
+		c.JSON(http.StatusInternalServerError, response.MsgAndError("error getting user ID from token. error:", errr))
+		return
+	}
+	fmt.Println("=================")
+
+	var req request.ResetPasswordReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
+		return
+	}
+
+	//validation
+	if err := requestValidation.ValidateRequest(req); err != nil {
+		c.JSON(http.StatusBadRequest, response.ErrOnFormValidation(&err))
+		return
+	}
+
+	//change password
+	updatedToken,err := h.UserUseCase.SetInitialPassword(userID, &req.NewPassword)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, response.MsgAndError("error getting id from token. error:", err))
+		return
+	}
+
+	c.JSON(http.StatusOK, response.SMT{
+		Status: "success",
+		Message: "Password set successfully",
+		Token: updatedToken,
+	})
 }

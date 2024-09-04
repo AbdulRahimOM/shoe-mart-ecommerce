@@ -16,3 +16,11 @@ var InvalidToken = struct {
 	"unauthorized",
 	"Invalid token. Access Denied",
 }
+
+var PasswordNotSet = struct {
+	Status  string `json:"status"`
+	Message string `json:"message"`
+}{
+	"failed",
+	"Password not set. Please set password to continue",
+}

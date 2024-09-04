@@ -30,10 +30,11 @@ func UserRoutes(engine *gin.RouterGroup,
 
 			loggedOutGroup.POST("/signup", user.PostSignUp)
 			loggedOutGroup.POST("/login", user.PostLogIn)
-
+			loggedOutGroup.Use(middleware.PasswordNotSetUserCheck).POST("/set-initial-password", user.SetInitialPassword)
+		
 			loggedOutGroup.POST("/resetpasswordsendotp", user.SendOtpForPWChange)
 			loggedOutGroup.POST("/resetpasswordverifyotp", user.VerifyOtpForPWChange)
-			loggedOutGroup.POST("/resetpassword", user.ResetPassword)
+			loggedOutGroup.POST("/resetpassword", user.ResetPasswordToNewPassword)
 		}
 
 		signinUpGroup := engine.Group("/")

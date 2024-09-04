@@ -311,3 +311,45 @@ func (repo *UserRepo) GetUserBasicInfoByID(id uint) (*response.UserInfoForInvoic
 
 	return user, nil
 }
+
+func (repo *UserRepo) GetUserDetailsByEmail(email string) (*entities.UserDetails, *e.Error) {
+	var userDetails *entities.UserDetails
+	query := repo.DB.Raw(`
+		SELECT 
+			id,
+			"firstName",
+			"lastName",
+			email,
+			phone,
+			status
+		FROM users
+		WHERE email = ?`,
+		email).Scan(&userDetails)
+
+	if query.Error != nil {
+		return nil, e.DBQueryError_500(&query.Error)
+	}
+
+	return userDetails, nil
+}
+
+func (repo *UserRepo) GetUserDetailsByID(id uint) (*entities.UserDetails, *e.Error) {
+	var userDetails *entities.UserDetails
+	query := repo.DB.Raw(`
+		SELECT 
+			id,
+			"firstName",
+			"lastName",
+			email,
+			phone,
+			status
+		FROM users
+		WHERE id = ?`,
+		id).Scan(&userDetails)
+
+	if query.Error != nil {
+		return nil, e.DBQueryError_500(&query.Error)
+	}
+
+	return userDetails, nil
+}

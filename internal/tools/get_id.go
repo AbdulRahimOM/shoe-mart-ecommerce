@@ -13,7 +13,7 @@ func GetUserID(c *gin.Context) (uint, error) {
 		fmt.Println("UserModel not found in context")
 		return 0, errors.New("UserModel not found in context")
 	}
-	userID := uint(userModel.(map[string]interface{})["ID"].(float64))
+	userID := uint(userModel.(map[string]interface{})["id"].(float64))
 	return userID, nil
 }
 

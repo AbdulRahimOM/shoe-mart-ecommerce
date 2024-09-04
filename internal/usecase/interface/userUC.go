@@ -10,13 +10,14 @@ type IUserUC interface {
 	SignUp(req *request.UserSignUpReq) (*string, *e.Error)
 	SignIn(req *request.UserSignInReq) (*string, *e.Error)
 	SendOtp(phone string) *e.Error
-	VerifyOtp(phone string, email string, otp string) (bool, *e.Error)
+	VerifyOtp(phone string, email string, otp string) (isValidOtp bool, newToken string,err *e.Error)
+	SetInitialPassword(id uint, newPassword *string) (newToken string, err *e.Error)
 
 	//forgot password related
 	GetUserByEmail(email string) (*entities.User, *e.Error)
 	SendOtpForPWChange(*entities.User) (*string, *e.Error)
 	VerifyOtpForPWChange(id uint, phone string, otp string) (bool, *string, *e.Error)
-	ResetPassword(id uint, newPassword *string) *e.Error
+	ResetPasswordToNewPassword(id uint, newPassword *string) *e.Error
 
 	//address related
 	AddUserAddress(req *request.AddUserAddress) *e.Error

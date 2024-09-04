@@ -1,6 +1,8 @@
 package middleware
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
 )
@@ -19,7 +21,8 @@ func VerifyUserStatus(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	userStatus := userModel.(map[string]interface{})["Status"].(string)
+	fmt.Println("userModel=", userModel)
+	userStatus := userModel.(map[string]interface{})["status"].(string)
 	if userStatus == "not verified" {
 		c.AbortWithStatusJSON(403, gin.H{"error": "User not verified"})
 		c.Abort()
@@ -39,7 +42,7 @@ func VerifySellerStatus(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	sellerStatus := sellerModel.(map[string]interface{})["Status"].(string)
+	sellerStatus := sellerModel.(map[string]interface{})["status"].(string)
 	if sellerStatus == "not verified" {
 		c.AbortWithStatusJSON(403, gin.H{"error": "Seller not verified"})
 		c.Abort()

@@ -7,7 +7,12 @@ import (
 
 	"github.com/joho/godotenv"
 )
+
 var Port string
+var Enviroment string
+var TakeAllOtpAsValid bool = false
+var DevModeOtp string
+
 var IsLocalHostMode bool = false
 var ExecutableDir string
 
@@ -36,7 +41,7 @@ var ShouldUploadExcel bool
 var ShouldRenderPaymentPage bool
 var ShouldUploadInvoice bool
 
-var relativeEnvPath  string ="config/envs/.env"
+var relativeEnvPath string = "config/envs/.env"
 
 func init() {
 
@@ -54,7 +59,7 @@ func LoadEnvVariables() error {
 	errBinaryExecMode := godotenv.Load(filepath.Join(ExecutableDir, relativeEnvPath)) //env file is presumed to be alongside the executable
 	if errBinaryExecMode != nil {
 		goto retryWithGoRunMode
-	}else{
+	} else {
 		initiateEnvValues()
 		return nil
 	}
@@ -77,6 +82,12 @@ func initiateEnvValues() {
 	}
 
 	Port = os.Getenv("PORT")
+	fmt.Println("Port: ", Port)
+	Enviroment = os.Getenv("ENVIROMENT")
+	if os.Getenv("TAKE_ALL_OTP_AS_VALID") == "true" && Enviroment == "DEVELOPMENT" {
+		TakeAllOtpAsValid = true
+	}
+	DevModeOtp = os.Getenv("DEV_MODE_OTP")
 
 	// Database URL.....................
 	DbURL = os.Getenv("DB_URL")

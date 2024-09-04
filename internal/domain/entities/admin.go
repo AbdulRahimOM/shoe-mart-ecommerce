@@ -9,10 +9,10 @@ type Admin struct {
 	Password  string `gorm:"column:password;notNull"`
 }
 type AdminDetails struct {
-	ID        uint   `gorm:"primaryKey"`
-	FirstName string `gorm:"notNull"`
-	LastName  string
-	Email     string `gorm:"unique;notNull"`
-	Phone     string `gorm:"notNull"`
-	Status    string `gorm:"default:Pending"`
+	ID        uint   `json:"id" gorm:"primaryKey"`
+	FirstName string `json:"first_name" gorm:"notNull"`
+	LastName  string `json:"last_name"`
+	Email     string `json:"email" gorm:"unique;notNull"`
+	Phone     string `json:"phone" gorm:"notNull"`
+	Status    string `json:"status" gorm:"default:Pending"`
 }
