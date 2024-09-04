@@ -32,17 +32,20 @@ func VerifyOtp(phone string, otp string) (bool, error) {
 	params := &verify.CreateVerificationCheckParams{}
 	params.SetTo(phone)
 	params.SetCode(otp)
-
+	fmt.Println("otp: ", otp)
 	resp, err := client.VerifyV2.CreateVerificationCheck(config.TwilioServiceSid, params)
 	if err != nil {
 		fmt.Println(err.Error())
 		return false, err
 	} else {
 		if resp.Status != nil {
-			fmt.Println(*resp.Status)
+			fmt.Println("*resp.Status: ", *resp.Status)
+			if *resp.Status == "approved" {
+				return true, nil
+			}
 		} else {
-			fmt.Println(resp.Status)
+			fmt.Println("resp.Status: ", resp.Status)
 		}
-		return true, nil
 	}
+	return false, err
 }
