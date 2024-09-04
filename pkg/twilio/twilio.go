@@ -10,6 +10,9 @@ import (
 )
 
 func SendOtp(phone string) error {
+	if config.TakeAllOtpAsValid {
+		return nil
+	}
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{Username: config.TwilioAccountSid, Password: config.TwilioAuthToken})
 	params := &verify.CreateVerificationParams{}
 	params.SetTo(phone)
@@ -19,7 +22,7 @@ func SendOtp(phone string) error {
 		return err
 	} else {
 		if resp.Status != nil { //?
-			fmt.Println("hh", *resp.Status)
+			fmt.Println("Otp sending status:", *resp.Status)
 		} else {
 			fmt.Println("kk", resp.Status)
 		}
@@ -28,6 +31,9 @@ func SendOtp(phone string) error {
 }
 
 func VerifyOtp(phone string, otp string) (bool, error) {
+	if config.TakeAllOtpAsValid {
+		return true, nil
+	}
 	client := twilio.NewRestClientWithParams(twilio.ClientParams{Username: config.TwilioAccountSid, Password: config.TwilioAuthToken})
 	params := &verify.CreateVerificationCheckParams{}
 	params.SetTo(phone)
