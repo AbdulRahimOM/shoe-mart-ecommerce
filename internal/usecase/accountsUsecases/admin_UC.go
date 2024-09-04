@@ -1,21 +1,22 @@
 package accountsusecase
 
 import (
-	"MyShoo/internal/config"
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	repoInterface "MyShoo/internal/repository/interface"
-	usecase "MyShoo/internal/usecase/interface"
-	hashpassword "MyShoo/pkg/hashPassword"
-	jwttoken "MyShoo/pkg/jwt"
 	"time"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	hashpassword "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/hashPassword"
+	jwttoken "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/jwt"
 )
 
 var (
 	errEmailNotRegistered_401      = e.ErrEmailNotRegistered_401
 	errEmailAlreadyUsed_401        = e.ErrEmailAlreadyUsed_401
-	errSellerIsAlreadyVerified_400 = &e.Error{Status: "failed",Msg: "Seller is already verified", Err: nil, StatusCode: 400}
+	errSellerIsAlreadyVerified_400 = &e.Error{Status: "failed", Msg: "Seller is already verified", Err: nil, StatusCode: 400}
 )
 
 type AdminUseCase struct {
@@ -66,7 +67,7 @@ func (uc *AdminUseCase) SignIn(req *request.AdminSignInReq) (*string, *e.Error) 
 	}
 
 	//check for password
-	if err:=hashpassword.CompareHashedPassword(*hashedPassword, req.Password);err != nil {
+	if err := hashpassword.CompareHashedPassword(*hashedPassword, req.Password); err != nil {
 		return nil, e.SetError("password mismatch", err, 401)
 	}
 

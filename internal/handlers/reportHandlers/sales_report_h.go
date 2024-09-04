@@ -1,11 +1,12 @@
 package reporthandlers
 
 import (
-	response "MyShoo/internal/models/responseModels"
-	usecase "MyShoo/internal/usecase/interface"
-	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
+
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 )

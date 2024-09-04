@@ -1,25 +1,26 @@
 package di
 
 import (
-	myhttp "MyShoo/internal"
-	accHandlers "MyShoo/internal/handlers/accountHandlers"
-	orderHandlers "MyShoo/internal/handlers/orderHandlers"
-	"MyShoo/internal/handlers/paymentHandlers"
-	productHandlers "MyShoo/internal/handlers/productHandlers"
-	reporthandlers "MyShoo/internal/handlers/reportHandlers"
-	infra "MyShoo/internal/infrastructure"
-	accountrepo "MyShoo/internal/repository/accounts"
-	orderrepo "MyShoo/internal/repository/order"
+	myhttp "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal"
+	accHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/accountHandlers"
+	orderHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/orderHandlers"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/paymentHandlers"
+	productHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/productHandlers"
+	reporthandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/reportHandlers"
+	infra "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/infrastructure"
+	accountrepo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/accounts"
+	orderrepo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/order"
 
-	// paymentrepo "MyShoo/internal/repository/payment_repo"
-	productRepository "MyShoo/internal/repository/productManagement"
-	reportsrepo "MyShoo/internal/repository/reports"
-	accountsusecase "MyShoo/internal/usecase/accountsUsecases"
-	orderusecase "MyShoo/internal/usecase/orderUseCase"
-	paymentusecase "MyShoo/internal/usecase/paymentUsecase"
-	productusecase "MyShoo/internal/usecase/productManagementUsecases"
-	reportsusecases "MyShoo/internal/usecase/reportsUsecases"
+	// paymentrepo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/payment_repo"
 	"fmt"
+
+	productRepository "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/productManagement"
+	reportsrepo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/reports"
+	accountsusecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/accountsUsecases"
+	orderusecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/orderUseCase"
+	paymentusecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/paymentUsecase"
+	productusecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/productManagementUsecases"
+	reportsusecases "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/reportsUsecases"
 )
 
 func InitializeAndStartAPI() {

@@ -5,9 +5,9 @@
 package mockusecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	entities "MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	entities "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"

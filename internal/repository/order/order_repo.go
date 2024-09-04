@@ -1,19 +1,20 @@
 package orderrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	response "MyShoo/internal/models/responseModels"
-	repoInterface "MyShoo/internal/repository/interface"
 	"context"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"github.com/cloudinary/cloudinary-go"
 	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"gorm.io/gorm"
 )
 
-var(
-	errOrderDontExist_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "No such order exists", Err: nil}	
+var (
+	errOrderDontExist_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "No such order exists", Err: nil}
 )
 
 type OrderRepo struct {
@@ -251,7 +252,7 @@ func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, *e.Error) {
 	}
 
 	if query.RowsAffected == 0 {
-		return 0, &errOrderDontExist_400	
+		return 0, &errOrderDontExist_400
 	}
 
 	return order.UserID, nil
@@ -591,7 +592,7 @@ func (repo *OrderRepo) GetOrderItemsPQRByOrderID(orderID uint) (*[]response.PQMS
 
 func (repo *OrderRepo) UploadInvoice(file string, fileName string) (*string, *e.Error) {
 	result, err := repo.Cld.Upload.Upload(context.Background(), file, uploader.UploadParams{
-		Folder:    "MyShoo/invoices",
+		Folder:    "github.com/AbdulRahimOM/shoe-mart-ecommerce/invoices",
 		PublicID:  fileName,
 		Overwrite: true,
 	})
@@ -600,7 +601,7 @@ func (repo *OrderRepo) UploadInvoice(file string, fileName string) (*string, *e.
 	}
 
 	if result.Error.Message != "" {
-		return nil, e.SetError("error while uploading file to cloudinary. result.Error: "+result.Error.Message,nil, 500)
+		return nil, e.SetError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, nil, 500)
 	}
 
 	return &result.SecureURL, nil

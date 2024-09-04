@@ -1,9 +1,9 @@
 package accountrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	repoInterface "MyShoo/internal/repository/interface"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"gorm.io/gorm"
 )

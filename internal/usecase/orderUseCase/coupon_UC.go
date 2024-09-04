@@ -1,11 +1,12 @@
 package orderusecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	requestValidation "MyShoo/pkg/validation"
 	"time"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
 
 	"github.com/jinzhu/copier"
 )

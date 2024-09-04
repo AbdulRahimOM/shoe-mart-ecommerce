@@ -1,11 +1,12 @@
 package reporthandlers
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	response "MyShoo/internal/models/responseModels"
-	requestValidation "MyShoo/pkg/validation"
 	"net/http"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 )

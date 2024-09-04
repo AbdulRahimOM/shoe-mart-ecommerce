@@ -1,9 +1,9 @@
 package usecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
 )
 
 type IAdminUC interface {
@@ -28,6 +28,7 @@ type ISellerUC interface {
 	SignUp(req *request.SellerSignUpReq) (*string, *e.Error)
 	SignIn(req *request.SellerSignInReq) (*string, *e.Error)
 }
+
 // type IUserUC interface {
 // 	SignUp(req *request.UserSignUpReq) (*string, *e.Error)
 // 	SignIn(req *request.UserSignInReq) (*string, *e.Error)

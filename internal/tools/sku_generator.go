@@ -1,8 +1,9 @@
 package tools
 
 import (
-	"MyShoo/internal/domain/entities"
 	"fmt"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 )
 
 // sku generator

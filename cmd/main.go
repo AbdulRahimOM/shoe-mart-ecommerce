@@ -1,13 +1,13 @@
 package main
 
 import (
-	myshoo "MyShoo"
-	_ "MyShoo/docs"
-	"MyShoo/internal/config"
-	"MyShoo/internal/di"
-	infra "MyShoo/internal/infrastructure"
 	"fmt"
 	"os"
+
+	_ "github.com/AbdulRahimOM/shoe-mart-ecommerce/docs"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/di"
+	infra "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/infrastructure"
 )
 
 // @title MyShoo API
@@ -18,12 +18,6 @@ import (
 // @name						Authorization
 func main() {
 	fmt.Println("Program initializing............")
-
-	//for dev purpose
-	myshoo.Test()
-	//don't remove this until the project is complete
-	//(to avoid frequent changes in main.go file just for testing purpose)
-	//which leads to frequent git tracking and commiting
 
 	defer os.Exit(1)
 

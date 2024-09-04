@@ -1,10 +1,10 @@
 package usecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
 )
 
 type ICartUC interface {
@@ -31,7 +31,7 @@ type IOrderUC interface {
 
 	//returns orderInfo, message, *e.Error
 	MakeOrder(req *request.MakeOrderReq) (*entities.OrderInfo, *response.ProceedToPaymentInfo, *e.Error)
-	GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo,  *e.Error)
+	GetOrdersOfUser(userID uint, page int, limit int) (*[]response.ResponseOrderInfo, *e.Error)
 	GetOrders(page int, limit int) (*[]response.ResponseOrderInfo, *e.Error)
 	CancelOrderByUser(orderID uint, userID uint) *e.Error
 	CancelOrderByAdmin(orderID uint) *e.Error

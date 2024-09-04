@@ -1,11 +1,11 @@
 package productusecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	repoInterface "MyShoo/internal/repository/interface"
-	usecase "MyShoo/internal/usecase/interface"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
 
 	"github.com/jinzhu/copier"
 )

@@ -1,21 +1,22 @@
 package productusecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	myMath "MyShoo/pkg/math"
 	"errors"
 	"os"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	myMath "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/math"
 
 	"github.com/jinzhu/copier"
 )
 
 var (
 	errColourVariantAlreadyExistsByAttributes_409 = &e.Error{Status: "failed", Msg: "colourVariant already exists with these attributes", Err: nil, StatusCode: 409}
-	errModelIDDoesNotBelongToSeller_401 = &e.Error{Status: "failed", Msg: "corrupt request", Err: errors.New("modelID does not belong to the seller"), StatusCode: 401}
-	errColourVariantAlreadyExists_409 = &e.Error{Status: "failed", Msg: "colourVariant already exists with these attributes", Err: nil, StatusCode: 409}
+	errModelIDDoesNotBelongToSeller_401           = &e.Error{Status: "failed", Msg: "corrupt request", Err: errors.New("modelID does not belong to the seller"), StatusCode: 401}
+	errColourVariantAlreadyExists_409             = &e.Error{Status: "failed", Msg: "colourVariant already exists with these attributes", Err: nil, StatusCode: 409}
 )
 
 func (uc *ProductsUC) AddColourVariant(sellerID uint, req *request.AddColourVariantReq, file *os.File) *e.Error {

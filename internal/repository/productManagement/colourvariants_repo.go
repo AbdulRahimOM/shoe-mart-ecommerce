@@ -1,17 +1,18 @@
 package productrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
 	"context"
 	"fmt"
 	"os"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 	"github.com/cloudinary/cloudinary-go/api/uploader"
 	"github.com/google/uuid"
 )
 
-var (	
+var (
 	errNoColourVariantByThisID_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "colourVariant doesn't exist by this ID", Err: nil}
 )
 
@@ -29,7 +30,7 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 
 	//add image to cloudinary
 	uploadParams := uploader.UploadParams{
-		Folder:    "MyShoo/colourVariants",
+		Folder:    "github.com/AbdulRahimOM/shoe-mart-ecommerce/colourVariants",
 		PublicID:  uuid.New().String()[:7],
 		Overwrite: true,
 	}
@@ -40,7 +41,7 @@ func (repo *ProductsRepo) AddColourVariant(req *entities.ColourVariant, file *os
 	}
 
 	if result.Error.Message != "" {
-		return e.SetError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, nil,500)
+		return e.SetError("error while uploading file to cloudinary. result.Error: "+result.Error.Message, nil, 500)
 	}
 
 	fmt.Println("req.ImageURL: ", req.ImageURL) //url printing,.. may be required for checking purposes

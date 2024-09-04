@@ -1,15 +1,16 @@
 package accounthandler
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	request "MyShoo/internal/models/requestModels"
 	"bytes"
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	mockusecase "MyShoo/internal/mock/mockUseCase"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+
+	mockusecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/mock/mockUseCase"
 
 	"github.com/gin-gonic/gin"
 	"github.com/golang/mock/gomock"

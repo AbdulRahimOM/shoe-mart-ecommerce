@@ -1,17 +1,17 @@
 package orderrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	repo "MyShoo/internal/repository/interface"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	repo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"gorm.io/gorm"
 )
 
-var(
-	errNoSuchItemInCart_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "No such item in cart", Err: nil}
-	errCartIsEmpty_400=e.Error{StatusCode: 400, Status: "Failed", Msg: "Cart is empty", Err: nil}
+var (
+	errNoSuchItemInCart_400 = e.Error{StatusCode: 400, Status: "Failed", Msg: "No such item in cart", Err: nil}
+	errCartIsEmpty_400      = e.Error{StatusCode: 400, Status: "Failed", Msg: "Cart is empty", Err: nil}
 )
 
 type CartRepo struct {

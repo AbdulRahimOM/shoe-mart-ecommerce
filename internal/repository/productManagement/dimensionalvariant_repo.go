@@ -1,9 +1,9 @@
 package productrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	"MyShoo/internal/tools"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/tools"
 
 	"gorm.io/gorm"
 )

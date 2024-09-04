@@ -1,15 +1,16 @@
 package reportsusecases
 
 import (
-	"MyShoo/internal/config"
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	repoInterface "MyShoo/internal/repository/interface"
-	usecase "MyShoo/internal/usecase/interface"
 	"fmt"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
 
 	"github.com/xuri/excelize/v2"
 )

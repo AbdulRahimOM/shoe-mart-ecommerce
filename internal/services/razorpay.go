@@ -1,8 +1,9 @@
 package services
 
 import (
-	"MyShoo/internal/config"
 	"fmt"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
 
 	razorpay "github.com/razorpay/razorpay-go"
 	razorpayUtils "github.com/razorpay/razorpay-go/utils"

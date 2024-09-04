@@ -1,11 +1,11 @@
 package routes
 
 import (
-	accHandlers "MyShoo/internal/handlers/accountHandlers"
-	orderhandler "MyShoo/internal/handlers/orderHandlers"
-	"MyShoo/internal/handlers/paymentHandlers"
-	productHandlers "MyShoo/internal/handlers/productHandlers"
-	"MyShoo/internal/middleware"
+	accHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/accountHandlers"
+	orderhandler "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/orderHandlers"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/paymentHandlers"
+	productHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/productHandlers"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/middleware"
 
 	"github.com/gin-gonic/gin"
 )

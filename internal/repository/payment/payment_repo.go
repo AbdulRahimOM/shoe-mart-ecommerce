@@ -1,7 +1,7 @@
 package paymentrepo
 
 import (
-	repo "MyShoo/internal/repository/interface"
+	repo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"gorm.io/gorm"
 )

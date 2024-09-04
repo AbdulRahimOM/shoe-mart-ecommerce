@@ -1,16 +1,17 @@
 package paymentHandlers
 
 import (
-	"MyShoo/internal/config"
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	"MyShoo/internal/tools"
-	usecase "MyShoo/internal/usecase/interface"
-	htmlRender "MyShoo/pkg/htmlTemplateRender"
-	requestValidation "MyShoo/pkg/validation"
 	"fmt"
 	"net/http"
 	"path/filepath"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/tools"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	htmlRender "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/htmlTemplateRender"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 )

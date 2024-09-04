@@ -1,6 +1,6 @@
 package tools
 
-import "MyShoo/internal/domain/entities"
+import "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 func IsValidPaymentMethod(paymentMethod string) bool {
 	//validate payment method

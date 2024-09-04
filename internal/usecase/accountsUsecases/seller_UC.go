@@ -1,13 +1,13 @@
 package accountsusecase
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	repoInterface "MyShoo/internal/repository/interface"
-	usecase "MyShoo/internal/usecase/interface"
-	hashpassword "MyShoo/pkg/hashPassword"
-	jwttoken "MyShoo/pkg/jwt"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	hashpassword "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/hashPassword"
+	jwttoken "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/jwt"
 
 	"time"
 )
@@ -37,7 +37,7 @@ func (uc *SellerUseCase) SignIn(req *request.SellerSignInReq) (*string, *e.Error
 	}
 
 	//check for password
-	if err:=hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password) ;err!= nil {
+	if err := hashpassword.CompareHashedPassword(sellerForToken.Password, req.Password); err != nil {
 		return nil, e.SetError("wrong password", err, 401)
 	}
 

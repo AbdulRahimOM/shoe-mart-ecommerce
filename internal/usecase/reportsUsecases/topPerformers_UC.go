@@ -1,8 +1,8 @@
 package reportsusecases
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	response "MyShoo/internal/models/responseModels"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
 )
 
 // GetTopModels implements usecase.ReportsUC.

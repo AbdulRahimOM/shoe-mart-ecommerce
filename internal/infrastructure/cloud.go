@@ -1,8 +1,9 @@
 package infra
 
 import (
-	"MyShoo/internal/config"
 	"fmt"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
 
 	"github.com/cloudinary/cloudinary-go"
 )

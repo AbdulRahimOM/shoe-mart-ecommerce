@@ -1,11 +1,12 @@
 package accounthandler
 
 import (
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	usecase "MyShoo/internal/usecase/interface"
-	requestValidation "MyShoo/pkg/validation"
 	"net/http"
+
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 )

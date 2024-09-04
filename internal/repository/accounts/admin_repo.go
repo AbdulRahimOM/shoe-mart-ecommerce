@@ -1,9 +1,9 @@
 package accountrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	repoInterface "MyShoo/internal/repository/interface"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"gorm.io/gorm"
 )
@@ -12,9 +12,9 @@ type AdminRepo struct {
 	DB *gorm.DB
 }
 
-var(
-	errUserIDNotExisting_404=e.Error{Status: "failed", Msg: "User ID not existing", Err: nil, StatusCode: 404}
-	errSellerIDNotExisting_404=e.Error{Status: "failed", Msg: "Seller ID not existing", Err: nil, StatusCode: 404}
+var (
+	errUserIDNotExisting_404   = e.Error{Status: "failed", Msg: "User ID not existing", Err: nil, StatusCode: 404}
+	errSellerIDNotExisting_404 = e.Error{Status: "failed", Msg: "Seller ID not existing", Err: nil, StatusCode: 404}
 )
 
 func NewAdminRepository(db *gorm.DB) repoInterface.IAdminRepo {
@@ -109,7 +109,7 @@ func (repo *AdminRepo) GetPasswordAndAdminDetailsByEmail(email string) (*string,
 		email).Scan(&adminDetails)
 
 	if query.Error != nil {
-		return nil, nil,  e.DBQueryError_500(&query.Error)
+		return nil, nil, e.DBQueryError_500(&query.Error)
 	}
 
 	return &hashedPassword, &adminDetails, nil

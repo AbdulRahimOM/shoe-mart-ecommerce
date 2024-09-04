@@ -1,11 +1,12 @@
 package config
 
 import (
-	myMath "MyShoo/pkg/math"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+
+	myMath "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/math"
 )
 
 var configRead struct {

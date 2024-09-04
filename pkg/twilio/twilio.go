@@ -1,8 +1,9 @@
 package otpManager
 
 import (
-	"MyShoo/internal/config"
 	"fmt"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
 
 	"github.com/twilio/twilio-go"
 	verify "github.com/twilio/twilio-go/rest/verify/v2"

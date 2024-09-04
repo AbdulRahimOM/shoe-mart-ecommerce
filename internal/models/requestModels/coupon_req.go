@@ -1,6 +1,6 @@
 package request
 
-import "MyShoo/internal/domain/entities"
+import "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 type NewCouponReq struct {
 	Code          string              `json:"code" validate:"required,min=3,max=15"`

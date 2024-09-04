@@ -1,12 +1,13 @@
 package middleware
 
 import (
-	"MyShoo/internal/config"
-	response "MyShoo/internal/models/responseModels"
-	jwttoken "MyShoo/pkg/jwt"
 	"fmt"
 	"net/http"
 	"strings"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	jwttoken "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )

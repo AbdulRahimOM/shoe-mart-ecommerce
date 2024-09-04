@@ -1,12 +1,13 @@
 package reportsrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
 	"time"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 )
 
-func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error){
+func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error) {
 	var dashBoardData entities.DashboardData
 	var salePerDay []entities.SalePerDay
 
@@ -39,7 +40,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataBetweenDates(start time.Time, end
 	return &dashBoardData, &salePerDay, nil
 }
 
-func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error){
+func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error) {
 	var dashBoardData entities.DashboardData
 	var salePerDay []entities.SalePerDay
 
@@ -55,7 +56,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
 		FROM orders`,
 	).Scan(&dashBoardData).Error
 	if err != nil {
-		return  nil, nil, e.DBQueryError_500(&err)
+		return nil, nil, e.DBQueryError_500(&err)
 	}
 
 	err = repo.DB.Raw(`
@@ -64,7 +65,7 @@ func (repo *DashboardDataRepo) GetDashBoardDataFullTime() (*entities.DashboardDa
     GROUP BY TO_CHAR(order_date_and_time, 'YYYY-MM-DD')`,
 	).Scan(&salePerDay).Error
 	if err != nil {
-		return  nil, nil, e.DBQueryError_500(&err)
+		return nil, nil, e.DBQueryError_500(&err)
 	}
 
 	return &dashBoardData, &salePerDay, nil

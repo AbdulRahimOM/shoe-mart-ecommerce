@@ -1,8 +1,9 @@
 package response
 
 import (
-	e "MyShoo/internal/domain/customErrors"
 	"fmt"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
 )
 
 type SM struct {

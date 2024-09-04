@@ -1,6 +1,6 @@
 package response
 
-import "MyShoo/internal/domain/entities"
+import "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 // OrderResponse
 type CODOrderResponse struct {
@@ -38,8 +38,8 @@ type GetOrdersResponse struct {
 
 // get cart response
 type GetCartResponse struct {
-// 	//Status     string              `json:"status"`
-// 	//Message    string              `json:"message"`
+	// 	//Status     string              `json:"status"`
+	// 	//Message    string              `json:"message"`
 	//Error      string              `json:"error"`
 	TotalValue float32             `json:"totalValue"`
 	Cart       []ResponseCartItems `json:"cart"`
@@ -140,7 +140,7 @@ type GetAddressesForCheckoutResponse struct {
 type SetAddrGetCouponsResponse struct {
 	//Status       string               `json:"status"`
 	//Message      string               `json:"message"`
-	Coupons      []ResponseCoupon    `json:"coupons"`
+	Coupons      []ResponseCoupon     `json:"coupons"`
 	Address      entities.UserAddress `json:"address"`
 	TotalQuantiy uint                 `json:"totalQuantiy"`
 	BillSumary   BillBeforeCoupon     `json:"billSummary"`
@@ -166,12 +166,12 @@ type GetPaymentMethodsForCheckoutResponse struct {
 }
 
 type BillAfterCoupon struct {
-	TotalProductsValue float32         `json:"totalProductsValue"`
-	CouponApplied      bool            `json:"couponApplied"`
+	TotalProductsValue float32        `json:"totalProductsValue"`
+	CouponApplied      bool           `json:"couponApplied"`
 	Coupon             ResponseCoupon `json:"coupon"`
-	CouponDiscount     float32         `json:"couponDiscount"`
-	ShippingCharge     float32         `json:"shippingCharge"`
-	GrandTotal         float32         `json:"grandTotal"`
+	CouponDiscount     float32        `json:"couponDiscount"`
+	ShippingCharge     float32        `json:"shippingCharge"`
+	GrandTotal         float32        `json:"grandTotal"`
 }
 
 type ResponseCoupon struct {
@@ -184,17 +184,17 @@ type ResponseCoupon struct {
 	Description   string  `json:"description"`
 }
 
-//InvoiceInfo
+// InvoiceInfo
 type InvoiceInfo struct {
-	OrderDetails entities.Order `json:"orderDetails"`
-	OrderItems []PQMS `json:"orderItems"`
-	UserInfo UserInfoForInvoice `json:"userInfo"`
+	OrderDetails entities.Order     `json:"orderDetails"`
+	OrderItems   []PQMS             `json:"orderItems"`
+	UserInfo     UserInfoForInvoice `json:"userInfo"`
 }
 
 type PQMS struct {
-	ProductID uint `json:"productID" gorm:"column:productID"`
-	ProductName string `json:"productName" gorm:"column:productName"`
-	Quantity  uint `json:"quantity" gorm:"column:quantity"`
-	MRP       float32 `json:"mrp" gorm:"column:mrp"`
-	SalePrice float32 `json:"salePrice" gorm:"column:salePrice"`
+	ProductID   uint    `json:"productID" gorm:"column:productID"`
+	ProductName string  `json:"productName" gorm:"column:productName"`
+	Quantity    uint    `json:"quantity" gorm:"column:quantity"`
+	MRP         float32 `json:"mrp" gorm:"column:mrp"`
+	SalePrice   float32 `json:"salePrice" gorm:"column:salePrice"`
 }

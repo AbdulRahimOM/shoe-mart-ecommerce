@@ -1,22 +1,23 @@
 package orderusecase
 
 import (
-	"MyShoo/internal/config"
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	repo "MyShoo/internal/repository/interface"
-	"MyShoo/internal/services"
-	"MyShoo/internal/tools"
-	usecase "MyShoo/internal/usecase/interface"
-	myMath "MyShoo/pkg/math"
 	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	repo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/services"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/tools"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	myMath "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/math"
 
 	"github.com/jinzhu/copier"
 	"github.com/jung-kurt/gofpdf"

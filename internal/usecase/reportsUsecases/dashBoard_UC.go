@@ -1,13 +1,14 @@
 package reportsusecases
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
 	"time"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 )
 
 func (uc *ReportsUseCase) GetDashBoardDataBetweenDates(start time.Time, end time.Time) (*entities.DashboardData, *[]entities.SalePerDay, *e.Error) {
-	return  uc.reportsRepo.GetDashBoardDataBetweenDates(start, end)
+	return uc.reportsRepo.GetDashBoardDataBetweenDates(start, end)
 }
 
 func (uc *ReportsUseCase) GetDashBoardDataFullTime() (*entities.DashboardData, *[]entities.SalePerDay, *e.Error) {

@@ -1,9 +1,10 @@
 package infra
 
 import (
-	"MyShoo/internal/config"
-	"MyShoo/internal/domain/entities"
 	"fmt"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"

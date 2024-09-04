@@ -1,9 +1,10 @@
 package reporthandlers
 
 import (
-	response "MyShoo/internal/models/responseModels"
 	"net/http"
 	"strconv"
+
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
 
 	"github.com/gin-gonic/gin"
 )

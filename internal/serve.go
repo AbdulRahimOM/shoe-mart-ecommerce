@@ -1,13 +1,13 @@
 package myhttp
 
 import (
-	"MyShoo/internal/config"
-	accHandlers "MyShoo/internal/handlers/accountHandlers"
-	orderHandlers "MyShoo/internal/handlers/orderHandlers"
-	"MyShoo/internal/handlers/paymentHandlers"
-	productHandlers "MyShoo/internal/handlers/productHandlers"
-	reporthandlers "MyShoo/internal/handlers/reportHandlers"
-	"MyShoo/internal/routes"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	accHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/accountHandlers"
+	orderHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/orderHandlers"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/paymentHandlers"
+	productHandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/productHandlers"
+	reporthandlers "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/handlers/reportHandlers"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/routes"
 
 	"github.com/gin-gonic/gin"
 
@@ -35,7 +35,7 @@ func NewServerHTTP(
 ) *ServerHttp {
 	engine := gin.Default()
 	// engine.LoadHTMLGlob("./internal/view/*.html")
-	// engine.LoadHTMLGlob("./internal/templates/*.html")	//server showing error with this while running binary executable (don't know exact reason, busy) 
+	// engine.LoadHTMLGlob("./internal/templates/*.html")	//server showing error with this while running binary executable (don't know exact reason, busy)
 	engine.LoadHTMLFiles("./internal/templates/payment.html")
 
 	routes.UserRoutes(engine.Group("/"), user, category, brand, model, product, cart, wishList, order, payment)
@@ -51,5 +51,5 @@ func NewServerHTTP(
 
 }
 func (serveHttp *ServerHttp) Start() {
-	serveHttp.eng.Run(":"+config.Port)
+	serveHttp.eng.Run(":" + config.Port)
 }

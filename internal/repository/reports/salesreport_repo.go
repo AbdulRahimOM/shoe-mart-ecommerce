@@ -1,13 +1,14 @@
 package reportsrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
 	"context"
 	"errors"
 	"time"
 
-	repoInterface "MyShoo/internal/repository/interface"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+
+	repoInterface "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"github.com/cloudinary/cloudinary-go"
 	"github.com/cloudinary/cloudinary-go/api/uploader"
@@ -28,7 +29,7 @@ func NewReportRepository(db *gorm.DB, cloudinary *cloudinary.Cloudinary) repoInt
 
 func (repo *DashboardDataRepo) UploadSalesReportExcel(filePath string, rangeLabel string) (*string, *e.Error) {
 	uploadParams := uploader.UploadParams{
-		Folder:    "MyShoo/adminreports",
+		Folder:    "github.com/AbdulRahimOM/shoe-mart-ecommerce/adminreports",
 		PublicID:  rangeLabel + "ReportForAdmin",
 		Overwrite: true,
 	}

@@ -1,10 +1,11 @@
 package repo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	response "MyShoo/internal/models/responseModels"
 	"time"
+
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
 )
 
 type IReportsRepo interface {

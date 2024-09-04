@@ -1,9 +1,10 @@
 package jwttoken
 
 import (
-	"MyShoo/internal/config"
 	"fmt"
 	"time"
+
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
 
 	jwt "github.com/golang-jwt/jwt/v5"
 )

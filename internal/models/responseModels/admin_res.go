@@ -1,11 +1,11 @@
 package response
 
-import "MyShoo/internal/domain/entities"
+import "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 type AdminLoginResponse struct {
 	//Status  string `json:"status"`
 	//Message string `json:"message"`
-	Token   string `json:"token"`
+	Token string `json:"token"`
 }
 
 type GetUsersListResponse struct {

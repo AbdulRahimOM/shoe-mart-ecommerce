@@ -1,14 +1,15 @@
 package producthandler
 
 import (
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	"MyShoo/internal/tools"
-	requestValidation "MyShoo/pkg/validation"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strconv"
+
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/tools"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
 
 	"github.com/gin-gonic/gin"
 )

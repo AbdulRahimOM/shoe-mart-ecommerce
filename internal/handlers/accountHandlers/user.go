@@ -1,17 +1,18 @@
 package accounthandler
 
 import (
-	"MyShoo/internal/config"
-	"MyShoo/internal/domain/entities"
-	request "MyShoo/internal/models/requestModels"
-	response "MyShoo/internal/models/responseModels"
-	"MyShoo/internal/tools"
-	usecase "MyShoo/internal/usecase/interface"
-	requestValidation "MyShoo/pkg/validation"
 	"net/http"
 	"strings"
 
-	jwttoken "MyShoo/pkg/jwt"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
+	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/tools"
+	usecase "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/usecase/interface"
+	requestValidation "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/validation"
+
+	jwttoken "github.com/AbdulRahimOM/shoe-mart-ecommerce/pkg/jwt"
 
 	"github.com/gin-gonic/gin"
 )

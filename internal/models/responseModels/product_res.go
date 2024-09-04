@@ -1,6 +1,6 @@
 package response
 
-import "MyShoo/internal/domain/entities"
+import "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 // get products response
 type GetProductsResponse struct {
@@ -40,7 +40,7 @@ type GetModelsResponse struct {
 	//Status  string            `json:"status"`
 	//Message string            `json:"message"`
 	//Error   string            `json:"error"`
-	Models  []entities.Models `json:"models"`
+	Models []entities.Models `json:"models"`
 }
 
 // get brands response

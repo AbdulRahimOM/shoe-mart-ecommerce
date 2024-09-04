@@ -1,9 +1,9 @@
 package orderrepo
 
 import (
-	e "MyShoo/internal/domain/customErrors"
-	"MyShoo/internal/domain/entities"
-	repo "MyShoo/internal/repository/interface"
+	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
+	repo "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/repository/interface"
 
 	"gorm.io/gorm"
 )

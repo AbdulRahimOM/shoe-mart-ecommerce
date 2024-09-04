@@ -1,11 +1,11 @@
 package response
 
-import "MyShoo/internal/domain/entities"
+import "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 
 type UserLoginResponse struct {
 	//Status  string `json:"status"`
 	//Message string `json:"message"`
-	Token   string `json:"token"`
+	Token string `json:"token"`
 	//Error   string `json:"error"`
 }
 
@@ -20,13 +20,13 @@ type GetProfileResponse struct {
 	//Status  string `json:"status"`
 	//Message string `json:"message"`
 	Profile struct {
-		UserDetails entities.UserDetails `json:"userDetails"`
-		Addresses   []entities.UserAddress  `json:"addresses"`
+		UserDetails entities.UserDetails   `json:"userDetails"`
+		Addresses   []entities.UserAddress `json:"addresses"`
 	} `json:"profile"`
 	//Error string `json:"error"`
 }
 
-//UserInfoForInvoice
+// UserInfoForInvoice
 type UserInfoForInvoice struct {
 	FirstName string `json:"firstName" gorm:"column:firstName"`
 	LastName  string `json:"lastName" gorm:"column:lastName"`
