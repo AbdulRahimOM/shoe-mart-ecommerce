@@ -32,7 +32,7 @@ func AdminRoutes(engine *gin.RouterGroup,
 	}
 
 	loggedOutGroup := engine.Group("/")
-	loggedOutGroup.Use(middleware.ClearCache, middleware.NotLoggedOutCheck)
+	loggedOutGroup.Use(middleware.ClearCache)
 	{
 		loggedOutGroup.GET("/login", admin.GetAdminLogin)
 		loggedOutGroup.POST("/login", admin.PostLogIn)

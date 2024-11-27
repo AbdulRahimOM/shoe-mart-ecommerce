@@ -21,8 +21,15 @@ func VerifyUserStatus(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	fmt.Println("userModel=", userModel)
-	userStatus := userModel.(map[string]interface{})["status"].(string)
+
+	userStatus, ok := userModel.(map[string]interface{})["status"].(string)
+	if !ok {
+		fmt.Println("userModel: ", userModel)
+		c.AbortWithStatusJSON(500, gin.H{"error": "User status not found"})
+		c.Abort()
+		return
+	}
+
 	if userStatus == "not verified" {
 		c.AbortWithStatusJSON(403, gin.H{"error": "User not verified"})
 		c.Abort()

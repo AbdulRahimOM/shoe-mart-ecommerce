@@ -59,17 +59,30 @@ func TokenReturn(token *string) SMT {
 func FromError(err error) SME {
 	switch err := err.(type) {
 	case *e.Error:
-		return SME{
-			Status:  "failed",
-			Message: err.Msg,
-			Error:   err.Err.Error(),
+		if err.Err == nil {
+			return SME{
+				Status:  "failed",
+				Message: err.Msg,
+			}
+		} else {
+			return SME{
+				Status:  "failed",
+				Message: err.Msg,
+				Error:   err.Err.Error(),
+			}
 		}
-
 	default:
-		return SME{
-			Status:  "failed",
-			Message: "",
-			Error:   err.Error(),
+		if err == nil {
+			return SME{
+				Status:  "failed",
+				Message: "",
+			}
+		} else {
+			return SME{
+				Status:  "failed",
+				Message: "",
+				Error:   err.Error(),
+			}
 		}
 	}
 }

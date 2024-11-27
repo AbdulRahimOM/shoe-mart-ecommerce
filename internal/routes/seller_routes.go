@@ -29,11 +29,10 @@ func SellerRoutes(engine *gin.RouterGroup,
 	}
 
 	loggedOutGroup := engine.Group("/")
-	loggedOutGroup.Use(middleware.NotLoggedOutCheck)
 	{
-		loggedOutGroup.GET("/login", middleware.NotLoggedOutCheck, seller.GetLogin)
-		loggedOutGroup.POST("/signup", middleware.NotLoggedOutCheck, seller.PostSignUp)
-		loggedOutGroup.POST("/login", middleware.NotLoggedOutCheck, seller.PostLogIn)
+		loggedOutGroup.GET("/login", seller.GetLogin)
+		loggedOutGroup.POST("/signup", seller.PostSignUp)
+		loggedOutGroup.POST("/login", seller.PostLogIn)
 	}
 
 	authSeller := engine.Group("/")

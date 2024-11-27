@@ -54,16 +54,6 @@ func UserAuth(c *gin.Context) {
 	c.Next()
 }
 
-func NotLoggedOutCheck(c *gin.Context) {
-	fmt.Println("Handler ::: check for already signed-in before going to Next()")
-	//if aleady logged in
-	//...redirect to home
-	//...abort() if required
-	//else
-	fmt.Println("not logged in. So, allowing into sign-up page")
-	c.Next()
-}
-
 func PasswordNotSetUserCheck(c *gin.Context) {
 	tokenString := strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
 	// fmt.Println("tokenString: ", tokenString)

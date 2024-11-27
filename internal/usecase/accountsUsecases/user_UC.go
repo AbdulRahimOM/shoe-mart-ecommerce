@@ -4,6 +4,7 @@ import (
 	"errors"
 	"time"
 
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/constants"
 	e "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/customErrors"
 	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
@@ -257,14 +258,10 @@ func (uc *UserUseCase) SendOtpForPWChange(user *entities.User) (*string, *e.Erro
 	if err := otpManager.SendOtp(user.Phone); err != nil {
 		return nil, e.SetError("Error while sending otp", err, 500)
 	}
-	resetPWClaims := struct {
-		ID     uint
-		Phone  string
-		Status string
-	}{
-		ID:     user.ID,
-		Phone:  user.Phone,
-		Status: "PW change requested, otp not verified",
+	resetPWClaims := map[string]interface{}{
+		"id":     user.ID,
+		"phone":  user.Phone,
+		"status": constants.PasswordChangeRequested_OTPNotVerified,
 	}
 	tokenString, errr := jwttoken.GenerateToken("user", resetPWClaims, time.Minute*5)
 	if errr != nil {
@@ -281,14 +278,10 @@ func (uc *UserUseCase) VerifyOtpForPWChange(id uint, phone string, otp string) (
 	if !matchStatus {
 		return false, nil, nil
 	}
-	resetPWClaims := struct {
-		ID     uint
-		Phone  string
-		Status string
-	}{
-		ID:     id,
-		Phone:  phone,
-		Status: "PW change requested, otp verified",
+	resetPWClaims := map[string]interface{}{
+		"id":     id,
+		"phone":  phone,
+		"status": constants.PasswordChangeRequested_OTPVerified,
 	}
 	tokenString, errr := jwttoken.GenerateToken("user", resetPWClaims, time.Minute*60)
 	if errr != nil {
@@ -307,12 +300,12 @@ func (uc *UserUseCase) ResetPasswordToNewPassword(id uint, newPassword *string) 
 }
 
 func (uc *UserUseCase) SetInitialPassword(id uint, newPassword *string) (string, *e.Error) {
-	hashedPwd, errr:= hashpassword.Hashpassword(*newPassword)
+	hashedPwd, errr := hashpassword.Hashpassword(*newPassword)
 	if errr != nil {
 		return "", e.SetError("error while hashing pw", errr, 500)
 	}
 
-	err:= uc.userRepo.ResetPassword(id, &hashedPwd)
+	err := uc.userRepo.ResetPassword(id, &hashedPwd)
 	if err != nil {
 		return "", e.SetError("error while setting initial password", err, 500)
 	}

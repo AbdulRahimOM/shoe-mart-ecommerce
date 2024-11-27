@@ -24,14 +24,13 @@ func UserRoutes(engine *gin.RouterGroup,
 	engine.Use(middleware.ClearCache)
 	{
 		loggedOutGroup := engine.Group("/")
-		loggedOutGroup.Use(middleware.NotLoggedOutCheck)
 		{
 			loggedOutGroup.GET("/login", user.GetLogin)
 
 			loggedOutGroup.POST("/signup", user.PostSignUp)
 			loggedOutGroup.POST("/login", user.PostLogIn)
-			loggedOutGroup.Use(middleware.PasswordNotSetUserCheck).POST("/set-initial-password", user.SetInitialPassword)
-		
+			loggedOutGroup.POST("/set-initial-password", middleware.PasswordNotSetUserCheck, user.SetInitialPassword)
+
 			loggedOutGroup.POST("/resetpasswordsendotp", user.SendOtpForPWChange)
 			loggedOutGroup.POST("/resetpasswordverifyotp", user.VerifyOtpForPWChange)
 			loggedOutGroup.POST("/resetpassword", user.ResetPasswordToNewPassword)

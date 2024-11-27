@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/config"
+	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/constants"
 	"github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/domain/entities"
 	request "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/requestModels"
 	response "github.com/AbdulRahimOM/shoe-mart-ecommerce/internal/models/responseModels"
@@ -517,14 +518,27 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "role is not user"})
 		return
 	}
-	status := claims.Model.(map[string]interface{})["status"].(string)
-	if status != "PW change requested, otp not verified" {
+	status, ok := claims.Model.(map[string]interface{})["status"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("error getting status from token"))
+		return
+	}
+	if status != constants.PasswordChangeRequested_OTPNotVerified {
 		c.JSON(http.StatusUnauthorized, response.FromErrByText("status is not PW change requested, otp not verified"))
 		return
 	}
 
-	phone := claims.Model.(map[string]interface{})["Phone"].(string)
-	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
+	phone, ok := claims.Model.(map[string]interface{})["phone"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("error getting phone from token"))
+		return
+	}
+
+	id, ok := claims.Model.(map[string]interface{})["id"].(float64)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("id not found in token"))
+		return
+	}
 
 	var otpStruct request.VerifyOTPReq
 	if err := c.Bind(&otpStruct); err != nil {
@@ -538,7 +552,7 @@ func (h *UserHandler) VerifyOtpForPWChange(c *gin.Context) {
 		return
 	}
 
-	isVerified, newtoken, err := h.UserUseCase.VerifyOtpForPWChange(id, phone, otpStruct.OTP)
+	isVerified, newtoken, err := h.UserUseCase.VerifyOtpForPWChange(uint(id), phone, otpStruct.OTP)
 	if err != nil {
 		c.JSON(err.StatusCode, response.FromError(err))
 		return
@@ -586,9 +600,14 @@ func (h *UserHandler) ResetPasswordToNewPassword(c *gin.Context) {
 		return
 	}
 
-	status := claims.Model.(map[string]interface{})["status"].(string)
-	if status != "PW change requested, otp verified" {
-		c.JSON(http.StatusUnauthorized, response.FromErrByText("status is not PW change requested, otp verified"))
+	status, ok := claims.Model.(map[string]interface{})["status"].(string)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("error getting status from token"))
+		return
+	}
+
+	if status != constants.PasswordChangeRequested_OTPVerified {
+		c.JSON(http.StatusUnauthorized, response.FromError(fmt.Errorf("status is not PW change requested, otp verified")))
 		return
 	}
 
@@ -605,8 +624,12 @@ func (h *UserHandler) ResetPasswordToNewPassword(c *gin.Context) {
 	}
 
 	//change password
-	id := uint(claims.Model.(map[string]interface{})["ID"].(float64))
-	if err := h.UserUseCase.ResetPasswordToNewPassword(id, &req.NewPassword); err != nil {
+	id, ok := claims.Model.(map[string]interface{})["id"].(float64)
+	if !ok {
+		c.JSON(http.StatusUnauthorized, response.FromErrByText("id not found in token"))
+		return
+	}
+	if err := h.UserUseCase.ResetPasswordToNewPassword(uint(id), &req.NewPassword); err != nil {
 		c.JSON(http.StatusUnauthorized, response.MsgAndError("error getting id from token. error:", err))
 		return
 	}
@@ -648,15 +671,15 @@ func (h *UserHandler) SetInitialPassword(c *gin.Context) {
 	}
 
 	//change password
-	updatedToken,err := h.UserUseCase.SetInitialPassword(userID, &req.NewPassword)
+	updatedToken, err := h.UserUseCase.SetInitialPassword(userID, &req.NewPassword)
 	if err != nil {
 		c.JSON(http.StatusUnauthorized, response.MsgAndError("error getting id from token. error:", err))
 		return
 	}
 
 	c.JSON(http.StatusOK, response.SMT{
-		Status: "success",
+		Status:  "success",
 		Message: "Password set successfully",
-		Token: updatedToken,
+		Token:   updatedToken,
 	})
 }

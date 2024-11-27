@@ -22,7 +22,7 @@ type AddUserAddress struct {
 	LandMark    string `json:"landmark" validate:"gte=3"`
 	City        string `json:"city" validate:"required,gte=3"`
 	State       string `json:"state" validate:"required,gte=3"`
-	Pincode     string `json:"pincode" validate:"required,pincode"`
+	Pincode     uint `json:"pincode" validate:"required,pincode"`
 }
 type EditUserAddress struct {
 	ID          uint   `json:"id" validate:"required,number"`
@@ -35,7 +35,7 @@ type EditUserAddress struct {
 	LandMark    string `json:"landmark" validate:"gte=0"`
 	City        string `json:"city" validate:"required,gte=3"`
 	State       string `json:"state" validate:"required,gte=3"`
-	Pincode     string `json:"pincode" validate:"required,pincode"`
+	Pincode     uint `json:"pincode" validate:"required,pincode"`
 }
 type DeleteUserAddress struct {
 	ID     uint `json:"id" validate:"required,number"`
