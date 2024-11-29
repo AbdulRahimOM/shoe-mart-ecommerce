@@ -12,6 +12,7 @@ type ProceedToPaymentReq struct {
 	FirstName          string  `json:"first_name" validate:"required"`
 	Email              string  `json:"email" validate:"required,email"`
 	Phone              string  `json:"phone" validate:"required"`
+	CallBackURL        string  `json:"call_back_url"`
 }
 
 // VerifyPaymentReq

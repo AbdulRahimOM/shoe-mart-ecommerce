@@ -13,8 +13,12 @@ func GetUserID(c *gin.Context) (uint, error) {
 		fmt.Println("UserModel not found in context")
 		return 0, errors.New("UserModel not found in context")
 	}
-	userID := uint(userModel.(map[string]interface{})["id"].(float64))
-	return userID, nil
+	userID, ok := userModel.(map[string]interface{})["id"].(float64)
+	if !ok {
+		fmt.Println("UserModel: ", userModel)
+		return 0, errors.New("User ID not found in context")
+	}
+	return uint(userID), nil
 }
 
 func GetSellerID(c *gin.Context) (uint, error) {
@@ -23,6 +27,6 @@ func GetSellerID(c *gin.Context) (uint, error) {
 		fmt.Println("SellerModel not found in context")
 		return 0, errors.New("SellerModel not found in context")
 	}
-	sellerID := uint(sellerModel.(map[string]interface{})["ID"].(float64))
+	sellerID := uint(sellerModel.(map[string]interface{})["id"].(float64))
 	return sellerID, nil
 }

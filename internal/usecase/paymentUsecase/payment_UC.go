@@ -90,6 +90,7 @@ func (uc *PaymentUC) RetryPayment(req *request.RetryPaymentReq, userID uint) (*r
 		FirstName:          order.FkAddress.FirstName,
 		Email:              order.FkAddress.Email,
 		Phone:              order.FkAddress.Phone,
+		CallBackURL:        config.BaseURL + "/payment/verify",
 	}
 
 	return &proceedToPaymentReq, nil

@@ -121,8 +121,16 @@ func (h *UserHandler) SendOtp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.FromErrByText("error getting user model from context"))
 		return
 	}
-	userMap := user.(map[string]interface{})
-	phone := userMap["phone"].(string)
+	userMap, ok := user.(map[string]interface{})
+	if !ok {
+		c.JSON(http.StatusBadRequest, response.FromErrByText("error getting user model from context"))
+		return
+	}
+	phone, ok := userMap["phone"].(string)
+	if !ok {
+		c.JSON(http.StatusBadRequest, response.FromErrByText("error getting phone from user model"))
+		return
+	}
 	err := h.UserUseCase.SendOtp(phone)
 	if err != nil {
 		c.JSON(err.StatusCode, response.FromError(err))
@@ -174,8 +182,8 @@ func (h *UserHandler) VerifyOtp(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, response.FromErrByText("error getting user model from context"))
 		return
 	}
-	phone := user.(map[string]interface{})["phone"].(string)
-	email := user.(map[string]interface{})["email"].(string)
+	phone, _ := user.(map[string]interface{})["phone"].(string)
+	email, _ := user.(map[string]interface{})["email"].(string)
 	isVerified, newToken, err := h.UserUseCase.VerifyOtp(phone, email, otpStruct.OTP)
 	if err != nil {
 		// fmt.Println("\n\nHandler: error recieved from usecase\n\n.")

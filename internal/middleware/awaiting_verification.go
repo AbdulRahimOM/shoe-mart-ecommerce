@@ -12,7 +12,11 @@ func UserAwaitingVerification(c *gin.Context) {
 		c.AbortWithStatusJSON(500, gin.H{"error": "UserModel not found"})
 		return
 	}
-	userStatus := userModel.(map[string]interface{})["status"].(string)
+	userStatus,ok := userModel.(map[string]interface{})["status"].(string)
+	if !ok {
+		c.AbortWithStatusJSON(500, gin.H{"error": "User status not found"})
+		return
+	}
 	fmt.Println("userStatus=", userStatus)
 	if userStatus != "not verified" {
 		c.AbortWithStatusJSON(403, gin.H{"error": "User is already verified. No need to verify again"})
@@ -29,7 +33,13 @@ func SellerAwaitingVerification(c *gin.Context) {
 		})
 		return
 	}
-	sellerStatus := sellerModel.(map[string]interface{})["status"].(string)
+	sellerStatus,ok := sellerModel.(map[string]interface{})["status"].(string)
+	if !ok {
+		c.AbortWithStatusJSON(500, gin.H{
+			"error": "Seller status not found",
+		})
+		return
+	}
 	fmt.Println("sellerStatus=", sellerStatus)
 	if sellerStatus != "not verified" {
 		c.AbortWithStatusJSON(403, gin.H{

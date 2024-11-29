@@ -37,12 +37,12 @@ func (repo *AdminRepo) GetSellersList() (*[]entities.PwMaskedSeller, *e.Error) {
 
 func (repo *AdminRepo) UpdateUserStatus(userID uint, newStatus string) *e.Error {
 	var user entities.User
-	err := repo.DB.Model(&user).Where("id = ?", userID).Update("status", newStatus).Error
-	if err != nil {
-		return e.DBQueryError_500(&err)
+	result := repo.DB.Model(&user).Where("id = ?", userID).Update("status", newStatus)
+	if result.Error != nil {
+		return e.DBQueryError_500(&result.Error)
 	}
 
-	if repo.DB.RowsAffected == 0 {
+	if result.RowsAffected == 0 {
 		return &errUserIDNotExisting_404
 	}
 
@@ -51,13 +51,13 @@ func (repo *AdminRepo) UpdateUserStatus(userID uint, newStatus string) *e.Error 
 
 func (repo *AdminRepo) UpdateSellerStatus(sellerID uint, newStatus string) *e.Error {
 	var seller entities.Seller
-	err := repo.DB.Model(&seller).Where("id = ?", sellerID).Update("status", newStatus).Error
-	if err != nil {
+	result := repo.DB.Model(&seller).Where("id = ?", sellerID).Update("status", newStatus)
+	if result.Error != nil {
 		// return &e.Error{Status:"failed",Msg:"db query err",Err: err, StatusCode: 500}
-		return e.DBQueryError_500(&err)
+		return e.DBQueryError_500(&result.Error)
 	}
 
-	if repo.DB.RowsAffected == 0 {
+	if result.RowsAffected == 0 {
 		return &errSellerIDNotExisting_404
 	}
 

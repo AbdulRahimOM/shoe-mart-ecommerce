@@ -49,7 +49,12 @@ func VerifySellerStatus(c *gin.Context) {
 		c.Abort()
 		return
 	}
-	sellerStatus := sellerModel.(map[string]interface{})["status"].(string)
+	sellerStatus,ok := sellerModel.(map[string]interface{})["status"].(string)
+	if !ok {
+		c.AbortWithStatusJSON(500, gin.H{"error": "Seller status not found"})
+		c.Abort()
+		return
+	}
 	if sellerStatus == "not verified" {
 		c.AbortWithStatusJSON(403, gin.H{"error": "Seller not verified"})
 		c.Abort()

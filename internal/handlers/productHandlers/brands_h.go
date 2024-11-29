@@ -51,7 +51,7 @@ func (bh *BrandsHandler) AddBrand(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, nil)
+	c.JSON(http.StatusOK, response.SuccessSM("brand added"))
 }
 
 // get brands handler

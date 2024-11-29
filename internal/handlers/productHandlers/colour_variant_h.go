@@ -28,10 +28,32 @@ import (
 func (cvh *ProductHandler) AddColourVariant(c *gin.Context) {
 
 	var req request.AddColourVariantReq
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
+	var err error
+	// if err := c.ShouldBindJSON(&req); err != nil {
+	// 	c.JSON(http.StatusBadRequest, response.ErrOnBindingReq(err))
+	// 	return
+	// }
+	modelId,err:=strconv.Atoi(c.PostForm("modelId"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing modelId:", err))
 		return
 	}
+	req.ModelID=uint(modelId)
+
+	req.Colour = c.PostForm("colour")
+	mrp, err := strconv.ParseFloat(c.PostForm("mrp"), 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing mrp:", err))
+		return
+	}
+	req.MRP = float32(mrp)
+
+	salePrice, err := strconv.ParseFloat(c.PostForm("salePrice"), 64)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, response.MsgAndError("error parsing salePrice:", err))
+		return
+	}
+	req.SalePrice = float32(salePrice)
 
 	//validation
 	if err := requestValidation.ValidateRequest(req); err != nil {

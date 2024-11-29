@@ -9,6 +9,7 @@ import (
 )
 
 var Port string
+var BaseURL string
 var Enviroment string
 var TakeAllOtpAsValid bool = false
 var DevModeOtp string
@@ -88,6 +89,12 @@ func initiateEnvValues() {
 		TakeAllOtpAsValid = true
 	}
 	DevModeOtp = os.Getenv("DEV_MODE_OTP")
+
+	// Base URL.....................
+	BaseURL = os.Getenv("BASE_URL")
+	if BaseURL == "" {
+		BaseURL = "http://localhost:" + Port
+	}
 
 	// Database URL.....................
 	DbURL = os.Getenv("DB_URL")

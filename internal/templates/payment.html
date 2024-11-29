@@ -60,7 +60,7 @@
             // In Some systems you need to specify an ONLINE url as callback
             // If you are developing locally you have option to set NGORK as an ONLINE URL
             // "callback_url":"https://49ed-2409-40f3-100e-4909-f4d4-e07-24de-b501.ngrok-free.app/cart/checkout/online/",
-            "callback_url":"http://localhost:4000/payment/verify/",
+            "callback_url":"{{.CallBackURL}}",
             // "handler": function (response) {
             //     alert(response.razorpay_payment_id);
             //     alert(response.razorpay_order_id);

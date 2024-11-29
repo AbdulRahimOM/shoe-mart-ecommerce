@@ -52,6 +52,8 @@ func (h *PaymentHandler) ProceedToPayViaRazorPay(c *gin.Context) {
 		return
 	}
 
+	req.CallBackURL = config.BaseURL + "/payment/verify"
+
 	c.HTML(http.StatusOK, "payment.html", req)
 	// c.JSON(http.StatusOK, req)
 

@@ -226,6 +226,7 @@ func (repo *OrderRepo) CancelOrder(orderID uint) *e.Error {
 func (repo *OrderRepo) GetOrderStatusByID(orderID uint) (string, *e.Error) {
 	var status string
 	query := repo.DB.
+		Table("orders").
 		Select("status").
 		Where("id = ?", orderID).
 		Find(&status)
@@ -243,6 +244,7 @@ func (repo *OrderRepo) GetOrderStatusByID(orderID uint) (string, *e.Error) {
 func (repo *OrderRepo) GetUserIDByOrderID(orderID uint) (uint, *e.Error) {
 	var order entities.Order
 	query := repo.DB.
+		Table("orders").
 		Select("user_id").
 		Where("id = ?", orderID).
 		Find(&order)
@@ -553,6 +555,7 @@ func (repo *OrderRepo) UpdateOrderTransactionID(orderID uint, transactionID stri
 func (repo *OrderRepo) GetPaymentStatusByID(orderID uint) (string, *e.Error) {
 	var status string
 	query := repo.DB.
+		Table("orders").
 		Select("payment_status").
 		Where("id = ?", orderID).
 		Find(&status)
