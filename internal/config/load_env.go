@@ -17,6 +17,12 @@ var DevModeOtp string
 var IsLocalHostMode bool = false
 var ExecutableDir string
 
+var InitialSuperAdminEmail string
+var InitialSuperAdminPassword string
+var InitialSuperAdminFirstName string
+var InitialSuperAdminLastName string
+var InitialSuperAdminPhone string
+
 // var DB_URL string
 var DbURL string
 
@@ -95,6 +101,13 @@ func initiateEnvValues() {
 	if BaseURL == "" {
 		BaseURL = "http://localhost:" + Port
 	}
+
+	// Initial Super Admin.....................
+	InitialSuperAdminEmail = os.Getenv("INITIAL_SUPER_ADMIN_EMAIL")
+	InitialSuperAdminPassword = os.Getenv("INITIAL_SUPER_ADMIN_PASSWORD")
+	InitialSuperAdminFirstName = os.Getenv("INITIAL_SUPER_ADMIN_FIRST_NAME")
+	InitialSuperAdminLastName = os.Getenv("INITIAL_SUPER_ADMIN_LAST_NAME")
+	InitialSuperAdminPhone = os.Getenv("INITIAL_SUPER_ADMIN_PHONE")
 
 	// Database URL.....................
 	DbURL = os.Getenv("DB_URL")
