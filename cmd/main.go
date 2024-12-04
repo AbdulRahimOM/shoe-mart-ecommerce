@@ -45,6 +45,17 @@ func main() {
 }
 
 func seedSuperAdmin() error {
+	// Check if super admin already exists
+	var count int64
+	if err := infra.DB.Model(&entities.Admin{}).Count(&count).Error; err != nil {
+		return fmt.Errorf("couldn't count admins. DB Error: %v", err)
+	}
+
+	if count > 0 {
+		fmt.Println("Super admin already exists")
+		return nil
+	}
+
 	hashpassword, err := hashpassword.Hashpassword(config.InitialSuperAdminPassword)
 	if err != nil {
 		return err
